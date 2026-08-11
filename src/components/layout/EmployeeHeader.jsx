@@ -9,10 +9,6 @@ export default function EmployeeHeader({
   togglePunchStatus,
   onLogout
 }) {
-  const avatarUrl = user?.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || user?.username || 'Employee')}&background=10b981&color=fff`;
-  const userName = user?.name || user?.username || 'Employee User';
-  const empId = user?.employeeId || `EMP-${user?.id || '104'}`;
-
   return (
     <header className="emp-navbar" style={{
       display: 'flex',
@@ -74,14 +70,6 @@ export default function EmployeeHeader({
           🔔
           <span className="notification-dot"></span>
         </button>
-
-        <div className="emp-user-profile" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <img src={avatarUrl} alt={userName} className="emp-avatar" style={{ width: '36px', height: '36px', borderRadius: '50%', border: '2px solid #10b981' }} />
-          <div className="emp-user-meta" style={{ display: 'flex', flexDirection: 'column' }}>
-            <span className="emp-user-name" style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0f172a' }}>{userName}</span>
-            <span className="emp-user-sub" style={{ fontSize: '0.72rem', color: '#64748b' }}>{empId}</span>
-          </div>
-        </div>
 
         {onLogout && (
           <button className="emp-btn-logout" onClick={onLogout} title="Sign Out">
