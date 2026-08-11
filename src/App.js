@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Login from './components/Login/Login';
-import DashboardPreview from './components/Dashboard/DashboardPreview';
+import EmployeeDashboard from './components/Dashboard/EmployeeDashboard';
+import AdminDashboard from './components/Dashboard/AdminDashboard';
 import { getAuthData, clearAuthData } from './utils/storage';
 
-function App() {
+function AppContent() {
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoadingSession, setIsLoadingSession] = useState(true);
+  const navigate = useNavigate();
 
   // Restore authenticated session from storage on app load
   useEffect(() => {
@@ -41,11 +44,44 @@ function App() {
 
   const handleLoginSuccess = (user) => {
     setCurrentUser(user);
+    if (isEmployeeUser(user)) {
+      navigate('/employee');
+    } else {
+      navigate('/user');
+    }
   };
 
   const handleLogout = () => {
     clearAuthData();
     setCurrentUser(null);
+    navigate('/login');
+  };
+
+  // Helper to determine if user should be redirected to Employee Dashboard or Admin/Manager/Other Dashboard
+  const isEmployeeUser = (user) => {
+    if (!user) return true;
+
+    // Check role string / role_id from backend response
+    const roleStr = (user.role_name || user.role || '').toString().toLowerCase();
+
+    // If role contains admin, manager, hr, director, executive, supervisor, or user/other roles -> Admin & Management Dashboard
+    if (
+      roleStr.includes('admin') ||
+      roleStr.includes('manager') ||
+      roleStr.includes('hr') ||
+      roleStr.includes('director') ||
+      roleStr.includes('executive') ||
+      roleStr.includes('supervisor')
+    ) {
+      return false;
+    }
+
+    if (user.role_id === 5 || roleStr.includes('employee')) {
+      return true;
+    }
+
+    // Default: route non-employee roles to Admin/Management Dashboard
+    return false;
   };
 
   if (isLoadingSession) {
@@ -55,24 +91,75 @@ function App() {
         justifyContent: 'center',
         alignItems: 'center',
         height: '100vh',
-        background: '#090d16',
-        color: '#94a3b8',
+        background: '#f8fafc',
+        color: '#475569',
         fontFamily: 'sans-serif'
       }}>
-        <div>Loading session...</div>
+        <div>Loading WorkPulse EMS...</div>
       </div>
     );
   }
 
+  // Helper component for Admin Routes
+  const AdminRouteWrapper = ({ defaultTab }) => {
+    if (!currentUser) {
+      return <Navigate to="/login" replace />;
+    }
+    return <AdminDashboard user={currentUser} onLogout={handleLogout} activeTabFromRoute={defaultTab} />;
+  };
+
+  // Helper component for Employee Route
+  const EmployeeRouteWrapper = () => {
+    if (!currentUser) {
+      return <Navigate to="/login" replace />;
+    }
+    return <EmployeeDashboard user={currentUser} onLogout={handleLogout} />;
+  };
+
+  // Helper component for Login Route
+  const LoginRouteWrapper = () => {
+    if (currentUser) {
+      if (isEmployeeUser(currentUser)) {
+        return <Navigate to="/employee" replace />;
+      } else {
+        return <Navigate to="/user" replace />;
+      }
+    }
+    return <Login onLoginSuccess={handleLoginSuccess} />;
+  };
+
+  // Helper component for Root Route /
+  const RootRedirect = () => {
+    if (!currentUser) {
+      return <Navigate to="/login" replace />;
+    }
+    if (isEmployeeUser(currentUser)) {
+      return <Navigate to="/employee" replace />;
+    }
+    return <Navigate to="/user" replace />;
+  };
+
   return (
     <div className="App">
-      {!currentUser ? (
-        <Login onLoginSuccess={handleLoginSuccess} />
-      ) : (
-        <DashboardPreview user={currentUser} onLogout={handleLogout} />
-      )}
+      <Routes>
+        <Route path="/" element={<RootRedirect />} />
+        <Route path="/login" element={<LoginRouteWrapper />} />
+        <Route path="/employee" element={<EmployeeRouteWrapper />} />
+        <Route path="/overview" element={<AdminRouteWrapper defaultTab="overview" />} />
+        <Route path="/user" element={<AdminRouteWrapper defaultTab="user" />} />
+        <Route path="/project" element={<AdminRouteWrapper defaultTab="project" />} />
+        <Route path="/department" element={<AdminRouteWrapper defaultTab="department" />} />
+        <Route path="/role" element={<AdminRouteWrapper defaultTab="role" />} />
+        <Route path="*" element={<RootRedirect />} />
+      </Routes>
     </div>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
+  );
+}

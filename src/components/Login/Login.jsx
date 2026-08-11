@@ -5,7 +5,6 @@ import { loginApi } from '../../services/api';
 import { saveAuthData } from '../../utils/storage';
 
 export default function Login({ onLoginSuccess }) {
-  const [role, setRole] = useState('employee'); // 'employee' | 'admin'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
@@ -14,11 +13,6 @@ export default function Login({ onLoginSuccess }) {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleRoleChange = (newRole) => {
-    setRole(newRole);
-    setErrorMessage('');
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -128,7 +122,7 @@ export default function Login({ onLoginSuccess }) {
             </div>
             <div className="feature-item">
               <div className="feature-icon">✓</div>
-              <span>Role-Based Secure Access Controls</span>
+              <span>Automatic Role-Based Dashboard Access</span>
             </div>
           </div>
 
@@ -137,38 +131,11 @@ export default function Login({ onLoginSuccess }) {
           </div>
         </div>
 
-        {/* Right Area - Login Form */}
+        {/* Right Area - Single Login Form */}
         <div className="login-form-area">
           <div className="form-header">
             <h2>Welcome Back</h2>
-            <p>Please enter your credentials to access your account dashboard.</p>
-          </div>
-
-          {/* Role Switcher Tabs */}
-          <div className="role-tabs">
-            <button
-              type="button"
-              className={`role-tab ${role === 'employee' ? 'active' : ''}`}
-              onClick={() => handleRoleChange('employee')}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-              Employee Portal
-            </button>
-
-            <button
-              type="button"
-              className={`role-tab ${role === 'admin' ? 'active' : ''}`}
-              onClick={() => handleRoleChange('admin')}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-              </svg>
-              Admin / HR / Manager
-            </button>
+            <p>Please enter your credentials to sign in. You will be automatically redirected to your role dashboard.</p>
           </div>
 
           {/* Error Toast Notification */}
@@ -186,9 +153,7 @@ export default function Login({ onLoginSuccess }) {
           {/* Form */}
           <form onSubmit={handleSubmit} className="login-form">
             <div className="input-group">
-              <label htmlFor="email">
-                {role === 'employee' ? 'Work Email or Employee ID' : 'Admin Work Email'}
-              </label>
+              <label htmlFor="email">Work Email or Username</label>
               <div className="input-wrapper">
                 <span className="input-icon">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -199,7 +164,7 @@ export default function Login({ onLoginSuccess }) {
                 <input
                   id="email"
                   type="text"
-                  placeholder={role === 'employee' ? 'alex.morgan@company.com' : 'sarah.admin@company.com'}
+                  placeholder="name@company.com or username"
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
@@ -284,7 +249,7 @@ export default function Login({ onLoginSuccess }) {
                 </>
               ) : (
                 <>
-                  <span>Sign In to Dashboard</span>
+                  <span>Sign In to Portal</span>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                     <polyline points="12 5 19 12 12 19"></polyline>
