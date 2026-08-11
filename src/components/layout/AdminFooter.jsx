@@ -8,13 +8,9 @@ export default function AdminFooter() {
         <span>•</span>
         <span>© {new Date().getFullYear()} Enterprise EMS. All rights reserved.</span>
       </div>
-      <div className="flex items-center gap-5 font-medium">
-        <span className="cursor-pointer text-indigo-600 hover:underline">Audit Logs</span>
+      <div className="flex items-center gap-5">
         <span className="cursor-pointer hover:text-slate-900">Security Policies</span>
         <span className="cursor-pointer hover:text-slate-900">Documentation</span>
-        <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md text-xs font-semibold border border-emerald-200">
-          🟢 Region: us-east-1
-        </span>
       </div>
     </footer>
   );

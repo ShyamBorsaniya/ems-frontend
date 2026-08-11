@@ -27,7 +27,7 @@ export default function AdminLayout({
         onLogout={onLogout}
       />
 
-      <div className="flex-1 flex flex-col h-screen overflow-y-auto min-w-0 z-10">
+      <div className="flex-1 flex flex-col h-screen overflow-y-auto min-w-0">
         <AdminHeader
           user={user}
           searchTerm={searchTerm}
