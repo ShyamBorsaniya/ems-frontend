@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { getAuthData, clearAuthData, saveAuthData } from '../utils/storage';
+import { getAuthData, clearAuthData, saveAuthData, getCompanyData, getCompanyId } from '../utils/storage';
 import { loginApi } from '../api/authApi';
 import { isEmployeeUser } from '../utils/helpers';
 
@@ -14,6 +14,7 @@ export function AuthProvider({ children }) {
     const storedAuth = getAuthData();
     if (storedAuth && storedAuth.user) {
       const userData = storedAuth.user;
+      const companyData = storedAuth.company || (typeof userData.company === 'object' ? userData.company : null);
       const tokens = {
         access: storedAuth.accessToken,
         refresh: storedAuth.refreshToken
@@ -30,6 +31,9 @@ export function AuthProvider({ children }) {
         employeeId: `EMP-${userData.id || '1'}`,
         phone: userData.phone,
         profile_image: userData.profile_image,
+        company: companyData,
+        company_id: companyData?.id || (typeof userData.company === 'number' ? userData.company : null),
+        company_name: companyData?.name || '',
         is_active: userData.is_active,
         created_at: userData.created_at,
         tokens: tokens,
@@ -57,6 +61,7 @@ export function AuthProvider({ children }) {
       saveAuthData(response, rememberMe);
       const userData = response.data.user || {};
       const tokens = response.data.tokens || {};
+      const companyData = userData.company || response.data.company || getCompanyData();
 
       const userObj = {
         id: userData.id,
@@ -69,6 +74,9 @@ export function AuthProvider({ children }) {
         employeeId: `EMP-${userData.id || '1'}`,
         phone: userData.phone,
         profile_image: userData.profile_image,
+        company: companyData,
+        company_id: companyData?.id || (typeof userData.company === 'number' ? userData.company : null),
+        company_name: companyData?.name || '',
         is_active: userData.is_active,
         created_at: userData.created_at,
         tokens: tokens,
@@ -76,7 +84,7 @@ export function AuthProvider({ children }) {
       };
 
       setCurrentUser(userObj);
-      return { success: true, user: userObj };
+      return { success: true, user: userObj, company: companyData };
     }
     return response;
   };
@@ -90,6 +98,9 @@ export function AuthProvider({ children }) {
     currentUser,
     setCurrentUser,
     isLoadingSession,
+    company: currentUser?.company || getCompanyData(),
+    companyId: currentUser?.company_id || getCompanyId(),
+    companyName: currentUser?.company_name || getCompanyData()?.name || '',
     login,
     logout,
     isEmployee: isEmployeeUser(currentUser)

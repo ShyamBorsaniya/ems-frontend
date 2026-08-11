@@ -1,3 +1,7 @@
+import { getCompanyData, getCompanyId } from './storage';
+
+export { getCompanyData, getCompanyId };
+
 /**
  * Parses backend DRF error response format into user friendly message
  */
@@ -79,3 +83,4 @@ export function formatSecondsToTimer(totalSecs) {
   const secs = totalSecs % 60;
   return `${hrs.toString().padStart(2, '0')}h ${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
 }
+

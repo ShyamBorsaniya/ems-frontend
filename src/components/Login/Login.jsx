@@ -37,6 +37,7 @@ export default function Login({ onLoginSuccess }) {
 
         const userData = response.data.user || {};
         const tokens = response.data.tokens || {};
+        const companyData = userData.company || response.data.company || null;
 
         const authenticatedUser = {
           id: userData.id,
@@ -49,6 +50,9 @@ export default function Login({ onLoginSuccess }) {
           employeeId: `EMP-${userData.id || '1'}`,
           phone: userData.phone,
           profile_image: userData.profile_image,
+          company: companyData,
+          company_id: companyData?.id || (typeof userData.company === 'number' ? userData.company : null),
+          company_name: companyData?.name || '',
           is_active: userData.is_active,
           created_at: userData.created_at,
           tokens: tokens,
