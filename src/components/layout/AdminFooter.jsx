@@ -2,28 +2,17 @@ import React from 'react';
 
 export default function AdminFooter() {
   return (
-    <footer style={{
-      padding: '1.1rem 2rem',
-      borderTop: '1px solid #e2e8f0',
-      background: '#ffffff',
-      color: '#64748b',
-      fontSize: '0.85rem',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginTop: 'auto',
-      zIndex: 10
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <span style={{ fontWeight: 600, color: '#0f172a' }}>WorkPulse Admin Console</span>
+    <footer className="px-8 py-4 border-t border-slate-200 bg-white text-slate-500 text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-between gap-3 mt-auto z-10">
+      <div className="flex items-center gap-2">
+        <span className="font-semibold text-slate-900">WorkPulse Admin Console</span>
         <span>•</span>
         <span>© {new Date().getFullYear()} Enterprise EMS. All rights reserved.</span>
       </div>
-      <div style={{ display: 'flex', gap: '1.25rem', fontWeight: 500, alignItems: 'center' }}>
-        <span style={{ cursor: 'pointer', color: '#4f46e5' }}>Audit Logs</span>
-        <span style={{ cursor: 'pointer' }}>Security Policies</span>
-        <span style={{ cursor: 'pointer' }}>Documentation</span>
-        <span style={{ background: 'rgba(5, 150, 105, 0.1)', color: '#059669', padding: '0.2rem 0.5rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600 }}>
+      <div className="flex items-center gap-5 font-medium">
+        <span className="cursor-pointer text-indigo-600 hover:underline">Audit Logs</span>
+        <span className="cursor-pointer hover:text-slate-900">Security Policies</span>
+        <span className="cursor-pointer hover:text-slate-900">Documentation</span>
+        <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md text-xs font-semibold border border-emerald-200">
           🟢 Region: us-east-1
         </span>
       </div>

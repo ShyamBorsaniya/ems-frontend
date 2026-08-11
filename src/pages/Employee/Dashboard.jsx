@@ -79,6 +79,28 @@ export default function EmployeeDashboard({ user, onLogout }) {
 
   const userName = user?.name || user?.username || 'Employee User';
 
+  const getPriorityBadgeStyle = (priority) => {
+    switch (priority) {
+      case 'high':
+        return 'bg-rose-50 text-rose-700 border-rose-200';
+      case 'medium':
+        return 'bg-amber-50 text-amber-700 border-amber-200';
+      default:
+        return 'bg-sky-50 text-sky-700 border-sky-200';
+    }
+  };
+
+  const getLeaveStatusStyle = (status) => {
+    switch (status.toLowerCase()) {
+      case 'approved':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'pending':
+        return 'bg-amber-50 text-amber-700 border-amber-200';
+      default:
+        return 'bg-rose-50 text-rose-700 border-rose-200';
+    }
+  };
+
   return (
     <EmployeeLayout
       user={user}
@@ -86,106 +108,107 @@ export default function EmployeeDashboard({ user, onLogout }) {
       isPunchedIn={isPunchedIn}
       togglePunchStatus={togglePunchStatus}
     >
-      <div className="emp-dashboard-container">
+      <div className="relative min-h-full p-6 sm:p-8 flex flex-col gap-6 items-center">
         {/* Ambient Lighting Orbs */}
-        <div className="emp-ambient-bg">
-          <div className="emp-orb emp-orb-1"></div>
-          <div className="emp-orb emp-orb-2"></div>
+        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+          <div className="absolute rounded-full blur-[140px] opacity-35 w-[500px] h-[500px] bg-emerald-200/70 -top-28 -right-24"></div>
+          <div className="absolute rounded-full blur-[140px] opacity-35 w-[450px] h-[450px] bg-teal-200/70 -bottom-36 -left-20"></div>
         </div>
 
         {/* Main Content */}
-        <main className="emp-main-content">
-          <div className="emp-hero-card">
-            <div className="emp-hero-text">
-              <h1>Good Day, {userName.split(' ')[0]}! 👋</h1>
-              <p>Here is your daily work summary, attendance status, and pending tasks.</p>
+        <main className="relative z-10 w-full max-w-[1350px] flex flex-col gap-6">
+          {/* Hero Welcome Section */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-8 rounded-2xl bg-white border border-slate-200 shadow-lg shadow-slate-900/5 gap-4">
+            <div>
+              <h1 className="text-2xl font-extrabold text-slate-900 m-0">Good Day, {userName.split(' ')[0]}! 👋</h1>
+              <p className="text-sm text-slate-500 mt-1">Here is your daily work summary, attendance status, and pending tasks.</p>
             </div>
 
-            <div className="emp-hero-status">
-              <div className="emp-clock-display">{formatTimer(workSeconds)}</div>
-              <div className="emp-date-display">
+            <div className="flex flex-col items-start md:items-end">
+              <div className="text-2xl font-bold font-mono text-emerald-600 bg-emerald-50 px-4 py-1.5 rounded-xl border border-emerald-200">{formatTimer(workSeconds)}</div>
+              <div className="text-xs text-slate-400 mt-1">
                 {isPunchedIn ? `Logged in at ${punchTime}` : 'Currently Clocked Out'}
               </div>
             </div>
           </div>
 
           {/* Stats Grid */}
-          <div className="emp-stats-grid">
-            <div className="emp-stat-card">
-              <div className="emp-stat-header">
-                <span className="emp-stat-title">Attendance Rate</span>
-                <div className="emp-stat-icon-wrapper icon-blue">📅</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-emerald-300">
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-xs font-semibold text-slate-500">Attendance Rate</span>
+                <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-lg">📅</div>
               </div>
-              <div className="emp-stat-value">96.8%</div>
-              <div className="emp-stat-subtext">21 Days Present this month</div>
+              <div className="text-2xl font-bold text-slate-900 mb-1">96.8%</div>
+              <div className="text-xs text-slate-400">21 Days Present this month</div>
             </div>
 
-            <div className="emp-stat-card">
-              <div className="emp-stat-header">
-                <span className="emp-stat-title">Leave Balance</span>
-                <div className="emp-stat-icon-wrapper icon-emerald">🏖️</div>
+            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-emerald-300">
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-xs font-semibold text-slate-500">Leave Balance</span>
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">🏖️</div>
               </div>
-              <div className="emp-stat-value">14 Days</div>
-              <div className="emp-stat-subtext">10 Paid / 4 Sick leaves available</div>
+              <div className="text-2xl font-bold text-slate-900 mb-1">14 Days</div>
+              <div className="text-xs text-slate-400">10 Paid / 4 Sick leaves available</div>
             </div>
 
-            <div className="emp-stat-card">
-              <div className="emp-stat-header">
-                <span className="emp-stat-title">Work Hours Logged</span>
-                <div className="emp-stat-icon-wrapper icon-purple">⏱️</div>
+            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-emerald-300">
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-xs font-semibold text-slate-500">Work Hours Logged</span>
+                <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg">⏱️</div>
               </div>
-              <div className="emp-stat-value">38.5 hrs</div>
-              <div className="emp-stat-subtext">Target: 40.0 hrs / week</div>
+              <div className="text-2xl font-bold text-slate-900 mb-1">38.5 hrs</div>
+              <div className="text-xs text-slate-400">Target: 40.0 hrs / week</div>
             </div>
 
-            <div className="emp-stat-card">
-              <div className="emp-stat-header">
-                <span className="emp-stat-title">My Tasks</span>
-                <div className="emp-stat-icon-wrapper icon-amber">📋</div>
+            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-emerald-300">
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-xs font-semibold text-slate-500">My Tasks</span>
+                <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg">📋</div>
               </div>
-              <div className="emp-stat-value">{tasks.filter(t => !t.completed).length} Pending</div>
-              <div className="emp-stat-subtext">{tasks.filter(t => t.completed).length} Completed</div>
+              <div className="text-2xl font-bold text-slate-900 mb-1">{tasks.filter(t => !t.completed).length} Pending</div>
+              <div className="text-xs text-slate-400">{tasks.filter(t => t.completed).length} Completed</div>
             </div>
           </div>
 
           {/* Layout Grid */}
-          <div className="emp-layout-grid">
-            <div className="emp-left-col">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+            <div className="flex flex-col gap-6">
               {/* Tasks Card */}
-              <div className="emp-card">
-                <div className="emp-card-header">
-                  <span className="emp-card-title">
+              <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+                  <span className="text-lg font-bold text-slate-900 flex items-center gap-2">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M9 11l3 3L22 4"></path>
                       <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                     </svg>
                     My Tasks & Action Items
                   </span>
-                  <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                  <span className="text-xs text-slate-400">
                     {tasks.filter(t => t.completed).length}/{tasks.length} Completed
                   </span>
                 </div>
 
-                <div className="emp-tasks-list">
+                <div className="flex flex-col divide-y divide-slate-100">
                   {tasks.map(task => (
-                    <div key={task.id} className="emp-task-item">
-                      <div className="emp-task-left">
+                    <div key={task.id} className="py-3.5 flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
                         <input
                           type="checkbox"
-                          className="emp-checkbox"
+                          className="w-4.5 h-4.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                           checked={task.completed}
                           onChange={() => toggleTaskCompleted(task.id)}
                         />
-                        <span className={`emp-task-title ${task.completed ? 'completed' : ''}`}>
+                        <span className={`text-sm font-medium ${task.completed ? 'line-through text-slate-400' : 'text-slate-900'}`}>
                           {task.title}
                         </span>
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <span className={`emp-priority-tag tag-${task.priority}`}>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border capitalize ${getPriorityBadgeStyle(task.priority)}`}>
                           {task.priority}
                         </span>
-                        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                        <span className="text-xs text-slate-400">
                           Due: {task.due}
                         </span>
                       </div>
@@ -195,9 +218,9 @@ export default function EmployeeDashboard({ user, onLogout }) {
               </div>
 
               {/* Leave History Card */}
-              <div className="emp-card">
-                <div className="emp-card-header">
-                  <span className="emp-card-title">
+              <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+                  <span className="text-lg font-bold text-slate-900 flex items-center gap-2">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                       <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -207,31 +230,34 @@ export default function EmployeeDashboard({ user, onLogout }) {
                     My Leave Requests & History
                   </span>
 
-                  <button className="emp-btn-action" onClick={() => setShowLeaveModal(true)}>
+                  <button
+                    className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
+                    onClick={() => setShowLeaveModal(true)}
+                  >
                     + Apply New Leave
                   </button>
                 </div>
 
-                <div className="emp-table-wrapper">
-                  <table className="emp-table">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs sm:text-sm border-collapse">
                     <thead>
-                      <tr>
-                        <th>Leave Type</th>
-                        <th>From Date</th>
-                        <th>To Date</th>
-                        <th>Days</th>
-                        <th>Status</th>
+                      <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-semibold">
+                        <th className="py-3 px-4">Leave Type</th>
+                        <th className="py-3 px-4">From Date</th>
+                        <th className="py-3 px-4">To Date</th>
+                        <th className="py-3 px-4">Days</th>
+                        <th className="py-3 px-4">Status</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-slate-100">
                       {leaveHistory.map(item => (
-                        <tr key={item.id}>
-                          <td style={{ fontWeight: 600 }}>{item.type}</td>
-                          <td>{item.from}</td>
-                          <td>{item.to}</td>
-                          <td>{item.days} Day(s)</td>
-                          <td>
-                            <span className={`emp-status-badge status-${item.status.toLowerCase()}`}>
+                        <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                          <td className="py-3.5 px-4 font-semibold text-slate-900">{item.type}</td>
+                          <td className="py-3.5 px-4 text-slate-600">{item.from}</td>
+                          <td className="py-3.5 px-4 text-slate-600">{item.to}</td>
+                          <td className="py-3.5 px-4 text-slate-600">{item.days} Day(s)</td>
+                          <td className="py-3.5 px-4">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getLeaveStatusStyle(item.status)}`}>
                               ● {item.status}
                             </span>
                           </td>
@@ -243,19 +269,20 @@ export default function EmployeeDashboard({ user, onLogout }) {
               </div>
             </div>
 
-            <div className="emp-right-col">
-              <div className="emp-card">
-                <div className="emp-card-header">
-                  <span className="emp-card-title">📢 Announcements</span>
+            {/* Right Column / Announcements */}
+            <div className="flex flex-col gap-6">
+              <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                <div className="mb-4 pb-3 border-b border-slate-100">
+                  <span className="text-lg font-bold text-slate-900 flex items-center gap-2">📢 Announcements</span>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '12px', borderLeft: '4px solid #4f46e5' }}>
-                    <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#0f172a' }}>Annual All-Hands Meeting</div>
-                    <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.25rem' }}>Aug 25 at 10:00 AM • Main Auditorium & Virtual</div>
+                <div className="flex flex-col gap-3.5">
+                  <div className="bg-slate-50 p-4 rounded-xl border-l-4 border-indigo-600">
+                    <div className="font-semibold text-sm text-slate-900">Annual All-Hands Meeting</div>
+                    <div className="text-xs text-slate-500 mt-1">Aug 25 at 10:00 AM • Main Auditorium & Virtual</div>
                   </div>
-                  <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '12px', borderLeft: '4px solid #059669' }}>
-                    <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#0f172a' }}>Q3 Performance Appraisals</div>
-                    <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.25rem' }}>Self-evaluation portal opens Sep 01</div>
+                  <div className="bg-slate-50 p-4 rounded-xl border-l-4 border-emerald-600">
+                    <div className="font-semibold text-sm text-slate-900">Q3 Performance Appraisals</div>
+                    <div className="text-xs text-slate-500 mt-1">Self-evaluation portal opens Sep 01</div>
                   </div>
                 </div>
               </div>
@@ -265,31 +292,18 @@ export default function EmployeeDashboard({ user, onLogout }) {
 
         {/* Apply Leave Modal */}
         {showLeaveModal && (
-          <div style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(15, 23, 42, 0.5)', backdropFilter: 'blur(8px)', zIndex: 100,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
-          }}>
-            <div style={{
-              width: '100%', maxWidth: '480px', background: '#ffffff',
-              border: '1px solid #e2e8f0', borderRadius: '16px',
-              padding: '1.75rem', color: '#0f172a', boxShadow: '0 20px 50px rgba(15, 23, 42, 0.15)'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-                <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#0f172a' }}>Apply for Time Off</h3>
-                <button
-                  style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '1.2rem' }}
-                  onClick={() => setShowLeaveModal(false)}
-                >
-                  ✕
-                </button>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+            <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl p-7 text-slate-900 shadow-2xl animate-cardFadeUp">
+              <div className="flex justify-between items-center mb-5">
+                <h3 className="text-lg font-bold text-slate-900">Apply for Time Off</h3>
+                <button className="text-slate-400 hover:text-slate-700 text-lg cursor-pointer" onClick={() => setShowLeaveModal(false)}>✕</button>
               </div>
 
-              <form onSubmit={handleApplyLeaveSubmit}>
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ fontSize: '0.85rem', color: '#475569', display: 'block', marginBottom: '0.3rem', fontWeight: 500 }}>Leave Category</label>
+              <form onSubmit={handleApplyLeaveSubmit} className="flex flex-col gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-slate-700 mb-1 block">Leave Category</label>
                   <select
-                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', boxSizing: 'border-box' }}
+                    className="w-full p-3 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-emerald-600"
                     value={leaveType}
                     onChange={(e) => setLeaveType(e.target.value)}
                   >
@@ -300,22 +314,22 @@ export default function EmployeeDashboard({ user, onLogout }) {
                   </select>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label style={{ fontSize: '0.85rem', color: '#475569', display: 'block', marginBottom: '0.3rem', fontWeight: 500 }}>Start Date</label>
+                    <label className="text-xs font-semibold text-slate-700 mb-1 block">Start Date</label>
                     <input
                       type="date"
-                      style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', boxSizing: 'border-box' }}
+                      className="w-full p-3 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-emerald-600"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
                       required
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: '0.85rem', color: '#475569', display: 'block', marginBottom: '0.3rem', fontWeight: 500 }}>End Date</label>
+                    <label className="text-xs font-semibold text-slate-700 mb-1 block">End Date</label>
                     <input
                       type="date"
-                      style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', boxSizing: 'border-box' }}
+                      className="w-full p-3 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-emerald-600"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
                       required
@@ -323,10 +337,10 @@ export default function EmployeeDashboard({ user, onLogout }) {
                   </div>
                 </div>
 
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{ fontSize: '0.85rem', color: '#475569', display: 'block', marginBottom: '0.3rem', fontWeight: 500 }}>Reason / Note</label>
+                <div>
+                  <label className="text-xs font-semibold text-slate-700 mb-1 block">Reason / Note</label>
                   <textarea
-                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', boxSizing: 'border-box' }}
+                    className="w-full p-3 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-emerald-600"
                     rows="3"
                     placeholder="Briefly state reason for leave request..."
                     value={reason}
@@ -334,17 +348,17 @@ export default function EmployeeDashboard({ user, onLogout }) {
                   ></textarea>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+                <div className="flex justify-end gap-3 mt-4">
                   <button
                     type="button"
-                    style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 500 }}
+                    className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold hover:bg-slate-200 cursor-pointer"
                     onClick={() => setShowLeaveModal(false)}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', background: '#10b981', color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer' }}
+                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold cursor-pointer shadow-md shadow-emerald-600/20"
                   >
                     Submit Leave Request
                   </button>

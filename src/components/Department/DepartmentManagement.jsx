@@ -2,46 +2,46 @@ import React from 'react';
 
 export default function DepartmentManagement() {
   return (
-    <div className="admin-card">
-      <div className="admin-card-header">
-        <span className="admin-card-title">🏢 Department Structure & Allocation</span>
+    <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+      <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+        <span className="text-lg font-bold text-slate-900 flex items-center gap-2">🏢 Department Structure & Allocation</span>
       </div>
 
-      <div className="admin-dept-grid">
-        <div className="admin-dept-card">
-          <div className="admin-dept-header">
-            <span className="admin-dept-name">💻 Engineering & Product</span>
-            <span className="admin-dept-count">2 Headcount</span>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 hover:border-slate-300 transition-colors">
+          <div className="flex justify-between items-center mb-3">
+            <span className="font-semibold text-slate-900 text-sm">💻 Engineering & Product</span>
+            <span className="text-xs px-2 py-0.5 rounded-md bg-indigo-100/80 text-indigo-600 font-semibold">2 Headcount</span>
           </div>
-          <p style={{ fontSize: '0.85rem', color: '#475569', margin: '0 0 0.5rem 0' }}>Lead: Sarah Connor</p>
-          <div style={{ fontSize: '0.8rem', color: '#059669', fontWeight: 600 }}>● 100% Present Today</div>
+          <p className="text-xs text-slate-500 mb-2">Lead: Sarah Connor</p>
+          <div className="text-xs font-semibold text-emerald-600">● 100% Present Today</div>
         </div>
 
-        <div className="admin-dept-card">
-          <div className="admin-dept-header">
-            <span className="admin-dept-name">📈 Sales & Business Dev</span>
-            <span className="admin-dept-count">2 Headcount</span>
+        <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 hover:border-slate-300 transition-colors">
+          <div className="flex justify-between items-center mb-3">
+            <span className="font-semibold text-slate-900 text-sm">📈 Sales & Business Dev</span>
+            <span className="text-xs px-2 py-0.5 rounded-md bg-indigo-100/80 text-indigo-600 font-semibold">2 Headcount</span>
           </div>
-          <p style={{ fontSize: '0.85rem', color: '#475569', margin: '0 0 0.5rem 0' }}>Lead: Jim Halpert</p>
-          <div style={{ fontSize: '0.8rem', color: '#d97706', fontWeight: 600 }}>● 1 On Leave / 1 Present</div>
+          <p className="text-xs text-slate-500 mb-2">Lead: Jim Halpert</p>
+          <div className="text-xs font-semibold text-amber-600">● 1 On Leave / 1 Present</div>
         </div>
 
-        <div className="admin-dept-card">
-          <div className="admin-dept-header">
-            <span className="admin-dept-name">🤝 Human Resources</span>
-            <span className="admin-dept-count">1 Headcount</span>
+        <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 hover:border-slate-300 transition-colors">
+          <div className="flex justify-between items-center mb-3">
+            <span className="font-semibold text-slate-900 text-sm">🤝 Human Resources</span>
+            <span className="text-xs px-2 py-0.5 rounded-md bg-indigo-100/80 text-indigo-600 font-semibold">1 Headcount</span>
           </div>
-          <p style={{ fontSize: '0.85rem', color: '#475569', margin: '0 0 0.5rem 0' }}>Lead: Pam Beesly</p>
-          <div style={{ fontSize: '0.8rem', color: '#0284c7', fontWeight: 600 }}>● 1 Remote Active</div>
+          <p className="text-xs text-slate-500 mb-2">Lead: Pam Beesly</p>
+          <div className="text-xs font-semibold text-sky-600">● 1 Remote Active</div>
         </div>
 
-        <div className="admin-dept-card">
-          <div className="admin-dept-header">
-            <span className="admin-dept-name">💰 Finance & Accounting</span>
-            <span className="admin-dept-count">1 Headcount</span>
+        <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 hover:border-slate-300 transition-colors">
+          <div className="flex justify-between items-center mb-3">
+            <span className="font-semibold text-slate-900 text-sm">💰 Finance & Accounting</span>
+            <span className="text-xs px-2 py-0.5 rounded-md bg-indigo-100/80 text-indigo-600 font-semibold">1 Headcount</span>
           </div>
-          <p style={{ fontSize: '0.85rem', color: '#475569', margin: '0 0 0.5rem 0' }}>Lead: Angela Martin</p>
-          <div style={{ fontSize: '0.8rem', color: '#059669', fontWeight: 600 }}>● 100% Present Today</div>
+          <p className="text-xs text-slate-500 mb-2">Lead: Angela Martin</p>
+          <div className="text-xs font-semibold text-emerald-600">● 100% Present Today</div>
         </div>
       </div>
     </div>

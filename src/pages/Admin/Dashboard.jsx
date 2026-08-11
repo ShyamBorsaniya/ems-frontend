@@ -179,32 +179,19 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
 
       {/* Onboard User Modal */}
       {showAddUserModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(15, 23, 42, 0.5)', backdropFilter: 'blur(8px)', zIndex: 100,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
-        }}>
-          <div style={{
-            width: '100%', maxWidth: '500px', background: '#ffffff',
-            border: '1px solid #e2e8f0', borderRadius: '16px',
-            padding: '1.75rem', color: '#0f172a', boxShadow: '0 20px 50px rgba(15, 23, 42, 0.15)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-              <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#0f172a' }}>Onboard New User</h3>
-              <button
-                style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '1.2rem' }}
-                onClick={() => setShowAddUserModal(false)}
-              >
-                ✕
-              </button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+          <div className="w-full max-w-lg bg-white border border-slate-200 rounded-2xl p-7 text-slate-900 shadow-2xl animate-cardFadeUp">
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="text-lg font-bold text-slate-900">Onboard New User</h3>
+              <button className="text-slate-400 hover:text-slate-700 text-lg cursor-pointer" onClick={() => setShowAddUserModal(false)}>✕</button>
             </div>
 
-            <form onSubmit={handleAddEmployeeSubmit}>
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ fontSize: '0.85rem', color: '#475569', display: 'block', marginBottom: '0.3rem', fontWeight: 500 }}>Full Name</label>
+            <form onSubmit={handleAddEmployeeSubmit} className="flex flex-col gap-4">
+              <div>
+                <label className="text-xs font-semibold text-slate-700 mb-1 block">Full Name</label>
                 <input
                   type="text"
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', boxSizing: 'border-box' }}
+                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
                   placeholder="e.g. Eleanor Vance"
                   value={newEmpName}
                   onChange={(e) => setNewEmpName(e.target.value)}
@@ -212,11 +199,11 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
                 />
               </div>
 
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ fontSize: '0.85rem', color: '#475569', display: 'block', marginBottom: '0.3rem', fontWeight: 500 }}>Work Email</label>
+              <div>
+                <label className="text-xs font-semibold text-slate-700 mb-1 block">Work Email</label>
                 <input
                   type="email"
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', boxSizing: 'border-box' }}
+                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
                   placeholder="e.g. eleanor@company.com"
                   value={newEmpEmail}
                   onChange={(e) => setNewEmpEmail(e.target.value)}
@@ -224,20 +211,20 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label style={{ fontSize: '0.85rem', color: '#475569', display: 'block', marginBottom: '0.3rem', fontWeight: 500 }}>Role Title</label>
+                  <label className="text-xs font-semibold text-slate-700 mb-1 block">Role Title</label>
                   <input
                     type="text"
-                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', boxSizing: 'border-box' }}
+                    className="w-full p-3 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
                     value={newEmpRole}
                     onChange={(e) => setNewEmpRole(e.target.value)}
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.85rem', color: '#475569', display: 'block', marginBottom: '0.3rem', fontWeight: 500 }}>Department</label>
+                  <label className="text-xs font-semibold text-slate-700 mb-1 block">Department</label>
                   <select
-                    style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', boxSizing: 'border-box' }}
+                    className="w-full p-3 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
                     value={newEmpDept}
                     onChange={(e) => setNewEmpDept(e.target.value)}
                   >
@@ -250,17 +237,17 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+              <div className="flex justify-end gap-3 mt-4">
                 <button
                   type="button"
-                  style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 500 }}
+                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold hover:bg-slate-200 cursor-pointer"
                   onClick={() => setShowAddUserModal(false)}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', background: '#4f46e5', color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer' }}
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold cursor-pointer shadow-md shadow-indigo-600/20"
                 >
                   Confirm & Onboard
                 </button>
@@ -272,32 +259,19 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
 
       {/* Define Role Modal */}
       {showAddRoleModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(15, 23, 42, 0.5)', backdropFilter: 'blur(8px)', zIndex: 100,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
-        }}>
-          <div style={{
-            width: '100%', maxWidth: '480px', background: '#ffffff',
-            border: '1px solid #e2e8f0', borderRadius: '16px',
-            padding: '1.75rem', color: '#0f172a', boxShadow: '0 20px 50px rgba(15, 23, 42, 0.15)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-              <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#0f172a' }}>Define New Enterprise Role</h3>
-              <button
-                style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '1.2rem' }}
-                onClick={() => setShowAddRoleModal(false)}
-              >
-                ✕
-              </button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl p-7 text-slate-900 shadow-2xl animate-cardFadeUp">
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="text-lg font-bold text-slate-900">Define New Enterprise Role</h3>
+              <button className="text-slate-400 hover:text-slate-700 text-lg cursor-pointer" onClick={() => setShowAddRoleModal(false)}>✕</button>
             </div>
 
-            <form onSubmit={handleAddRoleSubmit}>
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ fontSize: '0.85rem', color: '#475569', display: 'block', marginBottom: '0.3rem', fontWeight: 500 }}>Role Title</label>
+            <form onSubmit={handleAddRoleSubmit} className="flex flex-col gap-4">
+              <div>
+                <label className="text-xs font-semibold text-slate-700 mb-1 block">Role Title</label>
                 <input
                   type="text"
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', boxSizing: 'border-box' }}
+                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
                   placeholder="e.g. Senior Tech Lead"
                   value={newRoleTitle}
                   onChange={(e) => setNewRoleTitle(e.target.value)}
@@ -305,10 +279,10 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
                 />
               </div>
 
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ fontSize: '0.85rem', color: '#475569', display: 'block', marginBottom: '0.3rem', fontWeight: 500 }}>Role Scope & Description</label>
+              <div>
+                <label className="text-xs font-semibold text-slate-700 mb-1 block">Role Scope & Description</label>
                 <textarea
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', boxSizing: 'border-box' }}
+                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
                   rows="3"
                   placeholder="Provide scope of permissions..."
                   value={newRoleDesc}
@@ -316,17 +290,17 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
                 ></textarea>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+              <div className="flex justify-end gap-3 mt-4">
                 <button
                   type="button"
-                  style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 500 }}
+                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold hover:bg-slate-200 cursor-pointer"
                   onClick={() => setShowAddRoleModal(false)}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', background: '#4f46e5', color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer' }}
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold cursor-pointer shadow-md shadow-indigo-600/20"
                 >
                   Save Role
                 </button>
@@ -338,32 +312,19 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
 
       {/* Create Project Modal */}
       {showAddProjModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(15, 23, 42, 0.5)', backdropFilter: 'blur(8px)', zIndex: 100,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
-        }}>
-          <div style={{
-            width: '100%', maxWidth: '480px', background: '#ffffff',
-            border: '1px solid #e2e8f0', borderRadius: '16px',
-            padding: '1.75rem', color: '#0f172a', boxShadow: '0 20px 50px rgba(15, 23, 42, 0.15)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-              <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#0f172a' }}>Create New Project Initiative</h3>
-              <button
-                style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '1.2rem' }}
-                onClick={() => setShowAddProjModal(false)}
-              >
-                ✕
-              </button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl p-7 text-slate-900 shadow-2xl animate-cardFadeUp">
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="text-lg font-bold text-slate-900">Create New Project Initiative</h3>
+              <button className="text-slate-400 hover:text-slate-700 text-lg cursor-pointer" onClick={() => setShowAddProjModal(false)}>✕</button>
             </div>
 
-            <form onSubmit={handleAddProjectSubmit}>
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ fontSize: '0.85rem', color: '#475569', display: 'block', marginBottom: '0.3rem', fontWeight: 500 }}>Project Title</label>
+            <form onSubmit={handleAddProjectSubmit} className="flex flex-col gap-4">
+              <div>
+                <label className="text-xs font-semibold text-slate-700 mb-1 block">Project Title</label>
                 <input
                   type="text"
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', boxSizing: 'border-box' }}
+                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
                   placeholder="e.g. Analytics Engine V2"
                   value={newProjName}
                   onChange={(e) => setNewProjName(e.target.value)}
@@ -371,28 +332,28 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
                 />
               </div>
 
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ fontSize: '0.85rem', color: '#475569', display: 'block', marginBottom: '0.3rem', fontWeight: 500 }}>Project Lead</label>
+              <div>
+                <label className="text-xs font-semibold text-slate-700 mb-1 block">Project Lead</label>
                 <input
                   type="text"
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', boxSizing: 'border-box' }}
+                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
                   placeholder="e.g. Sarah Connor"
                   value={newProjLead}
                   onChange={(e) => setNewProjLead(e.target.value)}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+              <div className="flex justify-end gap-3 mt-4">
                 <button
                   type="button"
-                  style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 500 }}
+                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold hover:bg-slate-200 cursor-pointer"
                   onClick={() => setShowAddProjModal(false)}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', background: '#4f46e5', color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer' }}
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold cursor-pointer shadow-md shadow-indigo-600/20"
                 >
                   Launch Project
                 </button>

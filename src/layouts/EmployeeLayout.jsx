@@ -15,7 +15,7 @@ export default function EmployeeLayout({
   togglePunchStatus
 }) {
   return (
-    <div className="admin-dashboard-wrapper" style={{ display: 'flex', height: '100vh', width: '100%', overflow: 'hidden' }}>
+    <div className="flex h-screen max-h-screen w-full bg-gradient-to-br from-slate-50 via-slate-100 to-emerald-50 text-slate-900 font-sans relative overflow-hidden">
       <EmployeeSidebar
         activeTab={activeTab}
         onTabChange={onTabChange}
@@ -23,7 +23,7 @@ export default function EmployeeLayout({
         onLogout={onLogout}
       />
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto', minWidth: 0 }}>
+      <div className="flex-1 flex flex-col h-screen overflow-y-auto min-w-0 z-10">
         <EmployeeHeader
           user={user}
           searchTerm={searchTerm}
@@ -33,7 +33,7 @@ export default function EmployeeLayout({
           togglePunchStatus={togglePunchStatus}
           onLogout={onLogout}
         />
-        <div style={{ flex: 1 }}>
+        <div className="flex-1">
           {children}
         </div>
         <EmployeeFooter />

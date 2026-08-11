@@ -13,56 +13,42 @@ export default function Tasks() {
     setTasks(tasks.map(t => t.id === taskId ? { ...t, completed: !t.completed } : t));
   };
 
+  const getPriorityBadgeStyle = (priority) => {
+    switch (priority) {
+      case 'high':
+        return 'bg-rose-50 text-rose-700 border-rose-200';
+      case 'medium':
+        return 'bg-amber-50 text-amber-700 border-amber-200';
+      default:
+        return 'bg-sky-50 text-sky-700 border-sky-200';
+    }
+  };
+
   return (
     <EmployeeLayout>
-      <div style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
-        <div style={{
-          background: '#ffffff',
-          borderRadius: '16px',
-          padding: '2rem',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 4px 12px rgba(15, 23, 42, 0.04)'
-        }}>
-          <h2 style={{ margin: '0 0 1.5rem 0', color: '#0f172a' }}>My Assigned Tasks</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <div className="p-6 sm:p-8 max-w-5xl mx-auto">
+        <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+          <h2 className="text-2xl font-bold text-slate-900 mb-6">My Assigned Tasks</h2>
+          <div className="flex flex-col gap-3">
             {tasks.map(task => (
-              <div key={task.id} style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '1rem',
-                borderRadius: '10px',
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div key={task.id} className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-slate-300 transition-colors">
+                <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
                     checked={task.completed}
                     onChange={() => toggleTaskCompleted(task.id)}
-                    style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    className="w-4.5 h-4.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                   />
-                  <span style={{
-                    fontWeight: 500,
-                    textDecoration: task.completed ? 'line-through' : 'none',
-                    color: task.completed ? '#94a3b8' : '#0f172a'
-                  }}>
+                  <span className={`text-sm font-medium ${task.completed ? 'line-through text-slate-400' : 'text-slate-900'}`}>
                     {task.title}
                   </span>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <span style={{
-                    padding: '0.2rem 0.6rem',
-                    borderRadius: '9999px',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    background: task.priority === 'high' ? 'rgba(225, 29, 72, 0.1)' : 'rgba(2, 132, 199, 0.1)',
-                    color: task.priority === 'high' ? '#e11d48' : '#0284c7'
-                  }}>
+                <div className="flex items-center gap-4">
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border capitalize ${getPriorityBadgeStyle(task.priority)}`}>
                     {task.priority}
                   </span>
-                  <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Due: {task.due}</span>
+                  <span className="text-xs text-slate-500">Due: {task.due}</span>
                 </div>
               </div>
             ))}

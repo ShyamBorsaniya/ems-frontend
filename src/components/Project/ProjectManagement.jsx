@@ -1,44 +1,58 @@
 import React from 'react';
 
 export default function ProjectManagement({ projects, setShowAddProjModal }) {
+  const getBadgeStyle = (status) => {
+    switch (status) {
+      case 'Completed':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'Testing':
+        return 'bg-sky-50 text-sky-700 border-sky-200';
+      default:
+        return 'bg-amber-50 text-amber-700 border-amber-200';
+    }
+  };
+
   return (
-    <div className="admin-card">
-      <div className="admin-card-header">
-        <span className="admin-card-title">🚀 Enterprise Projects & Delivery Status</span>
-        <button className="admin-btn-primary" style={{ padding: '0.45rem 0.9rem', fontSize: '0.8rem' }} onClick={() => setShowAddProjModal(true)}>
+    <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-100">
+        <span className="text-lg font-bold text-slate-900 flex items-center gap-2">🚀 Enterprise Projects & Delivery Status</span>
+        <button
+          className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
+          onClick={() => setShowAddProjModal(true)}
+        >
           + Add Project
         </button>
       </div>
 
-      <div className="admin-proj-grid">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {projects.map(proj => (
-          <div key={proj.id} className="admin-proj-card">
-            <div className="admin-proj-header">
+          <div key={proj.id} className="p-5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col gap-4">
+            <div className="flex justify-between items-start">
               <div>
-                <div className="admin-proj-title">{proj.name}</div>
-                <div className="admin-proj-lead">Lead: {proj.lead} ({proj.dept})</div>
+                <div className="font-bold text-slate-900 text-base">{proj.name}</div>
+                <div className="text-xs text-slate-500 mt-0.5">Lead: {proj.lead} ({proj.dept})</div>
               </div>
-              <span className={`admin-badge ${
-                proj.status === 'Completed' ? 'badge-present' :
-                proj.status === 'Testing' ? 'badge-remote' : 'badge-leave'
-              }`}>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getBadgeStyle(proj.status)}`}>
                 {proj.status}
               </span>
             </div>
 
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#475569', marginBottom: '0.3rem' }}>
+              <div className="flex justify-between text-xs text-slate-600 mb-1.5 font-medium">
                 <span>Progress Completion</span>
-                <span style={{ fontWeight: 600, color: '#0f172a' }}>{proj.progress}%</span>
+                <span className="font-semibold text-slate-900">{proj.progress}%</span>
               </div>
-              <div className="progress-bar-bg">
-                <div className="progress-bar-fill" style={{ width: `${proj.progress}%` }}></div>
+              <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full transition-all duration-300"
+                  style={{ width: `${proj.progress}%` }}
+                ></div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', borderTop: '1px solid #e2e8f0', paddingTop: '0.6rem', color: '#64748b' }}>
+            <div className="flex justify-between text-xs border-t border-slate-200 pt-3 text-slate-500">
               <span>Deadline: {proj.deadline}</span>
-              <span style={{ color: '#4f46e5', fontWeight: 600 }}>Budget: {proj.budget}</span>
+              <span className="color-indigo-600 font-semibold text-indigo-600">Budget: {proj.budget}</span>
             </div>
           </div>
         ))}

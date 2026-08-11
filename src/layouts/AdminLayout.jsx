@@ -13,10 +13,11 @@ export default function AdminLayout({
   setSearchTerm
 }) {
   return (
-    <div className="admin-dashboard-wrapper">
-      <div className="admin-ambient-bg">
-        <div className="admin-orb admin-orb-1"></div>
-        <div className="admin-orb admin-orb-2"></div>
+    <div className="flex h-screen max-h-screen w-full bg-gradient-to-br from-slate-50 via-slate-100 to-indigo-50 text-slate-900 font-sans relative overflow-hidden">
+      {/* Ambient Glow Orbs */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute rounded-full blur-[140px] opacity-35 w-[500px] h-[500px] bg-indigo-200/70 -top-28 -right-24"></div>
+        <div className="absolute rounded-full blur-[140px] opacity-35 w-[450px] h-[450px] bg-purple-200/70 -bottom-36 -left-20"></div>
       </div>
 
       <AdminSidebar
@@ -26,14 +27,14 @@ export default function AdminLayout({
         onLogout={onLogout}
       />
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto', minWidth: 0 }}>
+      <div className="flex-1 flex flex-col h-screen overflow-y-auto min-w-0 z-10">
         <AdminHeader
           user={user}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           activeTab={activeTab}
         />
-        <div style={{ flex: 1 }}>
+        <div className="flex-1">
           {children}
         </div>
         <AdminFooter />

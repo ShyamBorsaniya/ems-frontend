@@ -3,7 +3,7 @@ import UserManagement from '../../components/User/UserManagement';
 
 export default function Users({ employees, filteredEmployees, deptFilter, setDeptFilter, triggerToast, setShowAddUserModal }) {
   return (
-    <div style={{ padding: '1.5rem 2rem' }}>
+    <div className="p-6 sm:p-8">
       <UserManagement
         filteredEmployees={filteredEmployees}
         deptFilter={deptFilter}

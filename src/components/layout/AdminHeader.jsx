@@ -21,25 +21,15 @@ export default function AdminHeader({ user, searchTerm, setSearchTerm, activeTab
   };
 
   return (
-    <header className="admin-topbar">
-      <div className="admin-topbar-left">
-        <h2 className="admin-topbar-title">{getTabTitle(activeTab)}</h2>
-        {/* <div className="admin-search-wrapper">
-          <span className="search-icon">🔍</span>
-          <input
-            type="text"
-            placeholder={`Search ${activeTab || 'users'}, projects, logs...`}
-            value={searchTerm || ''}
-            onChange={(e) => setSearchTerm && setSearchTerm(e.target.value)}
-            className="admin-search-input"
-          />
-        </div> */}
+    <header className="shrink-0 z-50 flex justify-between items-center px-8 py-3.5 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm w-full box-border">
+      <div className="flex items-center gap-6">
+        <h2 className="text-lg font-bold text-slate-900 m-0 flex items-center gap-2">{getTabTitle(activeTab)}</h2>
       </div>
 
-      <div className="admin-topbar-right">
-        <button className="topbar-icon-btn" title="Admin Alerts & Notifications">
+      <div className="flex items-center gap-5">
+        <button className="w-9.5 h-9.5 rounded-xl bg-white border border-slate-300 flex items-center justify-center cursor-pointer relative text-base transition-all duration-200 text-slate-600 hover:bg-slate-50 hover:border-slate-400 hover:text-slate-900" title="Admin Alerts & Notifications">
           🔔
-          <span className="notification-dot"></span>
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-600 border-2 border-white"></span>
         </button>
       </div>
     </header>
