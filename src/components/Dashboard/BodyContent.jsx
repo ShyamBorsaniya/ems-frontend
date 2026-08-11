@@ -15,6 +15,16 @@ export default function BodyContent({
   roles,
   deptFilter,
   setDeptFilter,
+  usersList,
+  usersLoading,
+  usersError,
+  searchTerm,
+  setSearchTerm,
+  roleFilter,
+  setRoleFilter,
+  isActiveFilter,
+  setIsActiveFilter,
+  onRefreshUsers,
   triggerToast,
   setShowAddUserModal,
   setShowAddProjModal,
@@ -33,6 +43,16 @@ export default function BodyContent({
         {/* 1. SEPARATE USER COMPONENT */}
         {activeTab === 'user' && (
           <UserManagement
+            usersList={usersList}
+            loading={usersLoading}
+            error={usersError}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            roleFilter={roleFilter}
+            setRoleFilter={setRoleFilter}
+            isActiveFilter={isActiveFilter}
+            setIsActiveFilter={setIsActiveFilter}
+            onRefresh={onRefreshUsers}
             filteredEmployees={filteredEmployees}
             deptFilter={deptFilter}
             setDeptFilter={setDeptFilter}

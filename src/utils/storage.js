@@ -63,6 +63,47 @@ export function getAuthData() {
 }
 
 /**
+ * Updates stored access token (and optional refresh token) in active storage
+ */
+export function updateTokens(newTokens) {
+  if (!newTokens) return;
+
+  const access = newTokens.access || newTokens.accessToken || newTokens.access_token;
+  const refresh = newTokens.refresh || newTokens.refreshToken || newTokens.refresh_token;
+
+  const isLocal = !!localStorage.getItem(ACCESS_TOKEN_KEY);
+  const isSession = !!sessionStorage.getItem(ACCESS_TOKEN_KEY);
+  const storage = isLocal ? localStorage : (isSession ? sessionStorage : localStorage);
+
+  if (access) {
+    storage.setItem(ACCESS_TOKEN_KEY, access);
+  }
+  if (refresh) {
+    storage.setItem(REFRESH_TOKEN_KEY, refresh);
+  }
+
+  const authDataStr = storage.getItem(AUTH_DATA_KEY);
+  if (authDataStr) {
+    try {
+      const parsed = JSON.parse(authDataStr);
+      if (parsed.tokens) {
+        if (access) parsed.tokens.access = access;
+        if (refresh) parsed.tokens.refresh = refresh;
+      } else if (parsed.data && parsed.data.tokens) {
+        if (access) parsed.data.tokens.access = access;
+        if (refresh) parsed.data.tokens.refresh = refresh;
+      } else {
+        if (access) parsed.access = access;
+        if (refresh) parsed.refresh = refresh;
+      }
+      storage.setItem(AUTH_DATA_KEY, JSON.stringify(parsed));
+    } catch (e) {
+      console.error('Error updating cached auth data:', e);
+    }
+  }
+}
+
+/**
  * Clears all authentication tokens and cached user data from storage
  */
 export function clearAuthData() {
@@ -76,3 +117,4 @@ export function clearAuthData() {
   sessionStorage.removeItem(USER_KEY);
   sessionStorage.removeItem(AUTH_DATA_KEY);
 }
+

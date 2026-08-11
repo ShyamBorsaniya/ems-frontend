@@ -41,6 +41,16 @@ export function AuthProvider({ children }) {
     setIsLoadingSession(false);
   }, []);
 
+  // Listen for automatic logout events triggered by unhandled unauthorized requests / failed token refresh
+  useEffect(() => {
+    const handleLogoutEvent = () => {
+      logout();
+    };
+    window.addEventListener('auth:logout', handleLogoutEvent);
+    return () => window.removeEventListener('auth:logout', handleLogoutEvent);
+  }, []);
+
+
   const login = async (credentials, rememberMe = true) => {
     const response = await loginApi(credentials);
     if (response && response.success === true && response.data) {

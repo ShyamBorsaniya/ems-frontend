@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import AdminLayout from '../../layouts/AdminLayout';
 import BodyContent from '../../components/Dashboard/BodyContent';
 import Settings from './Settings';
+import { fetchUsersApi } from '../../api/admin/userApi';
 
 export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
   const navigate = useNavigate();
@@ -25,6 +26,48 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [deptFilter, setDeptFilter] = useState('All');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [isActiveFilter, setIsActiveFilter] = useState('all');
+
+  // Backend API User List state
+  const [usersList, setUsersList] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersError, setUsersError] = useState(null);
+
+  // Fetch users from backend API (/api/user/) with filter parameters
+  const loadUsersFromApi = useCallback(async () => {
+    setUsersLoading(true);
+    setUsersError(null);
+    try {
+      const filters = {
+        search: searchTerm,
+        role: roleFilter,
+        is_active: isActiveFilter
+      };
+      const res = await fetchUsersApi(filters);
+      if (res && res.success && Array.isArray(res.data)) {
+        setUsersList(res.data);
+      } else if (res && Array.isArray(res.data) && res.data.length > 0) {
+        setUsersList(res.data);
+      } else {
+        // If API fails or returns non-standard format, record note
+        if (res && res.message) {
+          setUsersError(res.message);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load users:', err);
+      setUsersError(err.message || 'Unable to connect to /api/user/ endpoint');
+    } finally {
+      setUsersLoading(false);
+    }
+  }, [searchTerm, roleFilter, isActiveFilter]);
+
+  useEffect(() => {
+    if (activeTab === 'user' || activeTab === 'overview') {
+      loadUsersFromApi();
+    }
+  }, [activeTab, loadUsersFromApi]);
 
   // Modals state
   const [showAddUserModal, setShowAddUserModal] = useState(false);
@@ -83,6 +126,30 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
     e.preventDefault();
     if (!newEmpName || !newEmpEmail) return;
 
+    const nameParts = newEmpName.trim().split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+    const username = newEmpEmail.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '_');
+
+    const newBackendUser = {
+      id: Date.now(),
+      username: username,
+      email: newEmpEmail,
+      first_name: firstName,
+      last_name: lastName,
+      phone: '+1-555-9999',
+      profile_image: null,
+      company: 2,
+      company_name: 'TechCorp Solutions',
+      role: 4,
+      role_name: newEmpRole.toLowerCase().replace(/\s+/g, '_'),
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    setUsersList([newBackendUser, ...usersList]);
+
     const createdEmp = {
       id: Date.now(),
       name: newEmpName,
@@ -98,7 +165,7 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
     setShowAddUserModal(false);
     setNewEmpName('');
     setNewEmpEmail('');
-    triggerToast(`Successfully onboarded ${newEmpName} into ${newEmpDept}!`);
+    triggerToast(`Successfully onboarded ${newEmpName}!`);
   };
 
   const handleAddRoleSubmit = (e) => {
@@ -170,6 +237,16 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
           roles={roles}
           deptFilter={deptFilter}
           setDeptFilter={setDeptFilter}
+          usersList={usersList}
+          usersLoading={usersLoading}
+          usersError={usersError}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          roleFilter={roleFilter}
+          setRoleFilter={setRoleFilter}
+          isActiveFilter={isActiveFilter}
+          setIsActiveFilter={setIsActiveFilter}
+          onRefreshUsers={loadUsersFromApi}
           triggerToast={triggerToast}
           setShowAddUserModal={setShowAddUserModal}
           setShowAddProjModal={setShowAddProjModal}
