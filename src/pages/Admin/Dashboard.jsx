@@ -31,26 +31,39 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
 
   // Backend API User List state
   const [usersList, setUsersList] = useState([]);
+  const [paginationInfo, setPaginationInfo] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState(null);
 
   // Fetch users from backend API (/api/user/) with filter parameters
-  const loadUsersFromApi = useCallback(async () => {
+  const loadUsersFromApi = useCallback(async (pageOverride) => {
     setUsersLoading(true);
     setUsersError(null);
+    const pageToLoad = pageOverride !== undefined ? pageOverride : currentPage;
     try {
       const filters = {
+        page: pageToLoad,
         search: searchTerm,
         role: roleFilter,
         is_active: isActiveFilter
       };
       const res = await fetchUsersApi(filters);
-      if (res && res.success && Array.isArray(res.data)) {
+      if (res && res.success && res.data) {
+        if (Array.isArray(res.data)) {
+          setUsersList(res.data);
+          setPaginationInfo(null);
+        } else if (res.data.results) {
+          setUsersList(Array.isArray(res.data.results) ? res.data.results : []);
+          setPaginationInfo(res.data.pagination || null);
+        } else {
+          setUsersList([]);
+          setPaginationInfo(null);
+        }
+      } else if (res && Array.isArray(res.data)) {
         setUsersList(res.data);
-      } else if (res && Array.isArray(res.data) && res.data.length > 0) {
-        setUsersList(res.data);
+        setPaginationInfo(null);
       } else {
-        // If API fails or returns non-standard format, record note
         if (res && res.message) {
           setUsersError(res.message);
         }
@@ -61,13 +74,33 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
     } finally {
       setUsersLoading(false);
     }
-  }, [searchTerm, roleFilter, isActiveFilter]);
+  }, [currentPage, searchTerm, roleFilter, isActiveFilter]);
 
   useEffect(() => {
     if (activeTab === 'user' || activeTab === 'overview') {
       loadUsersFromApi();
     }
   }, [activeTab, loadUsersFromApi]);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    loadUsersFromApi(newPage);
+  };
+
+  const handleSearchChange = (val) => {
+    setSearchTerm(val);
+    setCurrentPage(1);
+  };
+
+  const handleRoleFilterChange = (val) => {
+    setRoleFilter(val);
+    setCurrentPage(1);
+  };
+
+  const handleIsActiveFilterChange = (val) => {
+    setIsActiveFilter(val);
+    setCurrentPage(1);
+  };
 
   // Modals state
   const [showAddUserModal, setShowAddUserModal] = useState(false);
@@ -238,15 +271,18 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
           deptFilter={deptFilter}
           setDeptFilter={setDeptFilter}
           usersList={usersList}
+          paginationInfo={paginationInfo}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
           usersLoading={usersLoading}
           usersError={usersError}
           searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
+          setSearchTerm={handleSearchChange}
           roleFilter={roleFilter}
-          setRoleFilter={setRoleFilter}
+          setRoleFilter={handleRoleFilterChange}
           isActiveFilter={isActiveFilter}
-          setIsActiveFilter={setIsActiveFilter}
-          onRefreshUsers={loadUsersFromApi}
+          setIsActiveFilter={handleIsActiveFilterChange}
+          onRefreshUsers={() => loadUsersFromApi(currentPage)}
           triggerToast={triggerToast}
           setShowAddUserModal={setShowAddUserModal}
           setShowAddProjModal={setShowAddProjModal}

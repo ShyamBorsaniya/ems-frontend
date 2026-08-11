@@ -16,6 +16,9 @@ export default function BodyContent({
   deptFilter,
   setDeptFilter,
   usersList,
+  paginationInfo,
+  currentPage,
+  onPageChange,
   usersLoading,
   usersError,
   searchTerm,
@@ -44,6 +47,9 @@ export default function BodyContent({
         {activeTab === 'user' && (
           <UserManagement
             usersList={usersList}
+            paginationInfo={paginationInfo}
+            currentPage={currentPage}
+            onPageChange={onPageChange}
             loading={usersLoading}
             error={usersError}
             searchTerm={searchTerm}

@@ -3,8 +3,8 @@ import React from 'react';
 export default function AdminSidebar({ activeTab, onTabChange, user, onLogout }) {
   const navItems = [
     { id: 'overview', label: 'Overview', icon: '📊' },
-    { id: 'user', label: 'Users', icon: '👥', badge: '7' },
-    { id: 'project', label: 'Projects', icon: '🚀', badge: '4' },
+    { id: 'user', label: 'Users', icon: '👥' },
+    { id: 'project', label: 'Projects', icon: '🚀' },
     { id: 'department', label: 'Departments', icon: '🏢' },
     { id: 'role', label: 'Roles', icon: '🔑' },
     { id: 'settings', label: 'Settings', icon: '⚙️' }
@@ -38,11 +38,10 @@ export default function AdminSidebar({ activeTab, onTabChange, user, onLogout })
             return (
               <button
                 key={item.id}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 w-full text-left cursor-pointer ${
-                  isActive
-                    ? 'bg-indigo-50/80 text-indigo-600 font-semibold border border-indigo-200/80 shadow-xs'
-                    : 'text-slate-600 border border-transparent hover:bg-slate-50 hover:text-indigo-600'
-                }`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 w-full text-left cursor-pointer ${isActive
+                  ? 'bg-indigo-50/80 text-indigo-600 font-semibold border border-indigo-200/80 shadow-xs'
+                  : 'text-slate-600 border border-transparent hover:bg-slate-50 hover:text-indigo-600'
+                  }`}
                 onClick={() => onTabChange && onTabChange(item.id)}
               >
                 <span className="text-base w-6 flex items-center justify-center">{item.icon}</span>

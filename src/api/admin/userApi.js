@@ -9,6 +9,9 @@ export async function fetchUsersApi(filters = {}) {
   try {
     const params = new URLSearchParams();
 
+    if (filters.page) {
+      params.append('page', filters.page);
+    }
     if (filters.search && filters.search.trim()) {
       params.append('search', filters.search.trim());
     }
@@ -30,7 +33,7 @@ export async function fetchUsersApi(filters = {}) {
       status_code: res.status || 400,
       success: false,
       message: res.data?.message || 'Failed to retrieve user list',
-      data: []
+      data: { results: [], pagination: null }
     };
   } catch (error) {
     console.error('Error in fetchUsersApi:', error);
@@ -38,7 +41,7 @@ export async function fetchUsersApi(filters = {}) {
       status_code: 500,
       success: false,
       message: error.message || 'Network error retrieving user list',
-      data: []
+      data: { results: [], pagination: null }
     };
   }
 }
