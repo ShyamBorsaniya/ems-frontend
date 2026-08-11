@@ -4,34 +4,43 @@ export default function UserManagement({
   filteredEmployees,
   deptFilter,
   setDeptFilter,
-  triggerToast
+  triggerToast,
+  setShowAddUserModal
 }) {
   return (
     <div className="admin-card">
       <div className="admin-card-header">
         <span className="admin-card-title">👥 User Roster & Staff Directory</span>
         
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 500 }}>Department Filter:</span>
-          <select
-            style={{
-              padding: '0.4rem 0.8rem',
-              borderRadius: '8px',
-              background: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              color: '#0f172a',
-              fontSize: '0.85rem'
-            }}
-            value={deptFilter}
-            onChange={(e) => setDeptFilter(e.target.value)}
-          >
-            <option value="All">All Departments</option>
-            <option value="Engineering">Engineering</option>
-            <option value="Management">Management</option>
-            <option value="Human Resources">Human Resources</option>
-            <option value="Sales">Sales</option>
-            <option value="Finance">Finance</option>
-          </select>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 500 }}>Department Filter:</span>
+            <select
+              style={{
+                padding: '0.4rem 0.8rem',
+                borderRadius: '8px',
+                background: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                color: '#0f172a',
+                fontSize: '0.85rem'
+              }}
+              value={deptFilter}
+              onChange={(e) => setDeptFilter(e.target.value)}
+            >
+              <option value="All">All Departments</option>
+              <option value="Engineering">Engineering</option>
+              <option value="Management">Management</option>
+              <option value="Human Resources">Human Resources</option>
+              <option value="Sales">Sales</option>
+              <option value="Finance">Finance</option>
+            </select>
+          </div>
+
+          {setShowAddUserModal && (
+            <button className="admin-btn-primary" style={{ padding: '0.45rem 0.9rem', fontSize: '0.8rem' }} onClick={() => setShowAddUserModal(true)}>
+              + Onboard User
+            </button>
+          )}
         </div>
       </div>
 

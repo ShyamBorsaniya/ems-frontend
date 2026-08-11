@@ -44,65 +44,6 @@ export default function BodyContent({
         </div>
       )}
 
-      {/* Hero Banner Header */}
-      <div className="admin-hero-card">
-        <div className="admin-hero-text">
-          <h1>Welcome, {adminName.split(' ')[0]} 👋</h1>
-          <p>WorkPulse Management Console — Streamlining users, projects, departments, and roles.</p>
-        </div>
-
-        <div className="admin-hero-actions">
-          {activeTab === 'user' && (
-            <button className="admin-btn-primary" onClick={() => setShowAddUserModal(true)}>
-              <span>+</span> Onboard User
-            </button>
-          )}
-          {activeTab === 'project' && (
-            <button className="admin-btn-primary" onClick={() => setShowAddProjModal(true)}>
-              <span>+</span> Create Project
-            </button>
-          )}
-          {activeTab === 'role' && (
-            <button className="admin-btn-primary" onClick={() => setShowAddRoleModal(true)}>
-              <span>+</span> Define Role
-            </button>
-          )}
-          <button className="admin-btn-secondary" onClick={() => triggerToast('Exporting Report (CSV)...')}>
-            📥 Export Statement
-          </button>
-        </div>
-      </div>
-
-      {/* Stats KPI Cards */}
-      <div className="admin-stats-grid">
-        <div className="admin-stat-card">
-          <div className="admin-stat-header">
-            <span className="admin-stat-title">Total Users</span>
-            <div className="admin-stat-icon stat-icon-indigo">👥</div>
-          </div>
-          <div className="admin-stat-value">{employees.length} Active</div>
-          <div className="admin-stat-subtext">Across 5 Departments</div>
-        </div>
-
-        <div className="admin-stat-card">
-          <div className="admin-stat-header">
-            <span className="admin-stat-title">Active Projects</span>
-            <div className="admin-stat-icon stat-icon-cyan">🚀</div>
-          </div>
-          <div className="admin-stat-value">{projects.length} Initiatives</div>
-          <div className="admin-stat-subtext">{projects.filter(p => p.status === 'In Progress').length} In Progress</div>
-        </div>
-
-        <div className="admin-stat-card">
-          <div className="admin-stat-header">
-            <span className="admin-stat-title">Configured Roles</span>
-            <div className="admin-stat-icon stat-icon-amber">🔑</div>
-          </div>
-          <div className="admin-stat-value">{roles.length} Tiered Roles</div>
-          <div className="admin-stat-subtext">Access Matrix Enforced</div>
-        </div>
-      </div>
-
       {/* 1. SEPARATE USER COMPONENT */}
       {activeTab === 'user' && (
         <UserManagement
@@ -110,6 +51,7 @@ export default function BodyContent({
           deptFilter={deptFilter}
           setDeptFilter={setDeptFilter}
           triggerToast={triggerToast}
+          setShowAddUserModal={setShowAddUserModal}
         />
       )}
 
@@ -138,8 +80,11 @@ export default function BodyContent({
       {/* 5. SEPARATE OVERVIEW COMPONENT */}
       {activeTab === 'overview' && (
         <OverviewSummary
-          employeesCount={employees.length}
-          projectsCount={projects.length}
+          adminName={adminName}
+          employees={employees}
+          projects={projects}
+          roles={roles}
+          triggerToast={triggerToast}
         />
       )}
     </main>

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import './Login.css';
-import { loginApi } from '../../services/api';
-import { saveAuthData } from '../../utils/storage';
+import { useAuth } from '../../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login({ onLoginSuccess }) {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
@@ -16,7 +18,6 @@ export default function Login({ onLoginSuccess }) {
     e.preventDefault();
     setErrorMessage('');
 
-    // Form Validation
     if (!email.trim()) {
       setErrorMessage('Please enter your email or username.');
       return;
@@ -30,39 +31,24 @@ export default function Login({ onLoginSuccess }) {
     setIsLoading(true);
 
     try {
-      const response = await loginApi({ email: email.trim(), password });
-
+      const result = await login({ email: email.trim(), password }, rememberMe);
       setIsLoading(false);
 
-      if (response && response.success === true && response.data) {
-        // Save response data in browser storage (localStorage / sessionStorage)
-        saveAuthData(response, rememberMe);
-
-        const userData = response.data.user || {};
-        const tokens = response.data.tokens || {};
-
-        const authenticatedUser = {
-          id: userData.id,
-          username: userData.username,
-          email: userData.email,
-          name: [userData.first_name, userData.last_name].filter(Boolean).join(' ') || userData.username || 'User',
-          role: userData.role_name || (userData.role === 5 ? 'Employee' : 'User'),
-          role_name: userData.role_name,
-          role_id: userData.role,
-          employeeId: `EMP-${userData.id || '1'}`,
-          phone: userData.phone,
-          profile_image: userData.profile_image,
-          is_active: userData.is_active,
-          created_at: userData.created_at,
-          tokens: tokens,
-          loginTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-
+      if (result && result.success) {
+        const authenticatedUser = result.user;
         if (onLoginSuccess) {
           onLoginSuccess(authenticatedUser);
+        } else {
+          // Default routing
+          const roleStr = (authenticatedUser.role_name || authenticatedUser.role || '').toString().toLowerCase();
+          if (authenticatedUser.role_id === 5 || roleStr.includes('employee')) {
+            navigate('/employee');
+          } else {
+            navigate('/user');
+          }
         }
       } else {
-        setErrorMessage(response?.message || 'Login failed. Please check your credentials.');
+        setErrorMessage(result?.message || 'Login failed. Please check your credentials.');
       }
     } catch (err) {
       setIsLoading(false);
@@ -125,11 +111,11 @@ export default function Login({ onLoginSuccess }) {
           </div>
 
           <div className="brand-footer-text">
-            © 2026 WorkPulse Systems. Secure 256-bit SSL Encryption.
+            © {new Date().getFullYear()} WorkPulse Systems. Secure 256-bit SSL Encryption.
           </div>
         </div>
 
-        {/* Right Area - Single Login Form */}
+        {/* Right Area - Login Form */}
         <div className="login-form-area">
           <div className="form-header">
             <h2>Welcome Back</h2>
@@ -141,7 +127,7 @@ export default function Login({ onLoginSuccess }) {
             <div className="toast-message toast-error">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12"></line>
                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
               </svg>
               <span>{errorMessage}</span>
@@ -214,7 +200,6 @@ export default function Login({ onLoginSuccess }) {
               </div>
             </div>
 
-            {/* Remember Me Utility */}
             <div className="form-utility">
               <label className="remember-me">
                 <input
@@ -226,7 +211,6 @@ export default function Login({ onLoginSuccess }) {
               </label>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               className="btn-primary"
