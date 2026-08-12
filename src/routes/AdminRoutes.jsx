@@ -11,7 +11,6 @@ export default function AdminRoutes({ user, onLogout }) {
       <Route path="/project" element={<AdminDashboard user={user} onLogout={onLogout} defaultTab="project" />} />
       <Route path="/department" element={<AdminDashboard user={user} onLogout={onLogout} defaultTab="department" />} />
       <Route path="/role" element={<AdminDashboard user={user} onLogout={onLogout} defaultTab="role" />} />
-      <Route path="/settings" element={<AdminDashboard user={user} onLogout={onLogout} defaultTab="settings" />} />
     </Routes>
   );
 }

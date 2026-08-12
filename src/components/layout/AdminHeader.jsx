@@ -13,8 +13,6 @@ export default function AdminHeader({ user, searchTerm, setSearchTerm, activeTab
         return '🔑 Roles & Permissions';
       case 'overview':
         return '📊 Executive Overview';
-      case 'settings':
-        return '⚙️ System Settings';
       default:
         return '👑 Admin Console';
     }

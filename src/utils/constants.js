@@ -12,8 +12,7 @@ export const DEFAULT_TABS = {
   USERS: 'user',
   PROJECTS: 'project',
   DEPARTMENTS: 'department',
-  ROLES: 'role',
-  SETTINGS: 'settings'
+  ROLES: 'role'
 };
 
 export const LEAVE_STATUS = {

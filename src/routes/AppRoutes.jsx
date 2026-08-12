@@ -67,7 +67,6 @@ export default function AppRoutes() {
       <Route path="/project" element={<AdminWrapper tab="project" />} />
       <Route path="/department" element={<AdminWrapper tab="department" />} />
       <Route path="/role" element={<AdminWrapper tab="role" />} />
-      <Route path="/settings" element={<AdminWrapper tab="settings" />} />
       <Route path="*" element={<RootRedirect />} />
     </Routes>
   );

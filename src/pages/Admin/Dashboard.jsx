@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import AdminLayout from '../../layouts/AdminLayout';
 import BodyContent from '../../components/Dashboard/BodyContent';
-import Settings from './Settings';
 import { fetchUsersApi } from '../../api/admin/userApi';
 import { fetchRolesApi } from '../../api/admin/roleApi';
 import { fetchDepartmentsApi } from '../../api/admin/departmentApi';
@@ -16,7 +15,7 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
 
   const getTabFromPath = () => {
     const path = location.pathname.replace('/', '').toLowerCase();
-    const validTabs = ['overview', 'user', 'project', 'department', 'role', 'settings'];
+    const validTabs = ['overview', 'user', 'project', 'department', 'role'];
     if (validTabs.includes(path)) {
       return path;
     }
@@ -353,59 +352,55 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
       searchTerm={searchTerm}
       setSearchTerm={setSearchTerm}
     >
-      {activeTab === 'settings' ? (
-        <Settings triggerToast={triggerToast} />
-      ) : (
-        <BodyContent
-          activeTab={activeTab}
-          adminName={adminName}
-          toastMessage={toastMessage}
-          employees={employees}
-          filteredEmployees={filteredEmployees}
-          projects={projects}
-          roles={roles}
-          deptFilter={deptFilter}
-          setDeptFilter={setDeptFilter}
-          usersList={usersList}
-          paginationInfo={paginationInfo}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-          usersLoading={usersLoading}
-          usersError={usersError}
-          searchTerm={searchTerm}
-          setSearchTerm={handleSearchChange}
-          roleFilter={roleFilter}
-          setRoleFilter={handleRoleFilterChange}
-          isActiveFilter={isActiveFilter}
-          setIsActiveFilter={handleIsActiveFilterChange}
-          onRefreshUsers={() => loadUsersFromApi(currentPage)}
-          rolesList={rolesList}
-          rolesPaginationInfo={rolesPaginationInfo}
-          rolesCurrentPage={rolesCurrentPage}
-          onRolesPageChange={handleRolesPageChange}
-          rolesLoading={rolesLoading}
-          rolesError={rolesError}
-          roleSearchTerm={roleSearchTerm}
-          setRoleSearchTerm={handleRoleSearchChange}
-          onRefreshRoles={() => loadRolesFromApi(rolesCurrentPage)}
-          deptsList={deptsList}
-          deptsPaginationInfo={deptsPaginationInfo}
-          deptsCurrentPage={deptsCurrentPage}
-          onDeptsPageChange={handleDeptsPageChange}
-          deptsLoading={deptsLoading}
-          deptsError={deptsError}
-          deptSearchTerm={deptSearchTerm}
-          setDeptSearchTerm={handleDeptSearchChange}
-          deptStatusFilter={deptStatusFilter}
-          setDeptStatusFilter={handleDeptStatusFilterChange}
-          onRefreshDepts={() => loadDepartmentsFromApi(deptsCurrentPage)}
-          triggerToast={triggerToast}
-          setShowAddUserModal={setShowAddUserModal}
-          setShowAddProjModal={setShowAddProjModal}
-          setShowAddRoleModal={setShowAddRoleModal}
-          setShowAddDeptModal={setShowAddDeptModal}
-        />
-      )}
+      <BodyContent
+        activeTab={activeTab}
+        adminName={adminName}
+        toastMessage={toastMessage}
+        employees={employees}
+        filteredEmployees={filteredEmployees}
+        projects={projects}
+        roles={roles}
+        deptFilter={deptFilter}
+        setDeptFilter={setDeptFilter}
+        usersList={usersList}
+        paginationInfo={paginationInfo}
+        currentPage={currentPage}
+        onPageChange={handlePageChange}
+        usersLoading={usersLoading}
+        usersError={usersError}
+        searchTerm={searchTerm}
+        setSearchTerm={handleSearchChange}
+        roleFilter={roleFilter}
+        setRoleFilter={handleRoleFilterChange}
+        isActiveFilter={isActiveFilter}
+        setIsActiveFilter={handleIsActiveFilterChange}
+        onRefreshUsers={() => loadUsersFromApi(currentPage)}
+        rolesList={rolesList}
+        rolesPaginationInfo={rolesPaginationInfo}
+        rolesCurrentPage={rolesCurrentPage}
+        onRolesPageChange={handleRolesPageChange}
+        rolesLoading={rolesLoading}
+        rolesError={rolesError}
+        roleSearchTerm={roleSearchTerm}
+        setRoleSearchTerm={handleRoleSearchChange}
+        onRefreshRoles={() => loadRolesFromApi(rolesCurrentPage)}
+        deptsList={deptsList}
+        deptsPaginationInfo={deptsPaginationInfo}
+        deptsCurrentPage={deptsCurrentPage}
+        onDeptsPageChange={handleDeptsPageChange}
+        deptsLoading={deptsLoading}
+        deptsError={deptsError}
+        deptSearchTerm={deptSearchTerm}
+        setDeptSearchTerm={handleDeptSearchChange}
+        deptStatusFilter={deptStatusFilter}
+        setDeptStatusFilter={handleDeptStatusFilterChange}
+        onRefreshDepts={() => loadDepartmentsFromApi(deptsCurrentPage)}
+        triggerToast={triggerToast}
+        setShowAddUserModal={setShowAddUserModal}
+        setShowAddProjModal={setShowAddProjModal}
+        setShowAddRoleModal={setShowAddRoleModal}
+        setShowAddDeptModal={setShowAddDeptModal}
+      />
 
       {/* Onboard User Modal */}
       <UserFormModal
