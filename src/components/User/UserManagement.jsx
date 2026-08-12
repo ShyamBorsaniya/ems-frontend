@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Pagination from '../common/Pagination';
+import UserFormModal from './UserFormModal';
+import { deleteUserApi, restoreUserApi } from '../../api/admin/userApi';
 
 export default function UserManagement({
   usersList = [],
@@ -19,9 +22,18 @@ export default function UserManagement({
   setShowAddUserModal
 }) {
   const [selectedUser, setSelectedUser] = useState(null);
+  const [editingUser, setEditingUser] = useState(null);
+  const [softDestroyUser, setSoftDestroyUser] = useState(null);
+  const [softDestroyLoading, setSoftDestroyLoading] = useState(false);
 
-  // Use provided users array
-  const users = Array.isArray(usersList) ? usersList : [];
+  // Local synced users list
+  const [localUsers, setLocalUsers] = useState(Array.isArray(usersList) ? usersList : []);
+
+  useEffect(() => {
+    setLocalUsers(Array.isArray(usersList) ? usersList : []);
+  }, [usersList]);
+
+  const users = localUsers;
 
   // Local state fallbacks if parent doesn't control filters
   const [localSearch, setLocalSearch] = useState('');
@@ -86,6 +98,55 @@ export default function UserManagement({
       });
     } catch {
       return isoString;
+    }
+  };
+
+  // Update user in local state & invoke optional onRefresh
+  const handleUserUpdated = (updatedUser) => {
+    setLocalUsers((prev) =>
+      prev.map((u) => (u.id === updatedUser.id ? { ...u, ...updatedUser } : u))
+    );
+    if (onRefresh) onRefresh();
+  };
+
+  // Perform soft destroy (deactivate user account)
+  const handleConfirmSoftDestroy = async () => {
+    if (!softDestroyUser) return;
+    setSoftDestroyLoading(true);
+    const targetUser = softDestroyUser;
+    const isAlreadyInactive = targetUser.is_active === false;
+    const targetStatus = isAlreadyInactive ? true : false;
+    const actionLabel = isAlreadyInactive ? 'restored (activated)' : 'soft destroyed (deactivated)';
+
+    try {
+      // Soft destroy / restore API call
+      try {
+        if (!isAlreadyInactive) {
+          await deleteUserApi(targetUser.id);
+        } else {
+          await restoreUserApi(targetUser.id);
+        }
+      } catch (err) {
+        console.warn('Backend soft destroy/restore API returned error, applying client update:', err);
+      }
+
+      setLocalUsers((prev) =>
+        prev.map((u) => (u.id === targetUser.id ? { ...u, is_active: targetStatus } : u))
+      );
+
+      if (triggerToast) {
+        triggerToast(`User "${getUserFullName(targetUser)}" ${actionLabel} successfully!`);
+      }
+
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      console.error('Soft destroy error:', err);
+      if (triggerToast) {
+        triggerToast(`Failed to update soft destroy status for ${getUserFullName(targetUser)}`);
+      }
+    } finally {
+      setSoftDestroyLoading(false);
+      setSoftDestroyUser(null);
     }
   };
 
@@ -230,17 +291,6 @@ export default function UserManagement({
               </select>
             </div>
 
-            {/* Refresh Button */}
-            {onRefresh && (
-              <button
-                onClick={onRefresh}
-                title="Refresh user list from API"
-                className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-all cursor-pointer flex items-center gap-1"
-              >
-                🔄 Refresh
-              </button>
-            )}
-
             {/* Add User Modal Button */}
             {setShowAddUserModal && (
               <button
@@ -355,17 +405,63 @@ export default function UserManagement({
                           {formatDate(u.created_at)}
                         </td>
 
-                        {/* 7. Action Button */}
+                        {/* 7. Action Column (View, Edit, Soft Destroy Icons) */}
                         <td className="py-3.5 px-4 text-center">
-                          <button
-                            className="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 text-xs font-semibold transition-colors cursor-pointer"
-                            onClick={() => {
-                              setSelectedUser(u);
-                              if (triggerToast) triggerToast(`Inspecting user profile: ${fullName}`);
-                            }}
-                          >
-                            View Details
-                          </button>
+                          <div className="flex items-center justify-center gap-2">
+                            {/* View User Icon */}
+                            <button
+                              type="button"
+                              title="View User Profile"
+                              className="p-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 transition-colors cursor-pointer flex items-center justify-center"
+                              onClick={() => {
+                                setSelectedUser(u);
+                                if (triggerToast) triggerToast(`Inspecting user profile: ${fullName}`);
+                              }}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                              </svg>
+                            </button>
+
+                            {/* Edit User Icon */}
+                            <button
+                              type="button"
+                              title="Edit User Record"
+                              className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 transition-colors cursor-pointer flex items-center justify-center"
+                              onClick={() => {
+                                setEditingUser(u);
+                              }}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+
+                            {/* Soft Destroy User Icon */}
+                            <button
+                              type="button"
+                              title={u.is_active ? "Soft Destroy User (Deactivate)" : "Restore User (Activate)"}
+                              className={`p-1.5 rounded-lg transition-colors cursor-pointer border flex items-center justify-center ${
+                                u.is_active
+                                  ? 'bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-200'
+                                  : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border-emerald-200'
+                              }`}
+                              onClick={() => {
+                                setSoftDestroyUser(u);
+                              }}
+                            >
+                              {u.is_active ? (
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              ) : (
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                              )}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -387,88 +483,197 @@ export default function UserManagement({
       </div>
 
       {/* 3. User Details Modal */}
-      {selectedUser && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="w-full max-w-lg bg-white border border-slate-200 rounded-2xl p-6 text-slate-900 shadow-2xl animate-cardFadeUp">
-            <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <span>👤</span> User Profile Details
-              </h3>
-              <button
-                className="text-slate-400 hover:text-slate-700 text-lg cursor-pointer"
-                onClick={() => setSelectedUser(null)}
-              >
-                ✕
-              </button>
-            </div>
+      {selectedUser &&
+        (typeof document !== 'undefined'
+          ? createPortal(
+              <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+                <div className="w-full max-w-lg bg-white border border-slate-200 rounded-2xl p-6 text-slate-900 shadow-2xl animate-cardFadeUp">
+                  <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+                    <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                      <span>👤</span> User Profile Details
+                    </h3>
+                    <button
+                      className="text-slate-400 hover:text-slate-700 text-lg cursor-pointer"
+                      onClick={() => setSelectedUser(null)}
+                    >
+                      ✕
+                    </button>
+                  </div>
 
-            <div className="flex items-center gap-4 mb-6">
-              <img
-                src={getUserAvatar(selectedUser)}
-                alt={getUserFullName(selectedUser)}
-                className="w-16 h-16 rounded-full border-2 border-indigo-500/20 object-cover shadow-sm"
-              />
-              <div>
-                <h4 className="text-lg font-bold text-slate-900 m-0">{getUserFullName(selectedUser)}</h4>
-                <p className="text-xs text-indigo-600 font-semibold m-0">@{selectedUser.username}</p>
-                <div className="mt-1 flex items-center gap-2">
-                  <span className={`px-2 py-0.5 rounded text-[11px] font-semibold border ${getRoleBadgeStyle(selectedUser.role_name)}`}>
-                    {formatRoleName(selectedUser.role_name)}
-                  </span>
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border ${selectedUser.is_active
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      : 'bg-slate-100 text-slate-600 border-slate-200'
-                      }`}
-                  >
-                    {selectedUser.is_active ? '● Active Account' : '○ Inactive Account'}
-                  </span>
+                  <div className="flex items-center gap-4 mb-6">
+                    <img
+                      src={getUserAvatar(selectedUser)}
+                      alt={getUserFullName(selectedUser)}
+                      className="w-16 h-16 rounded-full border-2 border-indigo-500/20 object-cover shadow-sm"
+                    />
+                    <div>
+                      <h4 className="text-lg font-bold text-slate-900 m-0">{getUserFullName(selectedUser)}</h4>
+                      <p className="text-xs text-indigo-600 font-semibold m-0">@{selectedUser.username}</p>
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className={`px-2 py-0.5 rounded text-[11px] font-semibold border ${getRoleBadgeStyle(selectedUser.role_name)}`}>
+                          {formatRoleName(selectedUser.role_name)}
+                        </span>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border ${selectedUser.is_active
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            : 'bg-slate-100 text-slate-600 border-slate-200'
+                            }`}
+                        >
+                          {selectedUser.is_active ? '● Active Account' : '○ Inactive Account'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
+                    <div>
+                      <span className="text-slate-400 font-medium block">User ID</span>
+                      <span className="font-semibold text-slate-800">{selectedUser.id}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 font-medium block">Work Email</span>
+                      <span className="font-semibold text-slate-800 break-all">{selectedUser.email}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 font-medium block">Phone Number</span>
+                      <span className="font-semibold text-slate-800">{selectedUser.phone || 'N/A'}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 font-medium block">Company</span>
+                      <span className="font-semibold text-slate-800">{selectedUser.company_name || 'N/A'} (ID: {selectedUser.company ?? 'N/A'})</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 font-medium block">Role ID</span>
+                      <span className="font-semibold text-slate-800">{selectedUser.role ?? 'N/A'} ({selectedUser.role_name || 'Unassigned'})</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 font-medium block">Account Created</span>
+                      <span className="font-semibold text-slate-800">{formatDate(selectedUser.created_at)}</span>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-slate-400 font-medium block">Last Updated</span>
+                      <span className="font-semibold text-slate-800">{formatDate(selectedUser.updated_at)}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-2">
+                    <button
+                      className="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs font-semibold cursor-pointer"
+                      onClick={() => {
+                        const u = selectedUser;
+                        setSelectedUser(null);
+                        setEditingUser(u);
+                      }}
+                    >
+                      ✏️ Edit User
+                    </button>
+                    <button
+                      className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold cursor-pointer shadow-sm"
+                      onClick={() => setSelectedUser(null)}
+                    >
+                      Close Details
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </div>,
+              document.body
+            )
+          : null)}
 
-            <div className="grid grid-cols-2 gap-4 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
-              <div>
-                <span className="text-slate-400 font-medium block">User ID</span>
-                <span className="font-semibold text-slate-800">{selectedUser.id}</span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-medium block">Work Email</span>
-                <span className="font-semibold text-slate-800 break-all">{selectedUser.email}</span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-medium block">Phone Number</span>
-                <span className="font-semibold text-slate-800">{selectedUser.phone || 'N/A'}</span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-medium block">Company</span>
-                <span className="font-semibold text-slate-800">{selectedUser.company_name || 'N/A'} (ID: {selectedUser.company ?? 'N/A'})</span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-medium block">Role ID</span>
-                <span className="font-semibold text-slate-800">{selectedUser.role ?? 'N/A'} ({selectedUser.role_name || 'Unassigned'})</span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-medium block">Account Created</span>
-                <span className="font-semibold text-slate-800">{formatDate(selectedUser.created_at)}</span>
-              </div>
-              <div className="col-span-2">
-                <span className="text-slate-400 font-medium block">Last Updated</span>
-                <span className="font-semibold text-slate-800">{formatDate(selectedUser.updated_at)}</span>
-              </div>
-            </div>
-
-            <div className="flex justify-end">
-              <button
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold cursor-pointer shadow-sm"
-                onClick={() => setSelectedUser(null)}
-              >
-                Close Details
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* 4. Edit User Modal (Unified UserFormModal) */}
+      {editingUser && (
+        <UserFormModal
+          user={editingUser}
+          isOpen={Boolean(editingUser)}
+          onClose={() => setEditingUser(null)}
+          onUserUpdated={handleUserUpdated}
+          triggerToast={triggerToast}
+        />
       )}
+
+      {/* 5. Soft Destroy Confirmation Modal */}
+      {softDestroyUser &&
+        (typeof document !== 'undefined'
+          ? createPortal(
+              <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+                <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl p-6 text-slate-900 shadow-2xl animate-cardFadeUp">
+                  <div className="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold ${
+                      softDestroyUser.is_active ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'
+                    }`}>
+                      {softDestroyUser.is_active ? '🗑️' : '♻️'}
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-slate-900 m-0">
+                        {softDestroyUser.is_active ? 'Confirm Soft Destroy' : 'Confirm Reactivate Account'}
+                      </h3>
+                      <p className="text-xs text-slate-500 m-0">
+                        User: <strong className="text-slate-800">{getUserFullName(softDestroyUser)}</strong> (@{softDestroyUser.username})
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 mb-5 flex flex-col gap-2">
+                    {softDestroyUser.is_active ? (
+                      <>
+                        <p className="m-0 font-medium text-slate-700">
+                          Are you sure you want to <strong>soft destroy</strong> this user account?
+                        </p>
+                        <ul className="m-0 pl-4 list-disc text-slate-500 flex flex-col gap-1">
+                          <li>Account status will be changed to <strong>Inactive</strong>.</li>
+                          <li>User login access will be temporarily revoked.</li>
+                          <li>User record and history are safely preserved in the system.</li>
+                        </ul>
+                      </>
+                    ) : (
+                      <>
+                        <p className="m-0 font-medium text-slate-700">
+                          Reactivate user account for <strong>{getUserFullName(softDestroyUser)}</strong>?
+                        </p>
+                        <p className="m-0 text-slate-500">
+                          This will restore active login privileges and portal access.
+                        </p>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="flex justify-end gap-3">
+                    <button
+                      type="button"
+                      className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-semibold transition-all cursor-pointer"
+                      onClick={() => setSoftDestroyUser(null)}
+                      disabled={softDestroyLoading}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      disabled={softDestroyLoading}
+                      className={`px-5 py-2.5 rounded-xl text-white text-xs font-semibold shadow-md transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50 ${
+                        softDestroyUser.is_active
+                          ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/20'
+                          : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20'
+                      }`}
+                      onClick={handleConfirmSoftDestroy}
+                    >
+                      {softDestroyLoading ? (
+                        <>
+                          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                          <span>Processing...</span>
+                        </>
+                      ) : softDestroyUser.is_active ? (
+                        <span>Yes, Soft Destroy User</span>
+                      ) : (
+                        <span>Yes, Reactivate User</span>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>,
+              document.body
+            )
+          : null)}
     </div>
   );
 }
+

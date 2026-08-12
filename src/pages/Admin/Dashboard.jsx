@@ -4,6 +4,7 @@ import AdminLayout from '../../layouts/AdminLayout';
 import BodyContent from '../../components/Dashboard/BodyContent';
 import Settings from './Settings';
 import { fetchUsersApi } from '../../api/admin/userApi';
+import UserFormModal from '../../components/User/UserFormModal';
 
 export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
   const navigate = useNavigate();
@@ -139,11 +140,6 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
   ]);
 
   // Form Inputs
-  const [newEmpName, setNewEmpName] = useState('');
-  const [newEmpEmail, setNewEmpEmail] = useState('');
-  const [newEmpRole, setNewEmpRole] = useState('Software Engineer');
-  const [newEmpDept, setNewEmpDept] = useState('Engineering');
-
   const [newRoleTitle, setNewRoleTitle] = useState('');
   const [newRoleDesc, setNewRoleDesc] = useState('');
 
@@ -155,50 +151,40 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
     setTimeout(() => setToastMessage(''), 3500);
   };
 
-  const handleAddEmployeeSubmit = (e) => {
-    e.preventDefault();
-    if (!newEmpName || !newEmpEmail) return;
-
-    const nameParts = newEmpName.trim().split(' ');
-    const firstName = nameParts[0] || '';
-    const lastName = nameParts.slice(1).join(' ') || '';
-    const username = newEmpEmail.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '_');
-
-    const newBackendUser = {
-      id: Date.now(),
-      username: username,
-      email: newEmpEmail,
-      first_name: firstName,
-      last_name: lastName,
-      phone: '+1-555-9999',
-      profile_image: null,
-      company: 2,
-      company_name: 'TechCorp Solutions',
-      role: 4,
-      role_name: newEmpRole.toLowerCase().replace(/\s+/g, '_'),
-      is_active: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+  const handleUserCreated = (newUser) => {
+    const createdUserObj = newUser.user || newUser;
+    const fullName = [createdUserObj.first_name, createdUserObj.last_name].filter(Boolean).join(' ') || createdUserObj.username;
+    
+    const formattedUser = {
+      id: createdUserObj.id || Date.now(),
+      username: createdUserObj.username || 'user',
+      email: createdUserObj.email || '',
+      first_name: createdUserObj.first_name || '',
+      last_name: createdUserObj.last_name || '',
+      phone: createdUserObj.phone || '',
+      company: createdUserObj.company || 1,
+      company_name: createdUserObj.company_name || 'TechCorp',
+      role: createdUserObj.role || 1,
+      role_name: createdUserObj.role_name || (createdUserObj.role === 1 ? 'super_admin' : createdUserObj.role === 2 ? 'admin' : createdUserObj.role === 3 ? 'hr' : 'employee'),
+      is_active: createdUserObj.is_active ?? true,
+      created_at: createdUserObj.created_at || new Date().toISOString(),
+      updated_at: createdUserObj.updated_at || new Date().toISOString()
     };
 
-    setUsersList([newBackendUser, ...usersList]);
+    setUsersList((prev) => [formattedUser, ...prev]);
 
     const createdEmp = {
-      id: Date.now(),
-      name: newEmpName,
-      email: newEmpEmail,
-      role: newEmpRole,
-      department: newEmpDept,
+      id: formattedUser.id,
+      name: fullName,
+      email: formattedUser.email,
+      role: formattedUser.role_name,
+      department: 'Engineering',
       status: 'Offline',
       accountStatus: 'Active',
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(newEmpName)}&background=4f46e5&color=fff`
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=4f46e5&color=fff`
     };
 
-    setEmployees([createdEmp, ...employees]);
-    setShowAddUserModal(false);
-    setNewEmpName('');
-    setNewEmpEmail('');
-    triggerToast(`Successfully onboarded ${newEmpName}!`);
+    setEmployees((prev) => [createdEmp, ...prev]);
   };
 
   const handleAddRoleSubmit = (e) => {
@@ -291,84 +277,12 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
       )}
 
       {/* Onboard User Modal */}
-      {showAddUserModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="w-full max-w-lg bg-white border border-slate-200 rounded-2xl p-7 text-slate-900 shadow-2xl animate-cardFadeUp">
-            <div className="flex justify-between items-center mb-5">
-              <h3 className="text-lg font-bold text-slate-900">Onboard New User</h3>
-              <button className="text-slate-400 hover:text-slate-700 text-lg cursor-pointer" onClick={() => setShowAddUserModal(false)}>✕</button>
-            </div>
-
-            <form onSubmit={handleAddEmployeeSubmit} className="flex flex-col gap-4">
-              <div>
-                <label className="text-xs font-semibold text-slate-700 mb-1 block">Full Name</label>
-                <input
-                  type="text"
-                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
-                  placeholder="e.g. Eleanor Vance"
-                  value={newEmpName}
-                  onChange={(e) => setNewEmpName(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-slate-700 mb-1 block">Work Email</label>
-                <input
-                  type="email"
-                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
-                  placeholder="e.g. eleanor@company.com"
-                  value={newEmpEmail}
-                  onChange={(e) => setNewEmpEmail(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-semibold text-slate-700 mb-1 block">Role Title</label>
-                  <input
-                    type="text"
-                    className="w-full p-3 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
-                    value={newEmpRole}
-                    onChange={(e) => setNewEmpRole(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-slate-700 mb-1 block">Department</label>
-                  <select
-                    className="w-full p-3 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
-                    value={newEmpDept}
-                    onChange={(e) => setNewEmpDept(e.target.value)}
-                  >
-                    <option value="Engineering">Engineering</option>
-                    <option value="Management">Management</option>
-                    <option value="Human Resources">Human Resources</option>
-                    <option value="Sales">Sales</option>
-                    <option value="Finance">Finance</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 mt-4">
-                <button
-                  type="button"
-                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold hover:bg-slate-200 cursor-pointer"
-                  onClick={() => setShowAddUserModal(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold cursor-pointer shadow-md shadow-indigo-600/20"
-                >
-                  Confirm & Onboard
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <UserFormModal
+        isOpen={showAddUserModal}
+        onClose={() => setShowAddUserModal(false)}
+        onUserCreated={handleUserCreated}
+        triggerToast={triggerToast}
+      />
 
       {/* Define Role Modal */}
       {showAddRoleModal && (

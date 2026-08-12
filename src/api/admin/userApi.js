@@ -61,3 +61,9 @@ export async function deleteUserApi(userId) {
   return res.data;
 }
 
+export async function restoreUserApi(userId) {
+  const res = await axiosInstance.post(`/api/user/${userId}/restore/`);
+  return res.data;
+}
+
+
