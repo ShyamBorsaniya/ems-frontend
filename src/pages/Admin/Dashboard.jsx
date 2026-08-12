@@ -5,8 +5,10 @@ import BodyContent from '../../components/Dashboard/BodyContent';
 import Settings from './Settings';
 import { fetchUsersApi } from '../../api/admin/userApi';
 import { fetchRolesApi } from '../../api/admin/roleApi';
+import { fetchDepartmentsApi } from '../../api/admin/departmentApi';
 import UserFormModal from '../../components/User/UserFormModal';
 import RoleFormModal from '../../components/Role/RoleFormModal';
+import DepartmentFormModal from '../../components/Department/DepartmentFormModal';
 
 export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
   const navigate = useNavigate();
@@ -125,6 +127,54 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
     }
   }, [rolesCurrentPage, roleSearchTerm]);
 
+  // Backend API Department List state
+  const [deptsList, setDeptsList] = useState([]);
+  const [deptsPaginationInfo, setDeptsPaginationInfo] = useState(null);
+  const [deptsCurrentPage, setDeptsCurrentPage] = useState(1);
+  const [deptsLoading, setDeptsLoading] = useState(false);
+  const [deptsError, setDeptsError] = useState(null);
+  const [deptSearchTerm, setDeptSearchTerm] = useState('');
+  const [deptStatusFilter, setDeptStatusFilter] = useState('all');
+
+  // Fetch departments from backend API (/api/department/)
+  const loadDepartmentsFromApi = useCallback(async (pageOverride) => {
+    setDeptsLoading(true);
+    setDeptsError(null);
+    const pageToLoad = pageOverride !== undefined ? pageOverride : deptsCurrentPage;
+    try {
+      const filters = {
+        page: pageToLoad,
+        search: deptSearchTerm,
+        is_active: deptStatusFilter
+      };
+      const res = await fetchDepartmentsApi(filters);
+      if (res && res.success && res.data) {
+        if (Array.isArray(res.data)) {
+          setDeptsList(res.data);
+          setDeptsPaginationInfo(null);
+        } else if (res.data.results) {
+          setDeptsList(Array.isArray(res.data.results) ? res.data.results : []);
+          setDeptsPaginationInfo(res.data.pagination || null);
+        } else {
+          setDeptsList([]);
+          setDeptsPaginationInfo(null);
+        }
+      } else if (res && Array.isArray(res.data)) {
+        setDeptsList(res.data);
+        setDeptsPaginationInfo(null);
+      } else {
+        if (res && res.message) {
+          setDeptsError(res.message);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load departments:', err);
+      setDeptsError(err.message || 'Unable to connect to /api/department/ endpoint');
+    } finally {
+      setDeptsLoading(false);
+    }
+  }, [deptsCurrentPage, deptSearchTerm, deptStatusFilter]);
+
   useEffect(() => {
     if (activeTab === 'user' || activeTab === 'overview') {
       loadUsersFromApi();
@@ -132,7 +182,10 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
     if (activeTab === 'role' || activeTab === 'overview') {
       loadRolesFromApi();
     }
-  }, [activeTab, loadUsersFromApi, loadRolesFromApi]);
+    if (activeTab === 'department' || activeTab === 'overview') {
+      loadDepartmentsFromApi();
+    }
+  }, [activeTab, loadUsersFromApi, loadRolesFromApi, loadDepartmentsFromApi]);
 
   const handleRolesPageChange = (newPage) => {
     setRolesCurrentPage(newPage);
@@ -142,6 +195,21 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
   const handleRoleSearchChange = (val) => {
     setRoleSearchTerm(val);
     setRolesCurrentPage(1);
+  };
+
+  const handleDeptsPageChange = (newPage) => {
+    setDeptsCurrentPage(newPage);
+    loadDepartmentsFromApi(newPage);
+  };
+
+  const handleDeptSearchChange = (val) => {
+    setDeptSearchTerm(val);
+    setDeptsCurrentPage(1);
+  };
+
+  const handleDeptStatusFilterChange = (val) => {
+    setDeptStatusFilter(val);
+    setDeptsCurrentPage(1);
   };
 
   const handlePageChange = (newPage) => {
@@ -167,6 +235,7 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
   // Modals state
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showAddRoleModal, setShowAddRoleModal] = useState(false);
+  const [showAddDeptModal, setShowAddDeptModal] = useState(false);
   const [showAddProjModal, setShowAddProjModal] = useState(false);
 
   // Toast State
@@ -319,10 +388,22 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
           roleSearchTerm={roleSearchTerm}
           setRoleSearchTerm={handleRoleSearchChange}
           onRefreshRoles={() => loadRolesFromApi(rolesCurrentPage)}
+          deptsList={deptsList}
+          deptsPaginationInfo={deptsPaginationInfo}
+          deptsCurrentPage={deptsCurrentPage}
+          onDeptsPageChange={handleDeptsPageChange}
+          deptsLoading={deptsLoading}
+          deptsError={deptsError}
+          deptSearchTerm={deptSearchTerm}
+          setDeptSearchTerm={handleDeptSearchChange}
+          deptStatusFilter={deptStatusFilter}
+          setDeptStatusFilter={handleDeptStatusFilterChange}
+          onRefreshDepts={() => loadDepartmentsFromApi(deptsCurrentPage)}
           triggerToast={triggerToast}
           setShowAddUserModal={setShowAddUserModal}
           setShowAddProjModal={setShowAddProjModal}
           setShowAddRoleModal={setShowAddRoleModal}
+          setShowAddDeptModal={setShowAddDeptModal}
         />
       )}
 
@@ -339,6 +420,14 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
         isOpen={showAddRoleModal}
         onClose={() => setShowAddRoleModal(false)}
         onRoleCreated={(newRole) => setRolesList((prev) => [newRole, ...prev])}
+        triggerToast={triggerToast}
+      />
+
+      {/* Create Department Modal */}
+      <DepartmentFormModal
+        isOpen={showAddDeptModal}
+        onClose={() => setShowAddDeptModal(false)}
+        onDepartmentCreated={(newDept) => setDeptsList((prev) => [newDept, ...prev])}
         triggerToast={triggerToast}
       />
 

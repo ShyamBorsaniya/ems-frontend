@@ -37,10 +37,22 @@ export default function BodyContent({
   roleSearchTerm = '',
   setRoleSearchTerm,
   onRefreshRoles,
+  deptsList = [],
+  deptsPaginationInfo = null,
+  deptsCurrentPage = 1,
+  onDeptsPageChange,
+  deptsLoading = false,
+  deptsError = null,
+  deptSearchTerm = '',
+  setDeptSearchTerm,
+  deptStatusFilter = 'all',
+  setDeptStatusFilter,
+  onRefreshDepts,
   triggerToast,
   setShowAddUserModal,
   setShowAddProjModal,
-  setShowAddRoleModal
+  setShowAddRoleModal,
+  setShowAddDeptModal
 }) {
   return (
     <main className="relative z-10 w-full flex-1 overflow-y-auto p-6 sm:p-8 box-border flex flex-col gap-8 items-center">
@@ -86,7 +98,21 @@ export default function BodyContent({
 
         {/* 3. SEPARATE DEPARTMENT COMPONENT */}
         {activeTab === 'department' && (
-          <DepartmentManagement />
+          <DepartmentManagement
+            departments={deptsList}
+            paginationInfo={deptsPaginationInfo}
+            currentPage={deptsCurrentPage}
+            onPageChange={onDeptsPageChange}
+            loading={deptsLoading}
+            error={deptsError}
+            searchTerm={deptSearchTerm}
+            setSearchTerm={setDeptSearchTerm}
+            isActiveFilter={deptStatusFilter}
+            setIsActiveFilter={setDeptStatusFilter}
+            onRefresh={onRefreshDepts}
+            setShowAddDeptModal={setShowAddDeptModal}
+            triggerToast={triggerToast}
+          />
         )}
 
         {/* 4. SEPARATE ROLE COMPONENT */}
