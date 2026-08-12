@@ -190,49 +190,10 @@ export default function UserManagement({
   });
 
   const displayedUsers = paginationInfo ? users : filteredUsers;
-  const totalUsersCount = paginationInfo?.total_items ?? users.length;
-  const activeUsersCount = users.filter((u) => u.is_active).length;
-  const inactiveUsersCount = users.filter((u) => u.is_active === false).length;
 
   return (
     <div className="flex flex-col gap-6 w-full">
-      {/* 1. Header KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Users</span>
-            <div className="text-2xl font-extrabold text-slate-900 mt-1">{totalUsersCount}</div>
-            <span className="text-xs text-slate-400">Registered Accounts</span>
-          </div>
-          <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold">
-            👥
-          </div>
-        </div>
-
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Users</span>
-            <div className="text-2xl font-extrabold text-emerald-600 mt-1">{activeUsersCount}</div>
-            <span className="text-xs text-slate-400">Account status active</span>
-          </div>
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold">
-            ✓
-          </div>
-        </div>
-
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Inactive Users</span>
-            <div className="text-2xl font-extrabold text-slate-600 mt-1">{inactiveUsersCount}</div>
-            <span className="text-xs text-slate-400">Suspended or Pending</span>
-          </div>
-          <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center text-xl font-bold">
-            ⛔
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Main Users Table Card */}
+      {/* Main Users Table Card */}
       <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
         {/* Header & Filter Controls Bar */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 pb-4 border-b border-slate-100">

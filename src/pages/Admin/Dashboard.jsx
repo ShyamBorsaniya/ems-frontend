@@ -4,7 +4,9 @@ import AdminLayout from '../../layouts/AdminLayout';
 import BodyContent from '../../components/Dashboard/BodyContent';
 import Settings from './Settings';
 import { fetchUsersApi } from '../../api/admin/userApi';
+import { fetchRolesApi } from '../../api/admin/roleApi';
 import UserFormModal from '../../components/User/UserFormModal';
+import RoleFormModal from '../../components/Role/RoleFormModal';
 
 export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
   const navigate = useNavigate();
@@ -77,11 +79,70 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
     }
   }, [currentPage, searchTerm, roleFilter, isActiveFilter]);
 
+  // Backend API Role List state
+  const [rolesList, setRolesList] = useState([]);
+  const [rolesPaginationInfo, setRolesPaginationInfo] = useState(null);
+  const [rolesCurrentPage, setRolesCurrentPage] = useState(1);
+  const [rolesLoading, setRolesLoading] = useState(false);
+  const [rolesError, setRolesError] = useState(null);
+  const [roleSearchTerm, setRoleSearchTerm] = useState('');
+
+  // Fetch roles from backend API (/api/role/)
+  const loadRolesFromApi = useCallback(async (pageOverride) => {
+    setRolesLoading(true);
+    setRolesError(null);
+    const pageToLoad = pageOverride !== undefined ? pageOverride : rolesCurrentPage;
+    try {
+      const filters = {
+        page: pageToLoad,
+        search: roleSearchTerm
+      };
+      const res = await fetchRolesApi(filters);
+      if (res && res.success && res.data) {
+        if (Array.isArray(res.data)) {
+          setRolesList(res.data);
+          setRolesPaginationInfo(null);
+        } else if (res.data.results) {
+          setRolesList(Array.isArray(res.data.results) ? res.data.results : []);
+          setRolesPaginationInfo(res.data.pagination || null);
+        } else {
+          setRolesList([]);
+          setRolesPaginationInfo(null);
+        }
+      } else if (res && Array.isArray(res.data)) {
+        setRolesList(res.data);
+        setRolesPaginationInfo(null);
+      } else {
+        if (res && res.message) {
+          setRolesError(res.message);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load roles:', err);
+      setRolesError(err.message || 'Unable to connect to /api/role/ endpoint');
+    } finally {
+      setRolesLoading(false);
+    }
+  }, [rolesCurrentPage, roleSearchTerm]);
+
   useEffect(() => {
     if (activeTab === 'user' || activeTab === 'overview') {
       loadUsersFromApi();
     }
-  }, [activeTab, loadUsersFromApi]);
+    if (activeTab === 'role' || activeTab === 'overview') {
+      loadRolesFromApi();
+    }
+  }, [activeTab, loadUsersFromApi, loadRolesFromApi]);
+
+  const handleRolesPageChange = (newPage) => {
+    setRolesCurrentPage(newPage);
+    loadRolesFromApi(newPage);
+  };
+
+  const handleRoleSearchChange = (val) => {
+    setRoleSearchTerm(val);
+    setRolesCurrentPage(1);
+  };
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -131,7 +192,7 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
   ]);
 
   // Sample Roles Data
-  const [roles, setRoles] = useState([
+  const [roles] = useState([
     { id: 1, title: 'Super Administrator', usersCount: 2, permissions: ['Full System Access', 'Manage Roles', 'Payroll Control', 'Audit Logs'], level: 'Level 1' },
     { id: 2, title: 'Department Manager', usersCount: 5, permissions: ['Team Management', 'Approve Leaves', 'Assign Projects', 'Reports'], level: 'Level 2' },
     { id: 3, title: 'HR Officer', usersCount: 3, permissions: ['Employee Onboarding', 'Leave Records', 'Policy Updates'], level: 'Level 2' },
@@ -140,9 +201,6 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
   ]);
 
   // Form Inputs
-  const [newRoleTitle, setNewRoleTitle] = useState('');
-  const [newRoleDesc, setNewRoleDesc] = useState('');
-
   const [newProjName, setNewProjName] = useState('');
   const [newProjLead, setNewProjLead] = useState('');
 
@@ -185,23 +243,6 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
     };
 
     setEmployees((prev) => [createdEmp, ...prev]);
-  };
-
-  const handleAddRoleSubmit = (e) => {
-    e.preventDefault();
-    if (!newRoleTitle) return;
-    const newRole = {
-      id: Date.now(),
-      title: newRoleTitle,
-      usersCount: 0,
-      permissions: ['Custom Permission Set', 'Standard Portal Access'],
-      level: 'Custom'
-    };
-    setRoles([...roles, newRole]);
-    setShowAddRoleModal(false);
-    setNewRoleTitle('');
-    setNewRoleDesc('');
-    triggerToast(`Created new enterprise role: ${newRoleTitle}`);
   };
 
   const handleAddProjectSubmit = (e) => {
@@ -269,6 +310,15 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
           isActiveFilter={isActiveFilter}
           setIsActiveFilter={handleIsActiveFilterChange}
           onRefreshUsers={() => loadUsersFromApi(currentPage)}
+          rolesList={rolesList}
+          rolesPaginationInfo={rolesPaginationInfo}
+          rolesCurrentPage={rolesCurrentPage}
+          onRolesPageChange={handleRolesPageChange}
+          rolesLoading={rolesLoading}
+          rolesError={rolesError}
+          roleSearchTerm={roleSearchTerm}
+          setRoleSearchTerm={handleRoleSearchChange}
+          onRefreshRoles={() => loadRolesFromApi(rolesCurrentPage)}
           triggerToast={triggerToast}
           setShowAddUserModal={setShowAddUserModal}
           setShowAddProjModal={setShowAddProjModal}
@@ -285,57 +335,12 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
       />
 
       {/* Define Role Modal */}
-      {showAddRoleModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl p-7 text-slate-900 shadow-2xl animate-cardFadeUp">
-            <div className="flex justify-between items-center mb-5">
-              <h3 className="text-lg font-bold text-slate-900">Define New Enterprise Role</h3>
-              <button className="text-slate-400 hover:text-slate-700 text-lg cursor-pointer" onClick={() => setShowAddRoleModal(false)}>✕</button>
-            </div>
-
-            <form onSubmit={handleAddRoleSubmit} className="flex flex-col gap-4">
-              <div>
-                <label className="text-xs font-semibold text-slate-700 mb-1 block">Role Title</label>
-                <input
-                  type="text"
-                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
-                  placeholder="e.g. Senior Tech Lead"
-                  value={newRoleTitle}
-                  onChange={(e) => setNewRoleTitle(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-slate-700 mb-1 block">Role Scope & Description</label>
-                <textarea
-                  className="w-full p-3 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-indigo-600"
-                  rows="3"
-                  placeholder="Provide scope of permissions..."
-                  value={newRoleDesc}
-                  onChange={(e) => setNewRoleDesc(e.target.value)}
-                ></textarea>
-              </div>
-
-              <div className="flex justify-end gap-3 mt-4">
-                <button
-                  type="button"
-                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold hover:bg-slate-200 cursor-pointer"
-                  onClick={() => setShowAddRoleModal(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold cursor-pointer shadow-md shadow-indigo-600/20"
-                >
-                  Save Role
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <RoleFormModal
+        isOpen={showAddRoleModal}
+        onClose={() => setShowAddRoleModal(false)}
+        onRoleCreated={(newRole) => setRolesList((prev) => [newRole, ...prev])}
+        triggerToast={triggerToast}
+      />
 
       {/* Create Project Modal */}
       {showAddProjModal && (

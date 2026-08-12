@@ -28,6 +28,15 @@ export default function BodyContent({
   isActiveFilter,
   setIsActiveFilter,
   onRefreshUsers,
+  rolesList = [],
+  rolesPaginationInfo = null,
+  rolesCurrentPage = 1,
+  onRolesPageChange,
+  rolesLoading = false,
+  rolesError = null,
+  roleSearchTerm = '',
+  setRoleSearchTerm,
+  onRefreshRoles,
   triggerToast,
   setShowAddUserModal,
   setShowAddProjModal,
@@ -83,7 +92,15 @@ export default function BodyContent({
         {/* 4. SEPARATE ROLE COMPONENT */}
         {activeTab === 'role' && (
           <RoleManagement
-            roles={roles}
+            roles={rolesList.length > 0 ? rolesList : roles}
+            paginationInfo={rolesPaginationInfo}
+            currentPage={rolesCurrentPage}
+            onPageChange={onRolesPageChange}
+            loading={rolesLoading}
+            error={rolesError}
+            searchTerm={roleSearchTerm}
+            setSearchTerm={setRoleSearchTerm}
+            onRefresh={onRefreshRoles}
             setShowAddRoleModal={setShowAddRoleModal}
             triggerToast={triggerToast}
           />

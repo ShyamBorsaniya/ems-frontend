@@ -39,6 +39,7 @@ export default function UserFormModal({
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   // Sync form state when modal opens or user prop changes
   useEffect(() => {
@@ -71,6 +72,7 @@ export default function UserFormModal({
         });
       }
       setError(null);
+      setFieldErrors({});
       setShowPassword(false);
     }
   }, [isOpen, user, isEditMode, authCtx?.companyId]);
@@ -83,11 +85,19 @@ export default function UserFormModal({
       ...prev,
       [name]: type === 'checkbox' ? checked : name === 'role' ? Number(value) : value
     }));
+
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [name]: null
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setFieldErrors({});
     setLoading(true);
 
     const activeCompanyId = Number(authCtx?.companyId || getCompanyId() || formData.company) || 1;
@@ -118,69 +128,66 @@ export default function UserFormModal({
     };
 
     try {
-      if (isEditMode) {
-        // --- EDIT MODE ---
-        const res = await updateUserApi(user.id, payload);
-        const updatedData = res?.data || res || { ...user, ...payload };
-        const finalUser = {
-          ...user,
-          ...updatedData,
-          ...payload,
-          role_name: updatedData.role_name || roleNameMap[payload.role] || 'employee',
-          updated_at: new Date().toISOString()
-        };
+      const apiCall = isEditMode
+        ? updateUserApi(user.id, payload)
+        : createUserApi(payload);
 
-        if (triggerToast) {
-          triggerToast(`User "${payload.username}" updated successfully!`);
-        }
-        if (onUserUpdated) onUserUpdated(finalUser);
-        if (onSuccess) onSuccess(finalUser);
-      } else {
-        // --- CREATE MODE ---
-        const res = await createUserApi(payload);
-        const createdData = res?.data || res;
-        const createdUserObj = createdData?.user || createdData || {
-          id: Date.now(),
-          ...payload,
-          role_name: roleNameMap[payload.role] || 'employee',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
+      const res = await apiCall;
 
-        if (triggerToast) {
-          triggerToast(`User "${payload.username}" created successfully!`);
+      // Handle backend API error responses
+      if (res && (res.success === false || (res.status_code && res.status_code >= 400) || res.errors)) {
+        const errorMsg = res.message || (isEditMode ? 'User update failed' : 'User creation failed');
+        setError(errorMsg);
+
+        if (res.errors && typeof res.errors === 'object') {
+          setFieldErrors(res.errors);
+        } else {
+          setFieldErrors({});
         }
-        if (onUserCreated) onUserCreated(createdUserObj);
-        if (onSuccess) onSuccess(createdUserObj);
+        return; // STOP execution: do not proceed to close modal
       }
-      onClose();
-    } catch (err) {
-      console.error(isEditMode ? 'Update user error:' : 'Create user error:', err);
-      // Fallback for demonstration if backend API is offline
-      const fallbackUser = {
+
+      const updatedData = res?.data || res;
+      const finalUser = {
         ...(user || {}),
-        id: isEditMode ? user.id : Date.now(),
+        ...updatedData,
         ...payload,
-        role_name: roleNameMap[payload.role] || 'employee',
+        role_name: updatedData.role_name || roleNameMap[payload.role] || 'employee',
         updated_at: new Date().toISOString(),
         created_at: user?.created_at || new Date().toISOString()
       };
 
       if (triggerToast) {
-        triggerToast(
-          `User "${payload.username}" ${isEditMode ? 'updated' : 'created'} successfully!`
-        );
+        triggerToast(`User "${payload.username}" ${isEditMode ? 'updated' : 'created'} successfully!`);
       }
-      if (isEditMode) {
-        if (onUserUpdated) onUserUpdated(fallbackUser);
-      } else {
-        if (onUserCreated) onUserCreated(fallbackUser);
-      }
-      if (onSuccess) onSuccess(fallbackUser);
+      if (isEditMode && onUserUpdated) onUserUpdated(finalUser);
+      if (!isEditMode && onUserCreated) onUserCreated(finalUser);
+      if (onSuccess) onSuccess(finalUser);
+
       onClose();
+    } catch (err) {
+      console.error(isEditMode ? 'Update user error:' : 'Create user error:', err);
+      const errMsg = err?.message || (isEditMode ? 'Failed to update user' : 'Failed to create user');
+      setError(errMsg);
+      if (err?.errors && typeof err.errors === 'object') {
+        setFieldErrors(err.errors);
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper renderer for field-level error messages
+  const renderFieldError = (fieldName) => {
+    const errVal = fieldErrors[fieldName];
+    if (!errVal) return null;
+    const message = Array.isArray(errVal) ? errVal.join(' ') : String(errVal);
+    return (
+      <span className="text-[11px] font-semibold text-rose-600 mt-1 flex items-center gap-1">
+        <span>⚠️</span>
+        <span>{message}</span>
+      </span>
+    );
   };
 
   const modalContent = (
@@ -235,8 +242,13 @@ export default function UserFormModal({
                 onChange={handleChange}
                 placeholder="John"
                 required
-                className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm text-slate-900 focus:outline-none transition-all ${
+                  fieldErrors.first_name
+                    ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
+                    : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+                }`}
               />
+              {renderFieldError('first_name')}
             </div>
             <div>
               <label className="text-xs font-semibold text-slate-700 mb-1 block">
@@ -249,8 +261,13 @@ export default function UserFormModal({
                 onChange={handleChange}
                 placeholder="Doe"
                 required
-                className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm text-slate-900 focus:outline-none transition-all ${
+                  fieldErrors.last_name
+                    ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
+                    : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+                }`}
               />
+              {renderFieldError('last_name')}
             </div>
           </div>
 
@@ -267,8 +284,13 @@ export default function UserFormModal({
                 onChange={handleChange}
                 placeholder="user"
                 required
-                className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm text-slate-900 focus:outline-none transition-all ${
+                  fieldErrors.username
+                    ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
+                    : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+                }`}
               />
+              {renderFieldError('username')}
             </div>
             <div>
               <label className="text-xs font-semibold text-slate-700 mb-1 block">
@@ -281,8 +303,13 @@ export default function UserFormModal({
                 onChange={handleChange}
                 placeholder="user@gmail.com"
                 required
-                className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm text-slate-900 focus:outline-none transition-all ${
+                  fieldErrors.email
+                    ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
+                    : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+                }`}
               />
+              {renderFieldError('email')}
             </div>
           </div>
 
@@ -305,7 +332,11 @@ export default function UserFormModal({
                   onChange={handleChange}
                   placeholder={isEditMode ? '••••••••' : 'User@123'}
                   required={!isEditMode}
-                  className="w-full p-2.5 pr-10 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                  className={`w-full p-2.5 pr-10 rounded-xl bg-slate-50 border text-sm text-slate-900 focus:outline-none transition-all ${
+                    fieldErrors.password
+                      ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
+                      : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+                  }`}
                 />
                 <button
                   type="button"
@@ -315,6 +346,7 @@ export default function UserFormModal({
                   {showPassword ? 'Hide' : 'Show'}
                 </button>
               </div>
+              {renderFieldError('password')}
             </div>
             <div>
               <label className="text-xs font-semibold text-slate-700 mb-1 block">
@@ -326,8 +358,13 @@ export default function UserFormModal({
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="1234567890"
-                className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm text-slate-900 focus:outline-none transition-all ${
+                  fieldErrors.phone
+                    ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
+                    : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+                }`}
               />
+              {renderFieldError('phone')}
             </div>
           </div>
 
@@ -346,6 +383,7 @@ export default function UserFormModal({
                 tabIndex={-1}
                 className="w-full p-2.5 rounded-xl bg-slate-100 border border-slate-300 text-sm font-semibold text-slate-600 cursor-not-allowed select-none focus:outline-none"
               />
+              {renderFieldError('company')}
             </div>
             <div>
               <label className="text-xs font-semibold text-slate-700 mb-1 block">
@@ -356,7 +394,11 @@ export default function UserFormModal({
                 value={formData.role}
                 onChange={handleChange}
                 required
-                className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-indigo-600 focus:bg-white transition-all cursor-pointer"
+                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm text-slate-900 focus:outline-none transition-all cursor-pointer ${
+                  fieldErrors.role
+                    ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
+                    : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+                }`}
               >
                 <option value={1}>Super Admin (Role 1)</option>
                 <option value={2}>Admin (Role 2)</option>
@@ -365,6 +407,7 @@ export default function UserFormModal({
                 <option value={5}>Project Manager (Role 5)</option>
                 <option value={6}>Department Manager (Role 6)</option>
               </select>
+              {renderFieldError('role')}
             </div>
           </div>
 
