@@ -53,8 +53,8 @@ export default function UserFormModal({
           first_name: user.first_name || '',
           last_name: user.last_name || '',
           phone: user.phone || '',
-          company: user.company || activeCompanyId,
-          role: user.role !== undefined && user.role !== null ? Number(user.role) : 4,
+          company: typeof user.company === 'object' && user.company !== null ? (user.company.id || activeCompanyId) : (user.company || activeCompanyId),
+          role: typeof user.role === 'object' && user.role !== null ? (Number(user.role.id) || 4) : (user.role !== undefined && user.role !== null && !isNaN(Number(user.role)) ? Number(user.role) : 4),
           is_active: user.is_active ?? true
         });
       } else {

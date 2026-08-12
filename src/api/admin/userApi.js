@@ -66,4 +66,15 @@ export async function restoreUserApi(userId) {
   return res.data;
 }
 
+export async function fetchUserByIdApi(userId) {
+  try {
+    const res = await axiosInstance.get(`/api/user/${userId}/`);
+    return res.data;
+  } catch (error) {
+    console.error(`Error in fetchUserByIdApi (${userId}):`, error);
+    return null;
+  }
+}
+
+
 

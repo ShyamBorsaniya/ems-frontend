@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Pagination from '../common/Pagination';
 import UserFormModal from './UserFormModal';
+import UserShowModal from './UserShowModal';
 import { deleteUserApi, restoreUserApi } from '../../api/admin/userApi';
 
 export default function UserManagement({
@@ -360,14 +361,20 @@ export default function UserManagement({
                       <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
                         {/* 1. Name & Email */}
                         <td className="py-3.5 px-4">
-                          <div className="flex items-center gap-3">
+                          <div
+                            className="flex items-center gap-3 cursor-pointer group"
+                            onClick={() => {
+                              setSelectedUser(u);
+                            }}
+                            title="Click to view user profile"
+                          >
                             <img
                               src={avatarUrl}
                               alt={fullName}
-                              className="w-9 h-9 rounded-full object-cover border border-slate-200 shrink-0"
+                              className="w-9 h-9 rounded-full object-cover border border-slate-200 shrink-0 group-hover:border-indigo-400 transition-colors"
                             />
                             <div className="flex flex-col">
-                              <span className="font-semibold text-slate-900">{fullName}</span>
+                              <span className="font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors">{fullName}</span>
                               <span className="text-xs text-slate-400">
                                 @{u.username} • {u.email}
                               </span>
@@ -415,7 +422,6 @@ export default function UserManagement({
                               className="p-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 transition-colors cursor-pointer flex items-center justify-center"
                               onClick={() => {
                                 setSelectedUser(u);
-                                if (triggerToast) triggerToast(`Inspecting user profile: ${fullName}`);
                               }}
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -482,103 +488,17 @@ export default function UserManagement({
         )}
       </div>
 
-      {/* 3. User Details Modal */}
-      {selectedUser &&
-        (typeof document !== 'undefined'
-          ? createPortal(
-              <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-                <div className="w-full max-w-lg bg-white border border-slate-200 rounded-2xl p-6 text-slate-900 shadow-2xl animate-cardFadeUp">
-                  <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
-                    <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                      <span>👤</span> User Profile Details
-                    </h3>
-                    <button
-                      className="text-slate-400 hover:text-slate-700 text-lg cursor-pointer"
-                      onClick={() => setSelectedUser(null)}
-                    >
-                      ✕
-                    </button>
-                  </div>
-
-                  <div className="flex items-center gap-4 mb-6">
-                    <img
-                      src={getUserAvatar(selectedUser)}
-                      alt={getUserFullName(selectedUser)}
-                      className="w-16 h-16 rounded-full border-2 border-indigo-500/20 object-cover shadow-sm"
-                    />
-                    <div>
-                      <h4 className="text-lg font-bold text-slate-900 m-0">{getUserFullName(selectedUser)}</h4>
-                      <p className="text-xs text-indigo-600 font-semibold m-0">@{selectedUser.username}</p>
-                      <div className="mt-1 flex items-center gap-2">
-                        <span className={`px-2 py-0.5 rounded text-[11px] font-semibold border ${getRoleBadgeStyle(selectedUser.role_name)}`}>
-                          {formatRoleName(selectedUser.role_name)}
-                        </span>
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border ${selectedUser.is_active
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                            : 'bg-slate-100 text-slate-600 border-slate-200'
-                            }`}
-                        >
-                          {selectedUser.is_active ? '● Active Account' : '○ Inactive Account'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
-                    <div>
-                      <span className="text-slate-400 font-medium block">User ID</span>
-                      <span className="font-semibold text-slate-800">{selectedUser.id}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 font-medium block">Work Email</span>
-                      <span className="font-semibold text-slate-800 break-all">{selectedUser.email}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 font-medium block">Phone Number</span>
-                      <span className="font-semibold text-slate-800">{selectedUser.phone || 'N/A'}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 font-medium block">Company</span>
-                      <span className="font-semibold text-slate-800">{selectedUser.company_name || 'N/A'} (ID: {selectedUser.company ?? 'N/A'})</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 font-medium block">Role ID</span>
-                      <span className="font-semibold text-slate-800">{selectedUser.role ?? 'N/A'} ({selectedUser.role_name || 'Unassigned'})</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 font-medium block">Account Created</span>
-                      <span className="font-semibold text-slate-800">{formatDate(selectedUser.created_at)}</span>
-                    </div>
-                    <div className="col-span-2">
-                      <span className="text-slate-400 font-medium block">Last Updated</span>
-                      <span className="font-semibold text-slate-800">{formatDate(selectedUser.updated_at)}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end gap-2">
-                    <button
-                      className="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs font-semibold cursor-pointer"
-                      onClick={() => {
-                        const u = selectedUser;
-                        setSelectedUser(null);
-                        setEditingUser(u);
-                      }}
-                    >
-                      ✏️ Edit User
-                    </button>
-                    <button
-                      className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold cursor-pointer shadow-sm"
-                      onClick={() => setSelectedUser(null)}
-                    >
-                      Close Details
-                    </button>
-                  </div>
-                </div>
-              </div>,
-              document.body
-            )
-          : null)}
+      {/* 3. User Show Modal Page */}
+      {selectedUser && (
+        <UserShowModal
+          user={selectedUser}
+          isOpen={Boolean(selectedUser)}
+          onClose={() => setSelectedUser(null)}
+          onEditUser={(u) => setEditingUser(u)}
+          onSoftDestroyUser={(u) => setSoftDestroyUser(u)}
+          triggerToast={triggerToast}
+        />
+      )}
 
       {/* 4. Edit User Modal (Unified UserFormModal) */}
       {editingUser && (
