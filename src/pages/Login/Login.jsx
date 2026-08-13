@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 export default function Login({ onLoginSuccess }) {
   const { login } = useAuth();
@@ -235,9 +235,19 @@ export default function Login({ onLoginSuccess }) {
                 </>
               )}
             </button>
+
+            <div className="text-center mt-3">
+              <span className="text-xs text-slate-500">
+                Don't have an account?{' '}
+                <Link to="/register" className="text-indigo-600 font-bold hover:underline">
+                  Create an Account
+                </Link>
+              </span>
+            </div>
           </form>
         </div>
       </div>
     </div>
   );
 }
+

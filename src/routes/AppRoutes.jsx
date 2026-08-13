@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import Login from '../pages/Login/Login';
+import Register from '../pages/Register/Register';
 import AdminDashboard from '../pages/Admin/Dashboard';
 import EmployeeDashboard from '../pages/Employee/Dashboard';
 import Loader from '../components/common/Loader';
@@ -36,6 +37,13 @@ export default function AppRoutes() {
     return <Login onLoginSuccess={handleLoginSuccess} />;
   };
 
+  const RegisterWrapper = () => {
+    if (currentUser) {
+      return <Navigate to={isEmployee ? "/employee" : "/user"} replace />;
+    }
+    return <Register />;
+  };
+
   const AdminWrapper = ({ tab }) => {
     if (!currentUser) {
       return <Navigate to="/login" replace />;
@@ -61,6 +69,7 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<LoginWrapper />} />
+      <Route path="/register" element={<RegisterWrapper />} />
       <Route path="/employee/*" element={<EmployeeWrapper />} />
       <Route path="/overview" element={<AdminWrapper tab="overview" />} />
       <Route path="/user" element={<AdminWrapper tab="user" />} />
@@ -72,3 +81,4 @@ export default function AppRoutes() {
     </Routes>
   );
 }
+
