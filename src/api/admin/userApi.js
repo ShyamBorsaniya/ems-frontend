@@ -76,5 +76,90 @@ export async function fetchUserByIdApi(userId) {
   }
 }
 
+/**
+ * Fetches pending users list from backend API
+ * Endpoint: /api/user/pending/ (fallback: /api/users/pending/)
+ * Query parameters: search, company, page
+ */
+export async function fetchPendingUsersApi(filters = {}) {
+  try {
+    const params = new URLSearchParams();
 
+    if (filters.page) {
+      params.append('page', filters.page);
+    }
+    if (filters.search && filters.search.trim()) {
+      params.append('search', filters.search.trim());
+    }
+    if (filters.company) {
+      params.append('company', filters.company);
+    }
 
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    let res = await axiosInstance.get(`/api/user/pending/${queryString}`);
+
+    // Fallback if 404
+    if (!res.ok && res.status === 404) {
+      res = await axiosInstance.get(`/api/users/pending/${queryString}`);
+    }
+
+    if (res.ok && res.data) {
+      return res.data;
+    }
+
+    return {
+      status_code: res.status || 400,
+      success: false,
+      message: res.data?.message || 'Failed to retrieve pending users list',
+      data: { results: [], pagination: null }
+    };
+  } catch (error) {
+    console.error('Error in fetchPendingUsersApi:', error);
+    return {
+      status_code: 500,
+      success: false,
+      message: error.message || 'Network error retrieving pending users list',
+      data: { results: [], pagination: null }
+    };
+  }
+}
+
+/**
+ * Approves a pending user account
+ * Endpoint: POST /api/user/{id}/approve/ (fallback: /api/users/{id}/approve/)
+ */
+export async function approveUserApi(userId) {
+  try {
+    let res = await axiosInstance.post(`/api/user/${userId}/approve/`);
+    if (!res.ok && res.status === 404) {
+      res = await axiosInstance.post(`/api/users/${userId}/approve/`);
+    }
+    return res.data || { success: res.ok, status_code: res.status };
+  } catch (error) {
+    console.error(`Error approving user (${userId}):`, error);
+    return {
+      success: false,
+      message: error.message || 'Network error approving user'
+    };
+  }
+}
+
+/**
+ * Rejects a user account
+ * Endpoint: POST /api/user/{id}/reject/ (fallback: /api/users/{id}/reject/)
+ */
+export async function rejectUserApi(userId) {
+  try {
+    let res = await axiosInstance.post(`/api/user/${userId}/reject/`);
+    if (!res.ok && res.status === 404) {
+      res = await axiosInstance.post(`/api/users/${userId}/reject/`);
+    }
+    return res.data || { success: res.ok, status_code: res.status };
+  } catch (error) {
+    console.error(`Error rejecting user (${userId}):`, error);
+    return {
+      success: false,
+      message: error.message || 'Network error rejecting user'
+    };
+  }
+}

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import AdminLayout from '../../layouts/AdminLayout';
 import BodyContent from '../../components/Dashboard/BodyContent';
-import { fetchUsersApi } from '../../api/admin/userApi';
+import { fetchUsersApi, fetchPendingUsersApi, approveUserApi, rejectUserApi } from '../../api/admin/userApi';
 import { fetchRolesApi } from '../../api/admin/roleApi';
 import { fetchDepartmentsApi } from '../../api/admin/departmentApi';
 import { fetchProjectsApi } from '../../api/admin/projectApi';
@@ -17,7 +17,7 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
 
   const getTabFromPath = () => {
     const path = location.pathname.replace('/', '').toLowerCase();
-    const validTabs = ['overview', 'user', 'project', 'department', 'role'];
+    const validTabs = ['overview', 'user', 'pending-users', 'project', 'department', 'role'];
     if (validTabs.includes(path)) {
       return path;
     }
@@ -81,6 +81,52 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
       setUsersLoading(false);
     }
   }, [currentPage, searchTerm, roleFilter, isActiveFilter]);
+
+  // Backend API Pending User List state
+  const [pendingUsersList, setPendingUsersList] = useState([]);
+  const [pendingUsersPaginationInfo, setPendingUsersPaginationInfo] = useState(null);
+  const [pendingUsersCurrentPage, setPendingUsersCurrentPage] = useState(1);
+  const [pendingUsersLoading, setPendingUsersLoading] = useState(false);
+  const [pendingUsersError, setPendingUsersError] = useState(null);
+  const [pendingUsersSearchTerm, setPendingUsersSearchTerm] = useState('');
+
+  // Fetch pending users from backend API (/api/user/pending/)
+  const loadPendingUsersFromApi = useCallback(async (pageOverride) => {
+    setPendingUsersLoading(true);
+    setPendingUsersError(null);
+    const pageToLoad = pageOverride !== undefined ? pageOverride : pendingUsersCurrentPage;
+    try {
+      const filters = {
+        page: pageToLoad,
+        search: pendingUsersSearchTerm
+      };
+      const res = await fetchPendingUsersApi(filters);
+      if (res && res.success && res.data) {
+        if (Array.isArray(res.data)) {
+          setPendingUsersList(res.data);
+          setPendingUsersPaginationInfo(null);
+        } else if (res.data.results) {
+          setPendingUsersList(Array.isArray(res.data.results) ? res.data.results : []);
+          setPendingUsersPaginationInfo(res.data.pagination || null);
+        } else {
+          setPendingUsersList([]);
+          setPendingUsersPaginationInfo(null);
+        }
+      } else if (res && Array.isArray(res.data)) {
+        setPendingUsersList(res.data);
+        setPendingUsersPaginationInfo(null);
+      } else {
+        if (res && res.message) {
+          setPendingUsersError(res.message);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load pending users:', err);
+      setPendingUsersError(err.message || 'Unable to connect to /api/user/pending/ endpoint');
+    } finally {
+      setPendingUsersLoading(false);
+    }
+  }, [pendingUsersCurrentPage, pendingUsersSearchTerm]);
 
   // Backend API Role List state
   const [rolesList, setRolesList] = useState([]);
@@ -230,6 +276,9 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
     if (activeTab === 'user' || activeTab === 'overview') {
       loadUsersFromApi();
     }
+    if (activeTab === 'pending-users' || activeTab === 'overview') {
+      loadPendingUsersFromApi();
+    }
     if (activeTab === 'role' || activeTab === 'overview') {
       loadRolesFromApi();
     }
@@ -239,7 +288,7 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
     if (activeTab === 'project' || activeTab === 'overview') {
       loadProjectsFromApi();
     }
-  }, [activeTab, loadUsersFromApi, loadRolesFromApi, loadDepartmentsFromApi, loadProjectsFromApi]);
+  }, [activeTab, loadUsersFromApi, loadPendingUsersFromApi, loadRolesFromApi, loadDepartmentsFromApi, loadProjectsFromApi]);
 
   const handleRolesPageChange = (newPage) => {
     setRolesCurrentPage(newPage);
@@ -284,6 +333,37 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
   const handleProjectPriorityFilterChange = (val) => {
     setProjectPriorityFilter(val);
     setProjectsCurrentPage(1);
+  };
+
+  const handlePendingUsersPageChange = (newPage) => {
+    setPendingUsersCurrentPage(newPage);
+    loadPendingUsersFromApi(newPage);
+  };
+
+  const handlePendingUsersSearchChange = (val) => {
+    setPendingUsersSearchTerm(val);
+    setPendingUsersCurrentPage(1);
+  };
+
+  const handleApprovePendingUser = async (userId) => {
+    const res = await approveUserApi(userId);
+    if (res && (res.success !== false)) {
+      triggerToast('User account approved successfully!');
+      loadPendingUsersFromApi(pendingUsersCurrentPage);
+      loadUsersFromApi(currentPage);
+    } else {
+      triggerToast(res?.message || 'Failed to approve user');
+    }
+  };
+
+  const handleRejectPendingUser = async (userId) => {
+    const res = await rejectUserApi(userId);
+    if (res && (res.success !== false)) {
+      triggerToast('User account rejected successfully!');
+      loadPendingUsersFromApi(pendingUsersCurrentPage);
+    } else {
+      triggerToast(res?.message || 'Failed to reject user');
+    }
   };
 
   const handlePageChange = (newPage) => {
@@ -426,6 +506,16 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
         isActiveFilter={isActiveFilter}
         setIsActiveFilter={handleIsActiveFilterChange}
         onRefreshUsers={() => loadUsersFromApi(currentPage)}
+        pendingUsersList={pendingUsersList}
+        pendingUsersPaginationInfo={pendingUsersPaginationInfo}
+        pendingUsersCurrentPage={pendingUsersCurrentPage}
+        onPendingUsersPageChange={handlePendingUsersPageChange}
+        pendingUsersLoading={pendingUsersLoading}
+        pendingUsersError={pendingUsersError}
+        pendingUsersSearchTerm={pendingUsersSearchTerm}
+        setPendingUsersSearchTerm={handlePendingUsersSearchChange}
+        onApprovePendingUser={handleApprovePendingUser}
+        onRejectPendingUser={handleRejectPendingUser}
         rolesList={rolesList}
         rolesPaginationInfo={rolesPaginationInfo}
         rolesCurrentPage={rolesCurrentPage}

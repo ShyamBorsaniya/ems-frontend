@@ -1,5 +1,6 @@
 import React from 'react';
 import UserManagement from '../User/UserManagement';
+import PendingUserManagement from '../User/PendingUserManagement';
 import ProjectManagement from '../Project/ProjectManagement';
 import DepartmentManagement from '../Department/DepartmentManagement';
 import RoleManagement from '../Role/RoleManagement';
@@ -28,6 +29,16 @@ export default function BodyContent({
   isActiveFilter,
   setIsActiveFilter,
   onRefreshUsers,
+  pendingUsersList = [],
+  pendingUsersPaginationInfo = null,
+  pendingUsersCurrentPage = 1,
+  onPendingUsersPageChange,
+  pendingUsersLoading = false,
+  pendingUsersError = null,
+  pendingUsersSearchTerm = '',
+  setPendingUsersSearchTerm,
+  onApprovePendingUser,
+  onRejectPendingUser,
   rolesList = [],
   rolesPaginationInfo = null,
   rolesCurrentPage = 1,
@@ -98,6 +109,23 @@ export default function BodyContent({
             setDeptFilter={setDeptFilter}
             triggerToast={triggerToast}
             setShowAddUserModal={setShowAddUserModal}
+          />
+        )}
+
+        {/* 1.1 PENDING USER COMPONENT */}
+        {activeTab === 'pending-users' && (
+          <PendingUserManagement
+            pendingUsersList={pendingUsersList}
+            paginationInfo={pendingUsersPaginationInfo}
+            currentPage={pendingUsersCurrentPage}
+            onPageChange={onPendingUsersPageChange}
+            loading={pendingUsersLoading}
+            error={pendingUsersError}
+            searchTerm={pendingUsersSearchTerm}
+            setSearchTerm={setPendingUsersSearchTerm}
+            onApprove={onApprovePendingUser}
+            onReject={onRejectPendingUser}
+            triggerToast={triggerToast}
           />
         )}
 

@@ -64,6 +64,7 @@ export default function AppRoutes() {
       <Route path="/employee/*" element={<EmployeeWrapper />} />
       <Route path="/overview" element={<AdminWrapper tab="overview" />} />
       <Route path="/user" element={<AdminWrapper tab="user" />} />
+      <Route path="/pending-users" element={<AdminWrapper tab="pending-users" />} />
       <Route path="/project" element={<AdminWrapper tab="project" />} />
       <Route path="/department" element={<AdminWrapper tab="department" />} />
       <Route path="/role" element={<AdminWrapper tab="role" />} />

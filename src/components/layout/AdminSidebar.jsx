@@ -4,6 +4,7 @@ export default function AdminSidebar({ activeTab, onTabChange, user, onLogout })
   const navItems = [
     { id: 'overview', label: 'Overview', icon: '📊' },
     { id: 'user', label: 'Users', icon: '👥' },
+    { id: 'pending-users', label: 'Pending Users', icon: '⏳' },
     { id: 'project', label: 'Projects', icon: '🚀' },
     { id: 'department', label: 'Departments', icon: '🏢' },
     { id: 'role', label: 'Roles', icon: '🔑' }
