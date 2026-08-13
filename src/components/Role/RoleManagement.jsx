@@ -94,7 +94,8 @@ export default function RoleManagement({
     if (!q) return true;
     const name = (r.name || r.title || '').toLowerCase();
     const desc = (r.description || '').toLowerCase();
-    return name.includes(q) || desc.includes(q);
+    const roleType = r.is_system_role ? 'system' : 'custom';
+    return name.includes(q) || desc.includes(q) || roleType.includes(q);
   });
 
   const displayedRoles = paginationInfo ? rolesList : filteredRoles;
@@ -117,7 +118,7 @@ export default function RoleManagement({
             <div className="relative flex-1 sm:w-64 min-w-[200px]">
               <input
                 type="text"
-                placeholder="Search role title, description..."
+                placeholder="Search role title, description, system..."
                 value={currentSearch}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 className="w-full pl-9 pr-8 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white transition-all"
@@ -187,6 +188,7 @@ export default function RoleManagement({
                   <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-semibold">
                     <th className="py-3 px-4">Role Title</th>
                     <th className="py-3 px-4">Description & Scope</th>
+                    <th className="py-3 px-4 text-center">System Role</th>
                     <th className="py-3 px-4">Created Date</th>
                     <th className="py-3 px-4 text-center">Action</th>
                   </tr>
@@ -213,6 +215,29 @@ export default function RoleManagement({
                         {/* 2. Description */}
                         <td className="py-3.5 px-4 text-slate-600 max-w-md truncate">
                           {r.description || 'Standard enterprise role access level'}
+                        </td>
+
+                        {/* 3. System Role Status */}
+                        <td className="py-3.5 px-4 text-center">
+                          {r.is_system_role ? (
+                            <span
+                              className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300 shadow-xs"
+                              title="System Role: Yes"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                              </svg>
+                            </span>
+                          ) : (
+                            <span
+                              className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-rose-100 text-rose-700 border border-rose-300 shadow-xs"
+                              title="System Role: No"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </span>
+                          )}
                         </td>
 
                         {/* 4. Created Date */}

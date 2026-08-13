@@ -55,6 +55,27 @@ export default function RoleShowModal({
 
         {/* Body Info */}
         <div className="flex flex-col gap-4">
+          {/* System Role Badge / Status */}
+          <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div>
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-0.5">
+                Role Classification
+              </span>
+              <span className="text-xs font-semibold text-slate-800">
+                {role.is_system_role ? 'Core System Role' : 'Custom Enterprise Role'}
+              </span>
+            </div>
+            {role.is_system_role ? (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                🛡️ System Role
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                👤 Custom Role
+              </span>
+            )}
+          </div>
+
           {/* Description */}
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">

@@ -59,6 +59,13 @@ export default function RoleDeleteModal({
           </div>
         </div>
 
+        {role.is_system_role && (
+          <div className="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center gap-2 font-medium">
+            <span className="text-sm">⚠️</span>
+            <span>Caution: This is marked as a <strong>System Role</strong>. Deleting system roles may impact critical application access.</span>
+          </div>
+        )}
+
         <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 mb-5 flex flex-col gap-2">
           <p className="m-0 font-medium text-slate-700">
             Are you sure you want to permanently delete this role?

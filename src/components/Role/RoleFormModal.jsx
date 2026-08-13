@@ -27,7 +27,8 @@ export default function RoleFormModal({
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    company: cachedCompanyId
+    company: cachedCompanyId,
+    is_system_role: false
   });
 
   const [loading, setLoading] = useState(false);
@@ -43,13 +44,15 @@ export default function RoleFormModal({
         setFormData({
           name: role.name || role.title || '',
           description: role.description || '',
-          company: typeof role.company === 'object' && role.company !== null ? (role.company.id || activeCompanyId) : (role.company || activeCompanyId)
+          company: typeof role.company === 'object' && role.company !== null ? (role.company.id || activeCompanyId) : (role.company || activeCompanyId),
+          is_system_role: Boolean(role.is_system_role)
         });
       } else {
         setFormData({
           name: '',
           description: '',
-          company: activeCompanyId
+          company: activeCompanyId,
+          is_system_role: false
         });
       }
       setError(null);
@@ -60,10 +63,10 @@ export default function RoleFormModal({
   if (!isOpen) return null;
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
 
     // Clear field error for this field on user typing
@@ -86,7 +89,8 @@ export default function RoleFormModal({
     const payload = {
       name: formData.name.trim(),
       description: formData.description.trim(),
-      company: activeCompanyId
+      company: activeCompanyId,
+      is_system_role: Boolean(formData.is_system_role)
     };
 
     try {
@@ -249,6 +253,30 @@ export default function RoleFormModal({
             ></textarea>
             {renderFieldError('description')}
           </div>
+
+          {/* Is System Role Checkbox / Toggle */}
+          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-4">
+            <div>
+              <label htmlFor="is_system_role" className="text-xs font-semibold text-slate-800 cursor-pointer block">
+                System Role Status
+              </label>
+              <p className="text-[11px] text-slate-500 m-0">
+                Designate as a core system role (pre-defined system permission scope)
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer select-none shrink-0">
+              <input
+                type="checkbox"
+                id="is_system_role"
+                name="is_system_role"
+                checked={Boolean(formData.is_system_role)}
+                onChange={handleChange}
+                className="sr-only peer"
+              />
+              <div className="w-10 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+            </label>
+          </div>
+          {renderFieldError('is_system_role')}
 
           {/* Actions */}
           <div className="flex justify-end gap-3 mt-4 pt-3 border-t border-slate-100">
