@@ -48,6 +48,19 @@ export default function BodyContent({
   deptStatusFilter = 'all',
   setDeptStatusFilter,
   onRefreshDepts,
+  projectsList = [],
+  projectsPaginationInfo = null,
+  projectsCurrentPage = 1,
+  onProjectsPageChange,
+  projectsLoading = false,
+  projectsError = null,
+  projectSearchTerm = '',
+  setProjectSearchTerm,
+  projectStatusFilter = 'all',
+  setProjectStatusFilter,
+  projectPriorityFilter = 'all',
+  setProjectPriorityFilter,
+  onRefreshProjects,
   triggerToast,
   setShowAddUserModal,
   setShowAddProjModal,
@@ -91,7 +104,22 @@ export default function BodyContent({
         {/* 2. SEPARATE PROJECT COMPONENT */}
         {activeTab === 'project' && (
           <ProjectManagement
-            projects={projects}
+            projects={projectsList.length > 0 ? projectsList : projects}
+            paginationInfo={projectsPaginationInfo}
+            currentPage={projectsCurrentPage}
+            onPageChange={onProjectsPageChange}
+            loading={projectsLoading}
+            error={projectsError}
+            searchTerm={projectSearchTerm}
+            setSearchTerm={setProjectSearchTerm}
+            statusFilter={projectStatusFilter}
+            setStatusFilter={setProjectStatusFilter}
+            priorityFilter={projectPriorityFilter}
+            setPriorityFilter={setProjectPriorityFilter}
+            departments={deptsList}
+            employees={usersList.length > 0 ? usersList : employees}
+            onRefresh={onRefreshProjects}
+            triggerToast={triggerToast}
             setShowAddProjModal={setShowAddProjModal}
           />
         )}

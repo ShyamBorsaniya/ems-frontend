@@ -7,7 +7,8 @@ export default function OverviewSummary({
   roles = [],
   triggerToast
 }) {
-  const inProgressProjectsCount = projects.filter(p => p.status === 'In Progress').length;
+  const normalizeStatus = (s) => (s || '').toString().toUpperCase().replace(/[^A-Z0-9]+/g, '_');
+  const inProgressProjectsCount = projects.filter(p => normalizeStatus(p.status) === 'ACTIVE').length;
 
   return (
     <div className="flex flex-col gap-6">
