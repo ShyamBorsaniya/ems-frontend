@@ -7,7 +7,8 @@ export default function AdminSidebar({ activeTab, onTabChange, user, onLogout })
     { id: 'pending-users', label: 'Pending Users', icon: '⏳' },
     { id: 'project', label: 'Projects', icon: '🚀' },
     { id: 'department', label: 'Departments', icon: '🏢' },
-    { id: 'role', label: 'Roles', icon: '🔑' }
+    { id: 'role', label: 'Roles', icon: '🔑' },
+    { id: 'designation', label: 'Designations', icon: '🎖️' }
   ];
 
   const avatarUrl = user?.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || user?.username || 'Admin')}&background=4f46e5&color=fff`;

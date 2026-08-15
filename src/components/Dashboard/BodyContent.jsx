@@ -4,6 +4,7 @@ import PendingUserManagement from '../User/PendingUserManagement';
 import ProjectManagement from '../Project/ProjectManagement';
 import DepartmentManagement from '../Department/DepartmentManagement';
 import RoleManagement from '../Role/RoleManagement';
+import DesignationManagement from '../Designation/DesignationManagement';
 import OverviewSummary from '../Overview/OverviewSummary';
 
 export default function BodyContent({
@@ -72,6 +73,15 @@ export default function BodyContent({
   projectPriorityFilter = 'all',
   setProjectPriorityFilter,
   onRefreshProjects,
+  designationsList = [],
+  designationsPaginationInfo = null,
+  designationsCurrentPage = 1,
+  onDesignationsPageChange,
+  designationsLoading = false,
+  designationsError = null,
+  designationSearchTerm = '',
+  setDesignationSearchTerm,
+  onRefreshDesignations,
   triggerToast,
   setShowAddUserModal,
   setShowAddProjModal,
@@ -184,6 +194,22 @@ export default function BodyContent({
             setSearchTerm={setRoleSearchTerm}
             onRefresh={onRefreshRoles}
             setShowAddRoleModal={setShowAddRoleModal}
+            triggerToast={triggerToast}
+          />
+        )}
+
+        {/* 4.1 SEPARATE DESIGNATION COMPONENT */}
+        {activeTab === 'designation' && (
+          <DesignationManagement
+            designations={designationsList}
+            paginationInfo={designationsPaginationInfo}
+            currentPage={designationsCurrentPage}
+            onPageChange={onDesignationsPageChange}
+            loading={designationsLoading}
+            error={designationsError}
+            searchTerm={designationSearchTerm}
+            setSearchTerm={setDesignationSearchTerm}
+            onRefresh={onRefreshDesignations}
             triggerToast={triggerToast}
           />
         )}

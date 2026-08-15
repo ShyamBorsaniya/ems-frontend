@@ -6,6 +6,7 @@ import { fetchUsersApi, fetchPendingUsersApi, approveUserApi, rejectUserApi } fr
 import { fetchRolesApi } from '../../api/admin/roleApi';
 import { fetchDepartmentsApi } from '../../api/admin/departmentApi';
 import { fetchProjectsApi } from '../../api/admin/projectApi';
+import { fetchDesignationsApi } from '../../api/admin/designationApi';
 import UserFormModal from '../../components/User/UserFormModal';
 import RoleFormModal from '../../components/Role/RoleFormModal';
 import DepartmentFormModal from '../../components/Department/DepartmentFormModal';
@@ -17,7 +18,7 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
 
   const getTabFromPath = () => {
     const path = location.pathname.replace('/', '').toLowerCase();
-    const validTabs = ['overview', 'user', 'pending-users', 'project', 'department', 'role'];
+    const validTabs = ['overview', 'user', 'pending-users', 'project', 'department', 'role', 'designation'];
     if (validTabs.includes(path)) {
       return path;
     }
@@ -272,6 +273,52 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
     }
   }, [projectsCurrentPage, projectSearchTerm, projectStatusFilter, projectPriorityFilter]);
 
+  // Backend API Designation List state
+  const [designationsList, setDesignationsList] = useState([]);
+  const [designationsPaginationInfo, setDesignationsPaginationInfo] = useState(null);
+  const [designationsCurrentPage, setDesignationsCurrentPage] = useState(1);
+  const [designationsLoading, setDesignationsLoading] = useState(false);
+  const [designationsError, setDesignationsError] = useState(null);
+  const [designationSearchTerm, setDesignationSearchTerm] = useState('');
+
+  // Fetch designations from backend API (/api/designation/)
+  const loadDesignationsFromApi = useCallback(async (pageOverride) => {
+    setDesignationsLoading(true);
+    setDesignationsError(null);
+    const pageToLoad = pageOverride !== undefined ? pageOverride : designationsCurrentPage;
+    try {
+      const filters = {
+        page: pageToLoad,
+        search: designationSearchTerm
+      };
+      const res = await fetchDesignationsApi(filters);
+      if (res && res.success && res.data) {
+        if (Array.isArray(res.data)) {
+          setDesignationsList(res.data);
+          setDesignationsPaginationInfo(null);
+        } else if (res.data.results) {
+          setDesignationsList(Array.isArray(res.data.results) ? res.data.results : []);
+          setDesignationsPaginationInfo(res.data.pagination || null);
+        } else {
+          setDesignationsList([]);
+          setDesignationsPaginationInfo(null);
+        }
+      } else if (res && Array.isArray(res.data)) {
+        setDesignationsList(res.data);
+        setDesignationsPaginationInfo(null);
+      } else {
+        if (res && res.message) {
+          setDesignationsError(res.message);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load designations:', err);
+      setDesignationsError(err.message || 'Unable to connect to /api/designation/ endpoint');
+    } finally {
+      setDesignationsLoading(false);
+    }
+  }, [designationsCurrentPage, designationSearchTerm]);
+
   useEffect(() => {
     if (activeTab === 'user' || activeTab === 'overview') {
       loadUsersFromApi();
@@ -288,7 +335,10 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
     if (activeTab === 'project' || activeTab === 'overview') {
       loadProjectsFromApi();
     }
-  }, [activeTab, loadUsersFromApi, loadPendingUsersFromApi, loadRolesFromApi, loadDepartmentsFromApi, loadProjectsFromApi]);
+    if (activeTab === 'designation' || activeTab === 'overview') {
+      loadDesignationsFromApi();
+    }
+  }, [activeTab, loadUsersFromApi, loadPendingUsersFromApi, loadRolesFromApi, loadDepartmentsFromApi, loadProjectsFromApi, loadDesignationsFromApi]);
 
   const handleRolesPageChange = (newPage) => {
     setRolesCurrentPage(newPage);
@@ -333,6 +383,16 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
   const handleProjectPriorityFilterChange = (val) => {
     setProjectPriorityFilter(val);
     setProjectsCurrentPage(1);
+  };
+
+  const handleDesignationsPageChange = (newPage) => {
+    setDesignationsCurrentPage(newPage);
+    loadDesignationsFromApi(newPage);
+  };
+
+  const handleDesignationSearchChange = (val) => {
+    setDesignationSearchTerm(val);
+    setDesignationsCurrentPage(1);
   };
 
   const handlePendingUsersPageChange = (newPage) => {
@@ -549,6 +609,15 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
         projectPriorityFilter={projectPriorityFilter}
         setProjectPriorityFilter={handleProjectPriorityFilterChange}
         onRefreshProjects={() => loadProjectsFromApi(projectsCurrentPage)}
+        designationsList={designationsList}
+        designationsPaginationInfo={designationsPaginationInfo}
+        designationsCurrentPage={designationsCurrentPage}
+        onDesignationsPageChange={handleDesignationsPageChange}
+        designationsLoading={designationsLoading}
+        designationsError={designationsError}
+        designationSearchTerm={designationSearchTerm}
+        setDesignationSearchTerm={handleDesignationSearchChange}
+        onRefreshDesignations={() => loadDesignationsFromApi(designationsCurrentPage)}
         triggerToast={triggerToast}
         setShowAddUserModal={setShowAddUserModal}
         setShowAddProjModal={setShowAddProjModal}
