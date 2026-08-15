@@ -1,8 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import Login from '../pages/Login/Login';
-import Register from '../pages/Register/Register';
+import Auth from '../pages/Auth/Auth';
 import AdminDashboard from '../pages/Admin/Dashboard';
 import EmployeeDashboard from '../pages/Employee/Dashboard';
 import Loader from '../components/common/Loader';
@@ -34,14 +33,14 @@ export default function AppRoutes() {
     if (currentUser) {
       return <Navigate to={isEmployee ? "/employee" : "/user"} replace />;
     }
-    return <Login onLoginSuccess={handleLoginSuccess} />;
+    return <Auth mode="login" onLoginSuccess={handleLoginSuccess} />;
   };
 
   const RegisterWrapper = () => {
     if (currentUser) {
       return <Navigate to={isEmployee ? "/employee" : "/user"} replace />;
     }
-    return <Register />;
+    return <Auth mode="register" />;
   };
 
   const AdminWrapper = ({ tab }) => {
