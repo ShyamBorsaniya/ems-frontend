@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import EmployeeLayout from '../../layouts/EmployeeLayout';
+import CustomSelect from '../../components/common/CustomSelect';
 
 export default function EmployeeDashboard({ user, onLogout }) {
   const [isPunchedIn, setIsPunchedIn] = useState(true);
@@ -300,19 +301,17 @@ export default function EmployeeDashboard({ user, onLogout }) {
               </div>
 
               <form onSubmit={handleApplyLeaveSubmit} className="flex flex-col gap-4">
-                <div>
-                  <label className="text-xs font-semibold text-slate-700 mb-1 block">Leave Category</label>
-                  <select
-                    className="w-full p-3 rounded-xl bg-slate-50 border border-slate-300 text-sm text-slate-900 focus:outline-none focus:border-emerald-600"
-                    value={leaveType}
-                    onChange={(e) => setLeaveType(e.target.value)}
-                  >
-                    <option value="Paid Leave">Paid Annual Leave</option>
-                    <option value="Sick Leave">Medical / Sick Leave</option>
-                    <option value="Casual Leave">Casual Leave</option>
-                    <option value="Unpaid Leave">Unpaid Leave</option>
-                  </select>
-                </div>
+                <CustomSelect
+                  label="Leave Category"
+                  value={leaveType}
+                  onChange={(e) => setLeaveType(e.target.value)}
+                  options={[
+                    { value: 'Paid Leave', label: 'Paid Annual Leave' },
+                    { value: 'Sick Leave', label: 'Medical / Sick Leave' },
+                    { value: 'Casual Leave', label: 'Casual Leave' },
+                    { value: 'Unpaid Leave', label: 'Unpaid Leave' }
+                  ]}
+                />
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>

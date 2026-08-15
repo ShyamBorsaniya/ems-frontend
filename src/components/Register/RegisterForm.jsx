@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchCompaniesApi, fetchRolesByCompanyApi, registerUserApi } from '../../api/publicApi';
+import CustomSelect from '../common/CustomSelect';
 
 export default function RegisterForm() {
   // Form State
@@ -209,64 +210,48 @@ export default function RegisterForm() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {/* Step 1: Select Company */}
         <div>
-          <label htmlFor="company" className="text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
-            <span>Select Company <span className="text-rose-500">*</span></span>
-            {loadingCompanies && <span className="text-[10px] text-indigo-600 font-semibold animate-pulse">Loading companies...</span>}
-          </label>
-          <select
+          <CustomSelect
+            label="Select Company"
             id="company"
             name="company"
             value={formData.company}
             onChange={handleChange}
             disabled={loadingCompanies}
             required
-            className={`w-full py-2.5 px-3.5 rounded-xl bg-white/90 border text-sm text-slate-900 focus:outline-none transition-all cursor-pointer ${
-              fieldErrors.company ? 'border-rose-500 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20'
-            }`}
-          >
-            <option value="">-- Choose Organization / Company --</option>
-            {companies.map((comp) => (
-              <option key={comp.id || comp.value} value={comp.id || comp.value}>
-                {comp.name || comp.company_name || `Company #${comp.id}`} {comp.code ? `(${comp.code})` : ''}
-              </option>
-            ))}
-          </select>
-          {renderFieldError('company')}
+            error={fieldErrors.company}
+            placeholder={loadingCompanies ? "Loading companies..." : "-- Choose Organization / Company --"}
+            options={companies.map((comp) => ({
+              value: comp.id || comp.value,
+              label: `${comp.name || comp.company_name || `Company #${comp.id}`}${comp.code ? ` (${comp.code})` : ''}`
+            }))}
+          />
         </div>
 
         {/* Step 2: Select Role (Filtered by selected company) */}
         <div>
-          <label htmlFor="role" className="text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
-            <span>Select Role <span className="text-rose-500">*</span></span>
-            {loadingRoles && <span className="text-[10px] text-indigo-600 font-semibold animate-pulse">Loading roles...</span>}
-          </label>
-          <select
+          <CustomSelect
+            label="Select Role"
             id="role"
             name="role"
             value={formData.role}
             onChange={handleChange}
             disabled={!formData.company || loadingRoles}
             required
-            className={`w-full py-2.5 px-3.5 rounded-xl bg-white/90 border text-sm text-slate-900 focus:outline-none transition-all cursor-pointer ${
-              !formData.company ? 'bg-slate-100 text-slate-400 cursor-not-allowed border-slate-200' : fieldErrors.role ? 'border-rose-500 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20'
-            }`}
-          >
-            {!formData.company ? (
-              <option value="">-- Select a Company First --</option>
-            ) : roles.length === 0 ? (
-              <option value="">-- No Roles Found for Selected Company --</option>
-            ) : (
-              <>
-                <option value="">-- Choose Role --</option>
-                {roles.map((r) => (
-                  <option key={r.id || r.value} value={r.id || r.value}>
-                    {r.name || r.role_name || r.title || `Role #${r.id}`}
-                  </option>
-                ))}
-              </>
-            )}
-          </select>
-          {renderFieldError('role')}
+            error={fieldErrors.role}
+            placeholder={
+              loadingRoles
+                ? "Loading roles..."
+                : !formData.company
+                ? "-- Select a Company First --"
+                : roles.length === 0
+                ? "-- No Roles Found for Selected Company --"
+                : "-- Choose Role --"
+            }
+            options={roles.map((r) => ({
+              value: r.id || r.value,
+              label: r.name || r.role_name || r.role_display_name || r.title || `Role #${r.id}`
+            }))}
+          />
         </div>
 
         {/* First & Last Name */}

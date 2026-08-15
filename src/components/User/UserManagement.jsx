@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import Swal from 'sweetalert2';
 import Pagination from '../common/Pagination';
+import CustomSelect from '../common/CustomSelect';
 import UserFormModal from './UserFormModal';
 import UserShowModal from './UserShowModal';
 import { deleteUserApi, restoreUserApi } from '../../api/admin/userApi';
@@ -24,8 +25,6 @@ export default function UserManagement({
 }) {
   const [selectedUser, setSelectedUser] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
-  const [softDestroyUser, setSoftDestroyUser] = useState(null);
-  const [softDestroyLoading, setSoftDestroyLoading] = useState(false);
 
   // Local synced users list
   const [localUsers, setLocalUsers] = useState(Array.isArray(usersList) ? usersList : []);
@@ -110,45 +109,80 @@ export default function UserManagement({
     if (onRefresh) onRefresh();
   };
 
-  // Perform soft destroy (deactivate user account)
-  const handleConfirmSoftDestroy = async () => {
-    if (!softDestroyUser) return;
-    setSoftDestroyLoading(true);
-    const targetUser = softDestroyUser;
+  // Perform soft destroy (deactivate user account) or reactivate
+  const handleSoftDestroyClick = (targetUser) => {
     const isAlreadyInactive = targetUser.is_active === false;
     const targetStatus = isAlreadyInactive ? true : false;
     const actionLabel = isAlreadyInactive ? 'restored (activated)' : 'soft destroyed (deactivated)';
+    const fullName = getUserFullName(targetUser);
 
-    try {
-      // Soft destroy / restore API call
-      try {
-        if (!isAlreadyInactive) {
-          await deleteUserApi(targetUser.id);
-        } else {
-          await restoreUserApi(targetUser.id);
+    const title = isAlreadyInactive ? 'Confirm Reactivate Account' : 'Confirm Soft Destroy';
+    const htmlContent = isAlreadyInactive
+      ? `
+        <div class="text-left text-xs text-slate-600">
+          <p class="mb-2 font-medium text-slate-700">Reactivate user account for <strong>${fullName}</strong>?</p>
+          <p class="mb-2">User: <strong>${fullName}</strong> (@${targetUser.username})</p>
+          <p class="text-slate-500">This will restore active login privileges and portal access.</p>
+        </div>
+      `
+      : `
+        <div class="text-left text-xs text-slate-600">
+          <p class="mb-2 font-medium text-slate-700">Are you sure you want to <strong>soft destroy</strong> this user account?</p>
+          <p class="mb-2">User: <strong>${fullName}</strong> (@${targetUser.username})</p>
+          <ul class="pl-4 list-disc text-slate-500 flex flex-col gap-1">
+            <li>Account status will be changed to <strong>Inactive</strong>.</li>
+            <li>User login access will be temporarily revoked.</li>
+            <li>User record and history are safely preserved in the system.</li>
+          </ul>
+        </div>
+      `;
+
+    const confirmButtonText = isAlreadyInactive ? 'Yes, Reactivate User' : 'Yes, Soft Destroy User';
+    const confirmButtonBg = isAlreadyInactive ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20' : 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/20';
+
+    Swal.fire({
+      title: title,
+      html: htmlContent,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: confirmButtonText,
+      cancelButtonText: 'Cancel',
+      buttonsStyling: false,
+      showLoaderOnConfirm: true,
+      customClass: {
+        popup: 'rounded-2xl border border-slate-200 shadow-2xl p-6 text-slate-900 bg-white',
+        title: 'text-base font-bold text-slate-900 m-0',
+        htmlContainer: 'mt-3 mb-5',
+        actions: 'flex gap-3 justify-end w-full mt-4',
+        confirmButton: `px-5 py-2.5 text-white text-xs font-semibold shadow-md transition-all cursor-pointer flex items-center gap-2 rounded-xl ${confirmButtonBg}`,
+        cancelButton: 'px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-semibold transition-all cursor-pointer'
+      },
+      preConfirm: async () => {
+        try {
+          if (!isAlreadyInactive) {
+            await deleteUserApi(targetUser.id);
+          } else {
+            await restoreUserApi(targetUser.id);
+          }
+          return true;
+        } catch (err) {
+          Swal.showValidationMessage(`Request failed: ${err.message || err}`);
         }
-      } catch (err) {
-        console.warn('Backend soft destroy/restore API returned error, applying client update:', err);
-      }
+      },
+      allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setLocalUsers((prev) =>
+          prev.map((u) => (u.id === targetUser.id ? { ...u, is_active: targetStatus } : u))
+        );
 
-      setLocalUsers((prev) =>
-        prev.map((u) => (u.id === targetUser.id ? { ...u, is_active: targetStatus } : u))
-      );
+        if (triggerToast) {
+          triggerToast(`User "${fullName}" ${actionLabel} successfully!`);
+        }
 
-      if (triggerToast) {
-        triggerToast(`User "${getUserFullName(targetUser)}" ${actionLabel} successfully!`);
+        if (onRefresh) onRefresh();
       }
-
-      if (onRefresh) onRefresh();
-    } catch (err) {
-      console.error('Soft destroy error:', err);
-      if (triggerToast) {
-        triggerToast(`Failed to update soft destroy status for ${getUserFullName(targetUser)}`);
-      }
-    } finally {
-      setSoftDestroyLoading(false);
-      setSoftDestroyUser(null);
-    }
+    });
   };
 
   // Client-side filtering as fallback if backend pagination is not active
@@ -226,31 +260,33 @@ export default function UserManagement({
 
             {/* Role Filter */}
             <div className="flex items-center gap-1.5">
-              <select
-                className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-indigo-600 cursor-pointer"
+              <CustomSelect
+                selectClassName="py-2 px-3 text-xs min-w-[160px]"
                 value={currentRole}
                 onChange={(e) => handleRoleChange(e.target.value)}
-              >
-                <option value="all">All Roles</option>
-                <option value="2">Admin </option>
-                <option value="3">HR</option>
-                <option value="4">Employee</option>
-                <option value="5">Project Manager</option>
-                <option value="6">Department Manager</option>
-              </select>
+                options={[
+                  { value: 'all', label: 'All Roles' },
+                  { value: '2', label: 'Admin' },
+                  { value: '3', label: 'HR' },
+                  { value: '4', label: 'Employee' },
+                  { value: '5', label: 'Project Manager' },
+                  { value: '6', label: 'Department Manager' }
+                ]}
+              />
             </div>
 
             {/* Status Filter */}
             <div className="flex items-center gap-1.5">
-              <select
-                className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-indigo-600 cursor-pointer"
+              <CustomSelect
+                selectClassName="py-2 px-3 text-xs min-w-[130px]"
                 value={currentStatus}
                 onChange={(e) => handleStatusChange(e.target.value)}
-              >
-                <option value="all">All Status</option>
-                <option value="true">Active</option>
-                <option value="false">Inactive</option>
-              </select>
+                options={[
+                  { value: 'all', label: 'All Status' },
+                  { value: 'true', label: 'Active' },
+                  { value: 'false', label: 'Inactive' }
+                ]}
+              />
             </div>
 
             {/* Add User Modal Button */}
@@ -415,7 +451,7 @@ export default function UserManagement({
                                   : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border-emerald-200'
                               }`}
                               onClick={() => {
-                                setSoftDestroyUser(u);
+                                handleSoftDestroyClick(u);
                               }}
                             >
                               {u.is_active ? (
@@ -456,7 +492,7 @@ export default function UserManagement({
           isOpen={Boolean(selectedUser)}
           onClose={() => setSelectedUser(null)}
           onEditUser={(u) => setEditingUser(u)}
-          onSoftDestroyUser={(u) => setSoftDestroyUser(u)}
+          onSoftDestroyUser={(u) => handleSoftDestroyClick(u)}
           triggerToast={triggerToast}
         />
       )}
@@ -471,89 +507,6 @@ export default function UserManagement({
           triggerToast={triggerToast}
         />
       )}
-
-      {/* 5. Soft Destroy Confirmation Modal */}
-      {softDestroyUser &&
-        (typeof document !== 'undefined'
-          ? createPortal(
-              <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-                <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl p-6 text-slate-900 shadow-2xl animate-cardFadeUp">
-                  <div className="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold ${
-                      softDestroyUser.is_active ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'
-                    }`}>
-                      {softDestroyUser.is_active ? '🗑️' : '♻️'}
-                    </div>
-                    <div>
-                      <h3 className="text-base font-bold text-slate-900 m-0">
-                        {softDestroyUser.is_active ? 'Confirm Soft Destroy' : 'Confirm Reactivate Account'}
-                      </h3>
-                      <p className="text-xs text-slate-500 m-0">
-                        User: <strong className="text-slate-800">{getUserFullName(softDestroyUser)}</strong> (@{softDestroyUser.username})
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 mb-5 flex flex-col gap-2">
-                    {softDestroyUser.is_active ? (
-                      <>
-                        <p className="m-0 font-medium text-slate-700">
-                          Are you sure you want to <strong>soft destroy</strong> this user account?
-                        </p>
-                        <ul className="m-0 pl-4 list-disc text-slate-500 flex flex-col gap-1">
-                          <li>Account status will be changed to <strong>Inactive</strong>.</li>
-                          <li>User login access will be temporarily revoked.</li>
-                          <li>User record and history are safely preserved in the system.</li>
-                        </ul>
-                      </>
-                    ) : (
-                      <>
-                        <p className="m-0 font-medium text-slate-700">
-                          Reactivate user account for <strong>{getUserFullName(softDestroyUser)}</strong>?
-                        </p>
-                        <p className="m-0 text-slate-500">
-                          This will restore active login privileges and portal access.
-                        </p>
-                      </>
-                    )}
-                  </div>
-
-                  <div className="flex justify-end gap-3">
-                    <button
-                      type="button"
-                      className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-semibold transition-all cursor-pointer"
-                      onClick={() => setSoftDestroyUser(null)}
-                      disabled={softDestroyLoading}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      disabled={softDestroyLoading}
-                      className={`px-5 py-2.5 rounded-xl text-white text-xs font-semibold shadow-md transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50 ${
-                        softDestroyUser.is_active
-                          ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/20'
-                          : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20'
-                      }`}
-                      onClick={handleConfirmSoftDestroy}
-                    >
-                      {softDestroyLoading ? (
-                        <>
-                          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                          <span>Processing...</span>
-                        </>
-                      ) : softDestroyUser.is_active ? (
-                        <span>Yes, Soft Destroy User</span>
-                      ) : (
-                        <span>Yes, Reactivate User</span>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>,
-              document.body
-            )
-          : null)}
     </div>
   );
 }

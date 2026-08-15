@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { createUserApi, updateUserApi } from '../../api/admin/userApi';
 import { AuthContext } from '../../context/AuthContext';
 import { getCompanyData, getCompanyId } from '../../utils/storage';
+import CustomSelect from '../common/CustomSelect';
 
 export default function UserFormModal({
   user = null, // If user is provided, modal operates in EDIT mode; otherwise CREATE mode
@@ -385,30 +386,23 @@ export default function UserFormModal({
               />
               {renderFieldError('company')}
             </div>
-            <div>
-              <label className="text-xs font-semibold text-slate-700 mb-1 block">
-                User Role <span className="text-rose-500">*</span>
-              </label>
-              <select
+              <CustomSelect
+                label="User Role"
                 name="role"
                 value={formData.role}
                 onChange={handleChange}
                 required
-                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm text-slate-900 focus:outline-none transition-all cursor-pointer ${
-                  fieldErrors.role
-                    ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
-                    : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
-                }`}
-              >
-                <option value={1}>Super Admin (Role 1)</option>
-                <option value={2}>Admin (Role 2)</option>
-                <option value={3}>HR (Role 3)</option>
-                <option value={4}>Employee (Role 4)</option>
-                <option value={5}>Project Manager (Role 5)</option>
-                <option value={6}>Department Manager (Role 6)</option>
-              </select>
-              {renderFieldError('role')}
-            </div>
+                error={fieldErrors.role}
+                placeholder="-- Select User Role --"
+                options={[
+                  { value: 1, label: 'Super Admin (Role 1)' },
+                  { value: 2, label: 'Admin (Role 2)' },
+                  { value: 3, label: 'HR (Role 3)' },
+                  { value: 4, label: 'Employee (Role 4)' },
+                  { value: 5, label: 'Project Manager (Role 5)' },
+                  { value: 6, label: 'Department Manager (Role 6)' }
+                ]}
+              />
           </div>
 
           {/* Account Status Switch (Edit & Create Mode) */}

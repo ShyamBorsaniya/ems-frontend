@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Pagination from '../common/Pagination';
+import CustomSelect from '../common/CustomSelect';
 import ProjectFormModal from './ProjectFormModal';
 import ProjectShowModal from './ProjectShowModal';
-import ProjectDeleteModal from './ProjectDeleteModal';
+import Swal from 'sweetalert2';
+import { deleteProjectApi } from '../../api/admin/projectApi';
+
 
 export default function ProjectManagement({
   projects = [],
@@ -27,7 +30,6 @@ export default function ProjectManagement({
 }) {
   const [selectedProject, setSelectedProject] = useState(null);
   const [editingProject, setEditingProject] = useState(null);
-  const [deletingProject, setDeletingProject] = useState(null);
   const [showFormModal, setShowFormModal] = useState(false);
 
   // Local synced projects list
@@ -141,6 +143,57 @@ export default function ProjectManagement({
     if (onRefresh) onRefresh();
   };
 
+  const handleDeleteClick = (project) => {
+    Swal.fire({
+      title: 'Confirm Delete Project',
+      html: `
+        <div class="text-left text-xs text-slate-600">
+          <p class="mb-2 font-medium text-slate-700">Are you sure you want to permanently delete this project record?</p>
+          <p class="mb-2">Project: <strong>${project.name}</strong> (Code: ${project.code || `#${project.id}`})</p>
+          <ul class="pl-4 list-disc text-slate-500 flex flex-col gap-1">
+            <li>This action cannot be undone.</li>
+            <li>All associated tasks or timeline tracking for this project may be affected.</li>
+          </ul>
+        </div>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Delete Project',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#e11d48',
+      cancelButtonColor: '#64748b',
+      showLoaderOnConfirm: true,
+      customClass: {
+        popup: 'rounded-2xl border border-slate-200 shadow-2xl p-6 text-slate-900 bg-white',
+        title: 'text-base font-bold text-slate-900 m-0',
+        htmlContainer: 'mt-3 mb-5',
+        actions: 'flex gap-3 justify-end w-full mt-4',
+        confirmButton: 'px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-md shadow-rose-600/20 transition-all cursor-pointer flex items-center gap-2',
+        cancelButton: 'px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-semibold transition-all cursor-pointer'
+      },
+      buttonsStyling: false,
+      preConfirm: async () => {
+        try {
+          const res = await deleteProjectApi(project.id);
+          if (res && res.success === false) {
+            throw new Error(res.message || 'Failed to delete project');
+          }
+          return res;
+        } catch (error) {
+          Swal.showValidationMessage(`Request failed: ${error.message}`);
+        }
+      },
+      allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+      if (result.isConfirmed) {
+        if (triggerToast) {
+          triggerToast(`Project "${project.name}" deleted successfully!`);
+        }
+        handleProjectDeleted(project.id);
+      }
+    });
+  };
+
   // Client-side filtering fallback if backend pagination is off
   const filteredProjects = projectsList.filter((proj) => {
     // 1. Search query filter
@@ -212,31 +265,33 @@ export default function ProjectManagement({
             </div>
 
             {/* Status Filter */}
-            <select
-              className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-indigo-600 cursor-pointer"
+            <CustomSelect
+              selectClassName="py-2 px-3 text-xs min-w-[165px]"
               value={currentStatus}
               onChange={(e) => handleStatusChange(e.target.value)}
-            >
-              <option value="all">All Status</option>
-              <option value="PLANNED">Planned</option>
-              <option value="ACTIVE">Active / In Progress</option>
-              <option value="ON_HOLD">On Hold</option>
-              <option value="COMPLETED">Completed</option>
-              <option value="CANCELLED">Cancelled</option>
-            </select>
+              options={[
+                { value: 'all', label: 'All Status' },
+                { value: 'PLANNED', label: 'Planned' },
+                { value: 'ACTIVE', label: 'Active / In Progress' },
+                { value: 'ON_HOLD', label: 'On Hold' },
+                { value: 'COMPLETED', label: 'Completed' },
+                { value: 'CANCELLED', label: 'Cancelled' }
+              ]}
+            />
 
             {/* Priority Filter */}
-            <select
-              className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-indigo-600 cursor-pointer"
+            <CustomSelect
+              selectClassName="py-2 px-3 text-xs min-w-[145px]"
               value={currentPriority}
               onChange={(e) => handlePriorityChange(e.target.value)}
-            >
-              <option value="all">All Priority</option>
-              <option value="LOW">Low</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="HIGH">High</option>
-              <option value="CRITICAL">Critical</option>
-            </select>
+              options={[
+                { value: 'all', label: 'All Priority' },
+                { value: 'LOW', label: 'Low' },
+                { value: 'MEDIUM', label: 'Medium' },
+                { value: 'HIGH', label: 'High' },
+                { value: 'CRITICAL', label: 'Critical' }
+              ]}
+            />
 
             {/* Add Project Button */}
             <button
@@ -398,7 +453,7 @@ export default function ProjectManagement({
                         type="button"
                         title="Delete Project"
                         className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1"
-                        onClick={() => setDeletingProject(proj)}
+                        onClick={() => handleDeleteClick(proj)}
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -444,7 +499,7 @@ export default function ProjectManagement({
           isOpen={Boolean(selectedProject)}
           onClose={() => setSelectedProject(null)}
           onEditProject={(proj) => setEditingProject(proj)}
-          onDeleteProject={(proj) => setDeletingProject(proj)}
+          onDeleteProject={(proj) => handleDeleteClick(proj)}
         />
       )}
 
@@ -457,17 +512,6 @@ export default function ProjectManagement({
           onProjectUpdated={handleProjectUpdated}
           departments={departments}
           employees={employees}
-          triggerToast={triggerToast}
-        />
-      )}
-
-      {/* 4. Delete Project Modal */}
-      {deletingProject && (
-        <ProjectDeleteModal
-          project={deletingProject}
-          isOpen={Boolean(deletingProject)}
-          onClose={() => setDeletingProject(null)}
-          onProjectDeleted={handleProjectDeleted}
           triggerToast={triggerToast}
         />
       )}

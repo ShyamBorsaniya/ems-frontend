@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import Pagination from '../common/Pagination';
 import DesignationFormModal from './DesignationFormModal';
 import DesignationShowModal from './DesignationShowModal';
-import DesignationDeleteModal from './DesignationDeleteModal';
+import Swal from 'sweetalert2';
+import { deleteDesignationApi } from '../../api/admin/designationApi';
+
 
 export default function DesignationManagement({
   designations = [],
@@ -18,7 +20,6 @@ export default function DesignationManagement({
 }) {
   const [selectedDesg, setSelectedDesg] = useState(null);
   const [editingDesg, setEditingDesg] = useState(null);
-  const [deletingDesg, setDeletingDesg] = useState(null);
   const [showFormModal, setShowFormModal] = useState(false);
 
   // Local synced designations list
@@ -39,6 +40,57 @@ export default function DesignationManagement({
   const handleDesignationDeleted = (desgId) => {
     setLocalDesignations((prev) => prev.filter((d) => d.id !== desgId));
     if (onRefresh) onRefresh();
+  };
+
+  const handleDeleteClick = (desg) => {
+    Swal.fire({
+      title: 'Confirm Delete Designation',
+      html: `
+        <div class="text-left text-xs text-slate-600">
+          <p class="mb-2 font-medium text-slate-700">Are you sure you want to permanently delete this designation?</p>
+          <p class="mb-2">Designation: <strong>${desg.name}</strong> (ID: #${desg.id})</p>
+          <ul class="pl-4 list-disc text-slate-500 flex flex-col gap-1">
+            <li>This action cannot be undone.</li>
+            <li>Users assigned to this designation might need to be reassigned.</li>
+          </ul>
+        </div>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Delete Designation',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#e11d48',
+      cancelButtonColor: '#64748b',
+      showLoaderOnConfirm: true,
+      customClass: {
+        popup: 'rounded-2xl border border-slate-200 shadow-2xl p-6 text-slate-900 bg-white',
+        title: 'text-base font-bold text-slate-900 m-0',
+        htmlContainer: 'mt-3 mb-5',
+        actions: 'flex gap-3 justify-end w-full mt-4',
+        confirmButton: 'px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-md shadow-rose-600/20 transition-all cursor-pointer flex items-center gap-2',
+        cancelButton: 'px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-semibold transition-all cursor-pointer'
+      },
+      buttonsStyling: false,
+      preConfirm: async () => {
+        try {
+          const res = await deleteDesignationApi(desg.id);
+          if (res && res.success === false) {
+            throw new Error(res.message || 'Failed to delete designation');
+          }
+          return res;
+        } catch (error) {
+          Swal.showValidationMessage(`Request failed: ${error.message}`);
+        }
+      },
+      allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+      if (result.isConfirmed) {
+        if (triggerToast) {
+          triggerToast(`Designation "${desg.name}" deleted successfully!`);
+        }
+        handleDesignationDeleted(desg.id);
+      }
+    });
   };
 
   useEffect(() => {
@@ -266,7 +318,7 @@ export default function DesignationManagement({
                               type="button"
                               title="Delete Designation"
                               className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors cursor-pointer flex items-center justify-center"
-                              onClick={() => setDeletingDesg(d)}
+                              onClick={() => handleDeleteClick(d)}
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -310,7 +362,7 @@ export default function DesignationManagement({
           isOpen={Boolean(selectedDesg)}
           onClose={() => setSelectedDesg(null)}
           onEditDesignation={(desg) => setEditingDesg(desg)}
-          onDeleteDesignation={(desg) => setDeletingDesg(desg)}
+          onDeleteDesignation={(desg) => handleDeleteClick(desg)}
         />
       )}
 
@@ -321,17 +373,6 @@ export default function DesignationManagement({
           isOpen={Boolean(editingDesg)}
           onClose={() => setEditingDesg(null)}
           onDesignationUpdated={handleDesignationUpdated}
-          triggerToast={triggerToast}
-        />
-      )}
-
-      {/* Delete Designation Modal */}
-      {deletingDesg && (
-        <DesignationDeleteModal
-          designation={deletingDesg}
-          isOpen={Boolean(deletingDesg)}
-          onClose={() => setDeletingDesg(null)}
-          onDesignationDeleted={handleDesignationDeleted}
           triggerToast={triggerToast}
         />
       )}

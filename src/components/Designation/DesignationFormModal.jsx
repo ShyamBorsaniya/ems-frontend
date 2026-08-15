@@ -4,6 +4,7 @@ import { createDesignationApi, updateDesignationApi } from '../../api/admin/desi
 import { fetchDepartmentsApi } from '../../api/admin/departmentApi';
 import { AuthContext } from '../../context/AuthContext';
 import { getCompanyData, getCompanyId } from '../../utils/storage';
+import CustomSelect from '../common/CustomSelect';
 
 export default function DesignationFormModal({
   designation = null, // If designation is provided, modal operates in EDIT mode; otherwise CREATE mode
@@ -288,38 +289,26 @@ export default function DesignationFormModal({
 
           {/* Department Selection */}
           <div>
-            <label className="text-xs font-semibold text-slate-700 mb-1 block">
-              Department <span className="text-rose-500">*</span>
-            </label>
             {fetchingDepts ? (
               <div className="text-xs text-slate-500 py-2.5 flex items-center gap-2">
                 <span className="w-3.5 h-3.5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></span>
                 <span>Loading active departments...</span>
               </div>
             ) : (
-              <select
+              <CustomSelect
+                label="Department"
                 name="department"
                 value={formData.department}
                 onChange={handleChange}
                 required
-                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm text-slate-900 focus:outline-none transition-all cursor-pointer ${
-                  fieldErrors.department
-                    ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
-                    : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
-                }`}
-              >
-                {departments.length === 0 ? (
-                  <option value="" disabled>No active departments found</option>
-                ) : (
-                  departments.map((dept) => (
-                    <option key={dept.id} value={dept.id}>
-                      {dept.name} ({dept.code || `#${dept.id}`})
-                    </option>
-                  ))
-                )}
-              </select>
+                error={fieldErrors.department}
+                placeholder={departments.length === 0 ? "No active departments found" : "-- Select Department --"}
+                options={departments.map((dept) => ({
+                  value: dept.id,
+                  label: `${dept.name} (${dept.code || `#${dept.id}`})`
+                }))}
+              />
             )}
-            {renderFieldError('department')}
           </div>
 
           {/* Designation Name & Code */}

@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Pagination from '../common/Pagination';
+import CustomSelect from '../common/CustomSelect';
 import DepartmentFormModal from './DepartmentFormModal';
 import DepartmentShowModal from './DepartmentShowModal';
-import DepartmentDeleteModal from './DepartmentDeleteModal';
+import Swal from 'sweetalert2';
+import { deleteDepartmentApi } from '../../api/admin/departmentApi';
+
 
 export default function DepartmentManagement({
   departments = [],
@@ -21,7 +24,6 @@ export default function DepartmentManagement({
 }) {
   const [selectedDept, setSelectedDept] = useState(null);
   const [editingDept, setEditingDept] = useState(null);
-  const [deletingDept, setDeletingDept] = useState(null);
   const [showFormModal, setShowFormModal] = useState(false);
 
   // Local synced departments list
@@ -80,6 +82,57 @@ export default function DepartmentManagement({
   const handleDeptDeleted = (deptId) => {
     setLocalDepts((prev) => prev.filter((d) => d.id !== deptId));
     if (onRefresh) onRefresh();
+  };
+
+  const handleDeleteClick = (dept) => {
+    Swal.fire({
+      title: 'Confirm Delete Department',
+      html: `
+        <div class="text-left text-xs text-slate-600">
+          <p class="mb-2 font-medium text-slate-700">Are you sure you want to permanently delete this department?</p>
+          <p class="mb-2">Department: <strong>${dept.name}</strong> (ID: #${dept.id})</p>
+          <ul class="pl-4 list-disc text-slate-500 flex flex-col gap-1">
+            <li>This action cannot be undone.</li>
+            <li>Users assigned to this department might need to be reassigned.</li>
+          </ul>
+        </div>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Delete Department',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#e11d48',
+      cancelButtonColor: '#64748b',
+      showLoaderOnConfirm: true,
+      customClass: {
+        popup: 'rounded-2xl border border-slate-200 shadow-2xl p-6 text-slate-900 bg-white',
+        title: 'text-base font-bold text-slate-900 m-0',
+        htmlContainer: 'mt-3 mb-5',
+        actions: 'flex gap-3 justify-end w-full mt-4',
+        confirmButton: 'px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-md shadow-rose-600/20 transition-all cursor-pointer flex items-center gap-2',
+        cancelButton: 'px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-semibold transition-all cursor-pointer'
+      },
+      buttonsStyling: false,
+      preConfirm: async () => {
+        try {
+          const res = await deleteDepartmentApi(dept.id);
+          if (res && res.success === false) {
+            throw new Error(res.message || 'Failed to delete department');
+          }
+          return res;
+        } catch (error) {
+          Swal.showValidationMessage(`Request failed: ${error.message}`);
+        }
+      },
+      allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+      if (result.isConfirmed) {
+        if (triggerToast) {
+          triggerToast(`Department "${dept.name}" deleted successfully!`);
+        }
+        handleDeptDeleted(dept.id);
+      }
+    });
   };
 
   // Client-side filtering as fallback if no backend pagination active
@@ -144,15 +197,16 @@ export default function DepartmentManagement({
 
             {/* Status Filter */}
             <div className="flex items-center gap-1.5">
-              <select
-                className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-indigo-600 cursor-pointer"
+              <CustomSelect
+                selectClassName="py-2 px-3 text-xs min-w-[130px]"
                 value={currentStatus}
                 onChange={(e) => handleStatusChange(e.target.value)}
-              >
-                <option value="all">All Status</option>
-                <option value="true">Active</option>
-                <option value="false">Inactive</option>
-              </select>
+                options={[
+                  { value: 'all', label: 'All Status' },
+                  { value: 'true', label: 'Active' },
+                  { value: 'false', label: 'Inactive' }
+                ]}
+              />
             </div>
 
             {/* Create Department Button */}
@@ -298,7 +352,7 @@ export default function DepartmentManagement({
                               type="button"
                               title="Delete Department"
                               className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors cursor-pointer flex items-center justify-center"
-                              onClick={() => setDeletingDept(dept)}
+                              onClick={() => handleDeleteClick(dept)}
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -344,7 +398,7 @@ export default function DepartmentManagement({
           isOpen={Boolean(selectedDept)}
           onClose={() => setSelectedDept(null)}
           onEditDepartment={(dept) => setEditingDept(dept)}
-          onDeleteDepartment={(dept) => setDeletingDept(dept)}
+          onDeleteDepartment={(dept) => handleDeleteClick(dept)}
         />
       )}
 
@@ -355,17 +409,6 @@ export default function DepartmentManagement({
           isOpen={Boolean(editingDept)}
           onClose={() => setEditingDept(null)}
           onDepartmentUpdated={handleDeptUpdated}
-          triggerToast={triggerToast}
-        />
-      )}
-
-      {/* 4. Delete Department Modal */}
-      {deletingDept && (
-        <DepartmentDeleteModal
-          department={deletingDept}
-          isOpen={Boolean(deletingDept)}
-          onClose={() => setDeletingDept(null)}
-          onDepartmentDeleted={handleDeptDeleted}
           triggerToast={triggerToast}
         />
       )}

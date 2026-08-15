@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { createProjectApi, updateProjectApi } from '../../api/admin/projectApi';
 import { AuthContext } from '../../context/AuthContext';
 import { getCompanyData, getCompanyId } from '../../utils/storage';
+import CustomSelect from '../common/CustomSelect';
 
 export default function ProjectFormModal({
   project = null, // If project is provided, modal operates in EDIT mode; otherwise CREATE mode
@@ -321,85 +322,65 @@ export default function ProjectFormModal({
 
           {/* Department & Project Manager Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="font-semibold text-slate-700 mb-1 block">
-                Assigned Department
-              </label>
-              <select
-                name="department"
-                value={formData.department}
-                onChange={handleChange}
-                className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-indigo-600 cursor-pointer"
-              >
-                <option value="">-- Select Department --</option>
-                {departments.map((dept) => (
-                  <option key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </option>
-                ))}
-              </select>
-              {renderFieldError('department')}
-            </div>
+            <CustomSelect
+              label="Assigned Department"
+              name="department"
+              value={formData.department}
+              onChange={handleChange}
+              error={fieldErrors.department}
+              placeholder="-- Select Department --"
+              options={departments.map((dept) => ({
+                value: dept.id,
+                label: dept.name
+              }))}
+            />
 
-            <div>
-              <label className="font-semibold text-slate-700 mb-1 block">
-                Project Manager / Lead
-              </label>
-              <select
-                name="project_manager"
-                value={formData.project_manager}
-                onChange={handleChange}
-                className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-indigo-600 cursor-pointer"
-              >
-                <option value="">-- Unassigned --</option>
-                {employees.map((emp) => (
-                  <option key={emp.id} value={emp.id}>
-                    {emp.name || emp.username || `User #${emp.id}`}
-                  </option>
-                ))}
-              </select>
-              {renderFieldError('project_manager')}
-            </div>
+            <CustomSelect
+              label="Project Manager / Lead"
+              name="project_manager"
+              value={formData.project_manager}
+              onChange={handleChange}
+              error={fieldErrors.project_manager}
+              placeholder="-- Unassigned --"
+              options={employees.map((emp) => ({
+                value: emp.id,
+                label: emp.name || emp.username || `User #${emp.id}`
+              }))}
+            />
           </div>
 
           {/* Status & Priority Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="font-semibold text-slate-700 mb-1 block">
-                Project Status
-              </label>
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs font-semibold text-slate-900 focus:outline-none focus:border-indigo-600 cursor-pointer"
-              >
-                <option value="PLANNED">📅 Planned</option>
-                <option value="ACTIVE">⚡ Active / In Progress</option>
-                <option value="ON_HOLD">⏸️ On Hold</option>
-                <option value="COMPLETED">✅ Completed</option>
-                <option value="CANCELLED">🚫 Cancelled</option>
-              </select>
-              {renderFieldError('status')}
-            </div>
+            <CustomSelect
+              label="Project Status"
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              error={fieldErrors.status}
+              placeholder="-- Select Status --"
+              options={[
+                { value: 'PLANNED', label: '📅 Planned' },
+                { value: 'ACTIVE', label: '⚡ Active / In Progress' },
+                { value: 'ON_HOLD', label: '⏸️ On Hold' },
+                { value: 'COMPLETED', label: '✅ Completed' },
+                { value: 'CANCELLED', label: '🚫 Cancelled' }
+              ]}
+            />
 
-            <div>
-              <label className="font-semibold text-slate-700 mb-1 block">
-                Priority Level
-              </label>
-              <select
-                name="priority"
-                value={formData.priority}
-                onChange={handleChange}
-                className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs font-semibold text-slate-900 focus:outline-none focus:border-indigo-600 cursor-pointer"
-              >
-                <option value="LOW">🔵 Low Priority</option>
-                <option value="MEDIUM">🟡 Medium Priority</option>
-                <option value="HIGH">🟠 High Priority</option>
-                <option value="CRITICAL">🔴 Critical Priority</option>
-              </select>
-              {renderFieldError('priority')}
-            </div>
+            <CustomSelect
+              label="Priority Level"
+              name="priority"
+              value={formData.priority}
+              onChange={handleChange}
+              error={fieldErrors.priority}
+              placeholder="-- Select Priority --"
+              options={[
+                { value: 'LOW', label: '🔵 Low Priority' },
+                { value: 'MEDIUM', label: '🟡 Medium Priority' },
+                { value: 'HIGH', label: '🟠 High Priority' },
+                { value: 'CRITICAL', label: '🔴 Critical Priority' }
+              ]}
+            />
           </div>
 
           {/* Start Date, End Date, Budget Row */}
