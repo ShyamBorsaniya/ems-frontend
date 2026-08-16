@@ -4,7 +4,7 @@ export default function Footer({ theme = 'indigo' }) {
   const isIndigo = theme === 'indigo';
 
   return (
-    <footer className="px-8 py-4 border-t border-slate-200 bg-white text-slate-500 text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-between gap-3 mt-auto z-10">
+    <footer className="px-4 sm:px-8 py-4 border-t border-slate-200 bg-white text-slate-500 text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-between gap-3 mt-auto z-10">
       <div className="flex items-center gap-2">
         <span className="font-semibold text-slate-900">
           {isIndigo ? 'WorkPulse Admin Console' : 'WorkPulse Employee Portal'}

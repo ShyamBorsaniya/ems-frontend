@@ -4,6 +4,8 @@ import DesignationFormModal from './DesignationFormModal';
 import DesignationShowModal from './DesignationShowModal';
 import Swal from 'sweetalert2';
 import { deleteDesignationApi } from '../../api/admin/designationApi';
+import { useAuth } from '../../hooks/useAuth';
+import FilterDropdown from '../common/FilterDropdown';
 
 
 export default function DesignationManagement({
@@ -18,6 +20,7 @@ export default function DesignationManagement({
   onRefresh,
   triggerToast
 }) {
+  const { hasPermission } = useAuth();
   const [selectedDesg, setSelectedDesg] = useState(null);
   const [editingDesg, setEditingDesg] = useState(null);
   const [showFormModal, setShowFormModal] = useState(false);
@@ -101,6 +104,7 @@ export default function DesignationManagement({
 
   // Local search fallback if parent doesn't manage search term
   const [localSearch, setLocalSearch] = useState('');
+  
   const currentSearch = setSearchTerm !== undefined ? searchTerm : localSearch;
 
   const handleSearchChange = (val) => {
@@ -125,15 +129,21 @@ export default function DesignationManagement({
   // Local fallback filtering if no backend pagination
   const filteredDesignations = designationsList.filter((d) => {
     const q = currentSearch.toLowerCase().trim();
-    if (!q) return true;
-    const name = (d.name || '').toLowerCase();
-    const code = (d.code || '').toLowerCase();
-    const deptName = (d.department?.name || '').toLowerCase();
-    const compName = (d.company_name || '').toLowerCase();
-    return name.includes(q) || code.includes(q) || deptName.includes(q) || compName.includes(q);
+    if (q) {
+      const name = (d.name || '').toLowerCase();
+      const code = (d.code || '').toLowerCase();
+      const deptName = (d.department?.name || '').toLowerCase();
+      const compName = (d.company_name || '').toLowerCase();
+      const matches = name.includes(q) || code.includes(q) || deptName.includes(q) || compName.includes(q);
+      if (!matches) return false;
+    }
+
+
+
+    return true;
   });
 
-  const displayedDesignations = paginationInfo ? designationsList : filteredDesignations;
+  const displayedDesignations = filteredDesignations;
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -149,33 +159,34 @@ export default function DesignationManagement({
           </div>
 
           <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-            {/* Search Input */}
-            <div className="relative flex-1 sm:w-64 min-w-[200px]">
-              <input
-                type="text"
-                placeholder="Search name, code, department..."
-                value={currentSearch}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white transition-all"
-              />
-              <span className="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
-              {currentSearch && (
-                <button
-                  onClick={() => handleSearchChange('')}
-                  className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
+            {/* Filter Dropdown */}
+            <FilterDropdown
+              value={{
+                search: currentSearch
+              }}
+              onApply={(filters) => {
+                handleSearchChange(filters.search || '');
+              }}
+              config={[
+                {
+                  id: 'search',
+                  label: 'Keyword search',
+                  type: 'text',
+                  placeholder: 'Search name, code, dept...',
+                  defaultValue: ''
+                }
+              ]}
+            />
 
             {/* Create Designation Button */}
-            <button
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
-              onClick={() => setShowFormModal(true)}
-            >
-              + Create Designation
-            </button>
+            {hasPermission('add_designation') && (
+              <button
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
+                onClick={() => setShowFormModal(true)}
+              >
+                + Create Designation
+              </button>
+            )}
           </div>
         </div>
 
@@ -218,12 +229,12 @@ export default function DesignationManagement({
               <table className="w-full text-left text-xs sm:text-sm border-collapse">
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-semibold">
-                    <th className="py-3 px-4 w-20">ID</th>
+                    <th className="py-3 px-4 w-20 hidden sm:table-cell">ID</th>
                     <th className="py-3 px-4">Designation Name</th>
-                    <th className="py-3 px-4">Code</th>
+                    <th className="py-3 px-4 hidden md:table-cell">Code</th>
                     <th className="py-3 px-4">Department</th>
                     <th className="py-3 px-4 text-center">Status</th>
-                    <th className="py-3 px-4">Created Date</th>
+                    <th className="py-3 px-4 hidden lg:table-cell">Created Date</th>
                     <th className="py-3 px-4 text-center">Action</th>
                   </tr>
                 </thead>
@@ -232,7 +243,7 @@ export default function DesignationManagement({
                     return (
                       <tr key={d.id} className="hover:bg-slate-50/80 transition-colors">
                         {/* 1. ID */}
-                        <td className="py-3.5 px-4 font-mono text-xs font-semibold text-slate-500">
+                        <td className="py-3.5 px-4 font-mono text-xs font-semibold text-slate-500 hidden sm:table-cell">
                           #{d.id}
                         </td>
 
@@ -251,7 +262,7 @@ export default function DesignationManagement({
                         </td>
 
                         {/* 3. Code */}
-                        <td className="py-3.5 px-4 text-slate-600 font-mono text-xs">
+                        <td className="py-3.5 px-4 text-slate-600 font-mono text-xs hidden md:table-cell">
                           <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200">
                             {d.code || 'N/A'}
                           </span>
@@ -281,7 +292,7 @@ export default function DesignationManagement({
                         </td>
 
                         {/* 7. Created Date */}
-                        <td className="py-3.5 px-4 text-slate-500 text-xs">
+                        <td className="py-3.5 px-4 text-slate-500 text-xs hidden lg:table-cell">
                           {formatDate(d.created_at)}
                         </td>
 
@@ -302,28 +313,32 @@ export default function DesignationManagement({
                             </button>
 
                             {/* Edit Designation */}
-                            <button
-                              type="button"
-                              title="Edit Designation"
-                              className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 transition-colors cursor-pointer flex items-center justify-center"
-                              onClick={() => setEditingDesg(d)}
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
-                            </button>
+                            {hasPermission('change_designation') && (
+                              <button
+                                type="button"
+                                title="Edit Designation"
+                                className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 transition-colors cursor-pointer flex items-center justify-center"
+                                onClick={() => setEditingDesg(d)}
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                              </button>
+                            )}
 
                             {/* Delete Designation */}
-                            <button
-                              type="button"
-                              title="Delete Designation"
-                              className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors cursor-pointer flex items-center justify-center"
-                              onClick={() => handleDeleteClick(d)}
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
+                            {hasPermission('delete_designation') && (
+                              <button
+                                type="button"
+                                title="Delete Designation"
+                                className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors cursor-pointer flex items-center justify-center"
+                                onClick={() => handleDeleteClick(d)}
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>

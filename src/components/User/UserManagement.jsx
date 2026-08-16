@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import Pagination from '../common/Pagination';
-import CustomSelect from '../common/CustomSelect';
 import UserFormModal from './UserFormModal';
 import UserShowModal from './UserShowModal';
 import { deleteUserApi, restoreUserApi } from '../../api/admin/userApi';
+import { useAuth } from '../../hooks/useAuth';
+import FilterDropdown from '../common/FilterDropdown';
 
 export default function UserManagement({
   usersList = [],
@@ -23,6 +24,7 @@ export default function UserManagement({
   triggerToast,
   setShowAddUserModal
 }) {
+  const { hasPermission } = useAuth();
   const [selectedUser, setSelectedUser] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
 
@@ -220,10 +222,12 @@ export default function UserManagement({
       }
     }
 
+
+
     return true;
   });
 
-  const displayedUsers = paginationInfo ? users : filteredUsers;
+  const displayedUsers = filteredUsers;
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -238,59 +242,56 @@ export default function UserManagement({
           </div>
 
           <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-            {/* Search Input */}
-            <div className="relative flex-1 min-w-[200px] sm:w-64">
-              <input
-                type="text"
-                placeholder="Search name, email, phone..."
-                value={currentSearch}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white transition-all"
-              />
-              <span className="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
-              {currentSearch && (
-                <button
-                  onClick={() => handleSearchChange('')}
-                  className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-
-            {/* Role Filter */}
-            <div className="flex items-center gap-1.5">
-              <CustomSelect
-                selectClassName="py-2 px-3 text-xs min-w-[160px]"
-                value={currentRole}
-                onChange={(e) => handleRoleChange(e.target.value)}
-                options={[
-                  { value: 'all', label: 'All Roles' },
-                  { value: '2', label: 'Admin' },
-                  { value: '3', label: 'HR' },
-                  { value: '4', label: 'Employee' },
-                  { value: '5', label: 'Project Manager' },
-                  { value: '6', label: 'Department Manager' }
-                ]}
-              />
-            </div>
-
-            {/* Status Filter */}
-            <div className="flex items-center gap-1.5">
-              <CustomSelect
-                selectClassName="py-2 px-3 text-xs min-w-[130px]"
-                value={currentStatus}
-                onChange={(e) => handleStatusChange(e.target.value)}
-                options={[
-                  { value: 'all', label: 'All Status' },
-                  { value: 'true', label: 'Active' },
-                  { value: 'false', label: 'Inactive' }
-                ]}
-              />
-            </div>
+            {/* Filter Dropdown */}
+            <FilterDropdown
+              value={{
+                search: currentSearch,
+                role: currentRole,
+                status: currentStatus
+              }}
+              onApply={(filters) => {
+                handleSearchChange(filters.search || '');
+                handleRoleChange(filters.role || 'all');
+                handleStatusChange(filters.status || 'all');
+              }}
+              config={[
+                {
+                  id: 'role',
+                  label: 'Role',
+                  type: 'select',
+                  options: [
+                    { value: 'all', label: 'All Roles' },
+                    { value: '2', label: 'Admin' },
+                    { value: '3', label: 'HR' },
+                    { value: '4', label: 'Employee' },
+                    { value: '5', label: 'Project Manager' },
+                    { value: '6', label: 'Department Manager' }
+                  ],
+                  defaultValue: 'all'
+                },
+                {
+                  id: 'status',
+                  label: 'Status',
+                  type: 'select',
+                  options: [
+                    { value: 'all', label: 'All Status' },
+                    { value: 'true', label: 'Active', bullet: 'bg-emerald-500' },
+                    { value: 'false', label: 'Inactive', bullet: 'bg-slate-400' }
+                  ],
+                  defaultValue: 'all'
+                },
+                {
+                  id: 'search',
+                  label: 'Keyword search',
+                  type: 'text',
+                  placeholder: 'Search name, email, phone...',
+                  defaultValue: ''
+                }
+              ]}
+            />
 
             {/* Add User Modal Button */}
-            {setShowAddUserModal && (
+            {setShowAddUserModal && hasPermission('add_user') && (
               <button
                 className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
                 onClick={() => setShowAddUserModal(true)}
@@ -344,9 +345,9 @@ export default function UserManagement({
                   <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-semibold">
                     <th className="py-3 px-4">User Details</th>
                     <th className="py-3 px-4">Role</th>
-                    <th className="py-3 px-4">Phone</th>
+                    <th className="py-3 px-4 hidden md:table-cell">Phone</th>
                     <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4">Joined Date</th>
+                    <th className="py-3 px-4 hidden sm:table-cell">Joined Date</th>
                     <th className="py-3 px-4 text-center">Action</th>
                   </tr>
                 </thead>
@@ -387,7 +388,7 @@ export default function UserManagement({
                         </td>
 
                         {/* 3. Phone */}
-                        <td className="py-3.5 px-4 text-slate-600">
+                        <td className="py-3.5 px-4 text-slate-600 hidden md:table-cell">
                           {u.phone || 'N/A'}
                         </td>
 
@@ -405,7 +406,7 @@ export default function UserManagement({
                         </td>
 
                         {/* 6. Created At */}
-                        <td className="py-3.5 px-4 text-slate-500 text-xs">
+                        <td className="py-3.5 px-4 text-slate-500 text-xs hidden sm:table-cell">
                           {formatDate(u.created_at)}
                         </td>
 
@@ -428,42 +429,46 @@ export default function UserManagement({
                             </button>
 
                             {/* Edit User Icon */}
-                            <button
-                              type="button"
-                              title="Edit User Record"
-                              className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 transition-colors cursor-pointer flex items-center justify-center"
-                              onClick={() => {
-                                setEditingUser(u);
-                              }}
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
-                            </button>
+                            {hasPermission('change_user') && (
+                              <button
+                                type="button"
+                                title="Edit User Record"
+                                className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 transition-colors cursor-pointer flex items-center justify-center"
+                                onClick={() => {
+                                  setEditingUser(u);
+                                }}
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                              </button>
+                            )}
 
                             {/* Soft Destroy User Icon */}
-                            <button
-                              type="button"
-                              title={u.is_active ? "Soft Destroy User (Deactivate)" : "Restore User (Activate)"}
-                              className={`p-1.5 rounded-lg transition-colors cursor-pointer border flex items-center justify-center ${
-                                u.is_active
-                                  ? 'bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-200'
-                                  : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border-emerald-200'
-                              }`}
-                              onClick={() => {
-                                handleSoftDestroyClick(u);
-                              }}
-                            >
-                              {u.is_active ? (
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                              ) : (
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                </svg>
-                              )}
-                            </button>
+                            {hasPermission('delete_user') && (
+                              <button
+                                type="button"
+                                title={u.is_active ? "Soft Destroy User (Deactivate)" : "Restore User (Activate)"}
+                                className={`p-1.5 rounded-lg transition-colors cursor-pointer border flex items-center justify-center ${
+                                  u.is_active
+                                    ? 'bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-200'
+                                    : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border-emerald-200'
+                                }`}
+                                onClick={() => {
+                                  handleSoftDestroyClick(u);
+                                }}
+                              >
+                                {u.is_active ? (
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                ) : (
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                  </svg>
+                                )}
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>

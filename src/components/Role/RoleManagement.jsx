@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Pagination from '../common/Pagination';
+import { useAuth } from '../../hooks/useAuth';
+import FilterDropdown from '../common/FilterDropdown';
 
 export default function RoleManagement({
   roles = [],
@@ -10,8 +12,10 @@ export default function RoleManagement({
   error = null,
   searchTerm = '',
   setSearchTerm,
-  onRefresh
+  onRefresh,
+  setShowAddRoleModal
 }) {
+  const { hasPermission } = useAuth();
   // Local synced roles list
   const [localRoles, setLocalRoles] = useState(Array.isArray(roles) ? roles : []);
 
@@ -23,6 +27,7 @@ export default function RoleManagement({
 
   // Local search fallback if parent doesn't manage search term
   const [localSearch, setLocalSearch] = useState('');
+  
   const currentSearch = setSearchTerm !== undefined ? searchTerm : localSearch;
 
   const handleSearchChange = (val) => {
@@ -65,14 +70,20 @@ export default function RoleManagement({
   // Filtering roles locally if no backend pagination
   const filteredRoles = rolesList.filter((r) => {
     const q = currentSearch.toLowerCase().trim();
-    if (!q) return true;
-    const name = (r.name || '').toLowerCase();
-    const displayName = (r.display_name || '').toLowerCase();
-    const id = String(r.id || '');
-    return name.includes(q) || displayName.includes(q) || id.includes(q);
+    if (q) {
+      const name = (r.name || '').toLowerCase();
+      const displayName = (r.display_name || '').toLowerCase();
+      const id = String(r.id || '');
+      const matches = name.includes(q) || displayName.includes(q) || id.includes(q);
+      if (!matches) return false;
+    }
+
+
+
+    return true;
   });
 
-  const displayedRoles = paginationInfo ? rolesList : filteredRoles;
+  const displayedRoles = filteredRoles;
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -88,25 +99,34 @@ export default function RoleManagement({
           </div>
 
           <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-            {/* Search Input */}
-            <div className="relative flex-1 sm:w-64 min-w-[200px]">
-              <input
-                type="text"
-                placeholder="Search role name, display name..."
-                value={currentSearch}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white transition-all"
-              />
-              <span className="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
-              {currentSearch && (
-                <button
-                  onClick={() => handleSearchChange('')}
-                  className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
+            {/* Filter Dropdown */}
+            <FilterDropdown
+              value={{
+                search: currentSearch
+              }}
+              onApply={(filters) => {
+                handleSearchChange(filters.search || '');
+              }}
+              config={[
+                {
+                  id: 'search',
+                  label: 'Keyword search',
+                  type: 'text',
+                  placeholder: 'Search role name...',
+                  defaultValue: ''
+                }
+              ]}
+            />
+
+            {/* Add Role Button */}
+            {setShowAddRoleModal && hasPermission('add_role') && (
+              <button
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-xs shadow-md shadow-indigo-650/20 transition-all cursor-pointer"
+                onClick={() => setShowAddRoleModal(true)}
+              >
+                + Define Role
+              </button>
+            )}
           </div>
         </div>
 
@@ -149,11 +169,11 @@ export default function RoleManagement({
               <table className="w-full text-left text-xs sm:text-sm border-collapse">
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-semibold">
-                    <th className="py-3 px-4 w-20">ID</th>
+                    <th className="py-3 px-4 w-20 hidden sm:table-cell">ID</th>
                     <th className="py-3 px-4">Display Name</th>
                     <th className="py-3 px-4">Role Name</th>
-                    <th className="py-3 px-4">Created Date</th>
-                    <th className="py-3 px-4">Updated Date</th>
+                    <th className="py-3 px-4 hidden md:table-cell">Created Date</th>
+                    <th className="py-3 px-4 hidden lg:table-cell">Updated Date</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -163,7 +183,7 @@ export default function RoleManagement({
                     return (
                       <tr key={r.id} className="hover:bg-slate-50/80 transition-colors">
                         {/* 1. ID */}
-                        <td className="py-3.5 px-4 font-mono text-xs font-semibold text-slate-500">
+                        <td className="py-3.5 px-4 font-mono text-xs font-semibold text-slate-500 hidden sm:table-cell">
                           #{r.id}
                         </td>
 
@@ -180,12 +200,12 @@ export default function RoleManagement({
                         </td>
 
                         {/* 4. Created Date */}
-                        <td className="py-3.5 px-4 text-slate-500 text-xs">
+                        <td className="py-3.5 px-4 text-slate-500 text-xs hidden md:table-cell">
                           {formatDate(r.created_at)}
                         </td>
 
                         {/* 5. Updated Date */}
-                        <td className="py-3.5 px-4 text-slate-500 text-xs">
+                        <td className="py-3.5 px-4 text-slate-500 text-xs hidden lg:table-cell">
                           {formatDate(r.updated_at)}
                         </td>
                       </tr>

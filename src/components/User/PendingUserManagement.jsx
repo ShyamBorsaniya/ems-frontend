@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Pagination from '../common/Pagination';
+import { useAuth } from '../../hooks/useAuth';
+import FilterDropdown from '../common/FilterDropdown';
 
 export default function PendingUserManagement({
   pendingUsersList = [],
@@ -14,6 +16,7 @@ export default function PendingUserManagement({
   onReject,
   triggerToast
 }) {
+  const { hasPermission } = useAuth();
   const [localPendingUsers, setLocalPendingUsers] = useState(Array.isArray(pendingUsersList) ? pendingUsersList : []);
   const [localSearch, setLocalSearch] = useState('');
 
@@ -95,22 +98,27 @@ export default function PendingUserManagement({
   // Client-side search filtering fallback if backend pagination is not active
   const filteredUsers = localPendingUsers.filter((u) => {
     const query = currentSearch.toLowerCase().trim();
-    if (!query) return true;
-    const fullName = getUserFullName(u).toLowerCase();
-    const username = (u.username || '').toLowerCase();
-    const email = (u.email || '').toLowerCase();
-    const phone = (u.phone || '').toLowerCase();
-    const compName = getCompanyName(u).toLowerCase();
-    return (
-      fullName.includes(query) ||
-      username.includes(query) ||
-      email.includes(query) ||
-      phone.includes(query) ||
-      compName.includes(query)
-    );
+    if (query) {
+      const fullName = getUserFullName(u).toLowerCase();
+      const username = (u.username || '').toLowerCase();
+      const email = (u.email || '').toLowerCase();
+      const phone = (u.phone || '').toLowerCase();
+      const compName = getCompanyName(u).toLowerCase();
+      const matches =
+        fullName.includes(query) ||
+        username.includes(query) ||
+        email.includes(query) ||
+        phone.includes(query) ||
+        compName.includes(query);
+      if (!matches) return false;
+    }
+
+
+
+    return true;
   });
 
-  const displayedUsers = paginationInfo ? localPendingUsers : filteredUsers;
+  const displayedUsers = filteredUsers;
 
   // Execute approval or rejection
   const handleConfirmAction = async () => {
@@ -145,25 +153,24 @@ export default function PendingUserManagement({
           </div>
 
           <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-            {/* Search Input */}
-            <div className="relative flex-1 min-w-[200px] sm:w-64">
-              <input
-                type="text"
-                placeholder="Search name, email, phone..."
-                value={currentSearch}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white transition-all"
-              />
-              <span className="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
-              {currentSearch && (
-                <button
-                  onClick={() => handleSearchChange('')}
-                  className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
+            {/* Filter Dropdown */}
+            <FilterDropdown
+              value={{
+                search: currentSearch
+              }}
+              onApply={(filters) => {
+                handleSearchChange(filters.search || '');
+              }}
+              config={[
+                {
+                  id: 'search',
+                  label: 'Keyword search',
+                  type: 'text',
+                  placeholder: 'Search name, email, company...',
+                  defaultValue: ''
+                }
+              ]}
+            />
           </div>
         </div>
 
@@ -203,10 +210,10 @@ export default function PendingUserManagement({
                   <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-semibold">
                     <th className="py-3 px-4">User Details</th>
                     <th className="py-3 px-4">Role</th>
-                    <th className="py-3 px-4">Company</th>
+                    <th className="py-3 px-4 hidden sm:table-cell">Company</th>
                     <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4">Joined Date</th>
-                    <th className="py-3 px-4 text-center">Action</th>
+                    <th className="py-3 px-4 hidden md:table-cell">Joined Date</th>
+                    {hasPermission('change_user') && <th className="py-3 px-4 text-center">Action</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -244,7 +251,7 @@ export default function PendingUserManagement({
                         </td>
 
                         {/* Company */}
-                        <td className="py-3.5 px-4 text-slate-600">
+                        <td className="py-3.5 px-4 text-slate-600 hidden sm:table-cell">
                           <div className="flex flex-col">
                             <span className="font-medium text-slate-800">{companyName}</span>
                             {companyCode && <span className="text-[0.7rem] text-slate-400 font-mono">[{companyCode}]</span>}
@@ -260,29 +267,31 @@ export default function PendingUserManagement({
                         </td>
 
                         {/* Joined Date */}
-                        <td className="py-3.5 px-4 text-slate-500 text-xs font-medium">
+                        <td className="py-3.5 px-4 text-slate-500 text-xs font-medium hidden md:table-cell">
                           {formatDate(u.created_at || u.date_joined)}
                         </td>
 
                         {/* Actions */}
-                        <td className="py-3.5 px-4 text-center">
-                          <div className="flex items-center justify-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setModalAction({ type: 'approve', user: u })}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer active:scale-95"
-                            >
-                              <span>✓</span> Approve
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setModalAction({ type: 'reject', user: u })}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer active:scale-95"
-                            >
-                              <span>✕</span> Reject
-                            </button>
-                          </div>
-                        </td>
+                        {hasPermission('change_user') && (
+                          <td className="py-3.5 px-4 text-center">
+                            <div className="flex items-center justify-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setModalAction({ type: 'approve', user: u })}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer active:scale-95"
+                              >
+                                <span>✓</span> Approve
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setModalAction({ type: 'reject', user: u })}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer active:scale-95"
+                              >
+                                <span>✕</span> Reject
+                              </button>
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     );
                   })}

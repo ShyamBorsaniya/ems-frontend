@@ -5,6 +5,30 @@ import { isEmployeeUser } from '../utils/helpers';
 
 export const AuthContext = createContext(null);
 
+// Helper to extract a flat array of permission codes
+const extractPermissionCodes = (permissionsArray) => {
+  if (!Array.isArray(permissionsArray)) return [];
+  const codes = [];
+  permissionsArray.forEach(item => {
+    if (typeof item === 'string') {
+      codes.push(item);
+    } else if (item && typeof item === 'object') {
+      if (Array.isArray(item.permissions)) {
+        item.permissions.forEach(perm => {
+          if (perm && perm.code) {
+            codes.push(perm.code);
+          } else if (typeof perm === 'string') {
+            codes.push(perm);
+          }
+        });
+      } else if (item.code) {
+        codes.push(item.code);
+      }
+    }
+  });
+  return codes;
+};
+
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoadingSession, setIsLoadingSession] = useState(true);
@@ -37,7 +61,9 @@ export function AuthProvider({ children }) {
         is_active: userData.is_active,
         created_at: userData.created_at,
         tokens: tokens,
-        loginTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        loginTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        permissions: userData.permissions || [],
+        permissionCodes: extractPermissionCodes(userData.permissions)
       };
 
       setCurrentUser(restoredUser);
@@ -80,7 +106,9 @@ export function AuthProvider({ children }) {
         is_active: userData.is_active,
         created_at: userData.created_at,
         tokens: tokens,
-        loginTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        loginTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        permissions: userData.permissions || [],
+        permissionCodes: extractPermissionCodes(userData.permissions)
       };
 
       setCurrentUser(userObj);
@@ -94,6 +122,26 @@ export function AuthProvider({ children }) {
     setCurrentUser(null);
   };
 
+  const hasPermission = (permission, requireAll = false) => {
+    if (!currentUser) return false;
+
+    // Admins/Super Admins get all access by default
+    const roleStr = (currentUser.role_name || currentUser.role || '').toString().toLowerCase();
+    if (roleStr.includes('admin') || roleStr.includes('super')) {
+      return true;
+    }
+
+    if (!currentUser.permissionCodes) return false;
+
+    if (Array.isArray(permission)) {
+      if (requireAll) {
+        return permission.every(p => currentUser.permissionCodes.includes(p));
+      }
+      return permission.some(p => currentUser.permissionCodes.includes(p));
+    }
+    return currentUser.permissionCodes.includes(permission);
+  };
+
   const value = {
     currentUser,
     setCurrentUser,
@@ -103,7 +151,8 @@ export function AuthProvider({ children }) {
     companyName: currentUser?.company_name || getCompanyData()?.name || '',
     login,
     logout,
-    isEmployee: isEmployeeUser(currentUser)
+    isEmployee: isEmployeeUser(currentUser),
+    hasPermission
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

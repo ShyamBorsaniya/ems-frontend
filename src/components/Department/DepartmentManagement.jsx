@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Pagination from '../common/Pagination';
-import CustomSelect from '../common/CustomSelect';
 import DepartmentFormModal from './DepartmentFormModal';
 import DepartmentShowModal from './DepartmentShowModal';
 import Swal from 'sweetalert2';
 import { deleteDepartmentApi } from '../../api/admin/departmentApi';
+import { useAuth } from '../../hooks/useAuth';
+import FilterDropdown from '../common/FilterDropdown';
 
 
 export default function DepartmentManagement({
@@ -22,6 +23,7 @@ export default function DepartmentManagement({
   triggerToast,
   setShowAddDeptModal
 }) {
+  const { hasPermission } = useAuth();
   const [selectedDept, setSelectedDept] = useState(null);
   const [editingDept, setEditingDept] = useState(null);
   const [showFormModal, setShowFormModal] = useState(false);
@@ -156,10 +158,12 @@ export default function DepartmentManagement({
       }
     }
 
+
+
     return true;
   });
 
-  const displayedDepts = paginationInfo ? deptsList : filteredDepts;
+  const displayedDepts = filteredDepts;
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -175,50 +179,50 @@ export default function DepartmentManagement({
           </div>
 
           <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-            {/* Search Input */}
-            <div className="relative flex-1 sm:w-64 min-w-[200px]">
-              <input
-                type="text"
-                placeholder="Search department name, description..."
-                value={currentSearch}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white transition-all"
-              />
-              <span className="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
-              {currentSearch && (
-                <button
-                  onClick={() => handleSearchChange('')}
-                  className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-
-            {/* Status Filter */}
-            <div className="flex items-center gap-1.5">
-              <CustomSelect
-                selectClassName="py-2 px-3 text-xs min-w-[130px]"
-                value={currentStatus}
-                onChange={(e) => handleStatusChange(e.target.value)}
-                options={[
-                  { value: 'all', label: 'All Status' },
-                  { value: 'true', label: 'Active' },
-                  { value: 'false', label: 'Inactive' }
-                ]}
-              />
-            </div>
+            {/* Filter Dropdown */}
+            <FilterDropdown
+              value={{
+                search: currentSearch,
+                status: currentStatus
+              }}
+              onApply={(filters) => {
+                handleSearchChange(filters.search || '');
+                handleStatusChange(filters.status || 'all');
+              }}
+              config={[
+                {
+                  id: 'status',
+                  label: 'Status',
+                  type: 'select',
+                  options: [
+                    { value: 'all', label: 'All Status' },
+                    { value: 'true', label: 'Active', bullet: 'bg-emerald-500' },
+                    { value: 'false', label: 'Inactive', bullet: 'bg-slate-400' }
+                  ],
+                  defaultValue: 'all'
+                },
+                {
+                  id: 'search',
+                  label: 'Keyword search',
+                  type: 'text',
+                  placeholder: 'Search department name...',
+                  defaultValue: ''
+                }
+              ]}
+            />
 
             {/* Create Department Button */}
-            <button
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
-              onClick={() => {
-                if (setShowAddDeptModal) setShowAddDeptModal(true);
-                else setShowFormModal(true);
-              }}
-            >
-              + Create Department
-            </button>
+            {hasPermission('add_department') && (
+              <button
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
+                onClick={() => {
+                  if (setShowAddDeptModal) setShowAddDeptModal(true);
+                  else setShowFormModal(true);
+                }}
+              >
+                + Create Department
+              </button>
+            )}
           </div>
         </div>
 
@@ -265,10 +269,10 @@ export default function DepartmentManagement({
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-semibold">
                     <th className="py-3 px-4">Department Name</th>
-                    <th className="py-3 px-4">Organization</th>
-                    <th className="py-3 px-4">Scope & Description</th>
+                    <th className="py-3 px-4 hidden sm:table-cell">Organization</th>
+                    <th className="py-3 px-4 hidden md:table-cell">Scope & Description</th>
                     <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4">Created Date</th>
+                    <th className="py-3 px-4 hidden lg:table-cell">Created Date</th>
                     <th className="py-3 px-4 text-center">Action</th>
                   </tr>
                 </thead>
@@ -291,12 +295,12 @@ export default function DepartmentManagement({
                         </td>
 
                         {/* 2. Organization / Company */}
-                        <td className="py-3.5 px-4 text-slate-700 font-medium">
+                        <td className="py-3.5 px-4 text-slate-700 font-medium hidden sm:table-cell">
                           {dept.company_name || `Company #${dept.company}`}
                         </td>
 
                         {/* 3. Description */}
-                        <td className="py-3.5 px-4 text-slate-600 max-w-xs truncate">
+                        <td className="py-3.5 px-4 text-slate-600 max-w-xs truncate hidden md:table-cell">
                           {dept.description || 'Standard enterprise department'}
                         </td>
 
@@ -315,7 +319,7 @@ export default function DepartmentManagement({
                         </td>
 
                         {/* 5. Created Date */}
-                        <td className="py-3.5 px-4 text-slate-500 text-xs">
+                        <td className="py-3.5 px-4 text-slate-500 text-xs hidden lg:table-cell">
                           {formatDate(dept.created_at)}
                         </td>
 
@@ -336,28 +340,32 @@ export default function DepartmentManagement({
                             </button>
 
                             {/* Edit Department */}
-                            <button
-                              type="button"
-                              title="Edit Department"
-                              className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 transition-colors cursor-pointer flex items-center justify-center"
-                              onClick={() => setEditingDept(dept)}
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
-                            </button>
+                            {hasPermission('change_department') && (
+                              <button
+                                type="button"
+                                title="Edit Department"
+                                className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 transition-colors cursor-pointer flex items-center justify-center"
+                                onClick={() => setEditingDept(dept)}
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                              </button>
+                            )}
 
                             {/* Delete Department */}
-                            <button
-                              type="button"
-                              title="Delete Department"
-                              className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors cursor-pointer flex items-center justify-center"
-                              onClick={() => handleDeleteClick(dept)}
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
+                            {hasPermission('delete_department') && (
+                              <button
+                                type="button"
+                                title="Delete Department"
+                                className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors cursor-pointer flex items-center justify-center"
+                                onClick={() => handleDeleteClick(dept)}
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>

@@ -6,7 +6,9 @@ export default function Sidebar({
   onTabChange,
   user,
   onLogout,
-  theme = 'indigo' // 'indigo' or 'emerald'
+  theme = 'indigo', // 'indigo' or 'emerald'
+  isCollapsed = false,
+  onClose
 }) {
   const isIndigo = theme === 'indigo';
 
@@ -58,68 +60,80 @@ export default function Sidebar({
   const avatarUrl = user?.profile_image || defaultAvatar;
 
   return (
-    <aside className="w-[260px] min-w-[260px] bg-white border-r border-slate-200 flex flex-col justify-between h-screen z-[60] shadow-sm shrink-0">
-      <div className="p-6">
-        <div className="flex items-center gap-3 mb-8 pb-4 border-b border-slate-200">
-          <div className={`w-[38px] h-[38px] rounded-xl ${themeStyles.logoBg}`}>
-            {themeStyles.logoSvg}
-          </div>
-          <div>
-            <span className="font-bold text-[1.15rem] text-slate-900 tracking-tight block">WorkPulse EMS</span>
-            <span className={`text-[0.7rem] font-semibold uppercase tracking-wider block ${themeStyles.roleText}`}>
-              {themeStyles.logoSubtitle}
-            </span>
-          </div>
+    <>
+      {/* Mobile Sidebar Backdrop Overlay */}
+      {!isCollapsed && (
+        <div
+          className="fixed inset-0 bg-slate-900/40 z-45 md:hidden transition-opacity duration-300"
+          onClick={onClose}
+        />
+      )}
+      <aside className={`bg-white border-r border-slate-200 flex flex-col justify-between h-full z-50 shadow-sm shrink-0 transition-all duration-300 overflow-x-hidden fixed inset-y-0 left-0 md:relative ${
+        isCollapsed
+          ? '-translate-x-full md:translate-x-0 w-[260px] md:w-[76px] md:min-w-[76px]'
+          : 'translate-x-0 w-[260px] min-w-[260px] shadow-2xl md:shadow-none'
+      }`}>
+        <div className={isCollapsed ? 'p-3' : 'p-6'}>
+          {isCollapsed ? (
+            <div className="h-px bg-slate-200 my-4" />
+          ) : (
+            <div className="text-[0.7rem] font-bold text-slate-400 uppercase tracking-widest mt-2 mb-4 ml-2 truncate">
+              {themeStyles.sectionTitle}
+            </div>
+          )}
+
+          <nav className="flex flex-col gap-1.5">
+            {navItems.map((item) => {
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  className={`flex items-center rounded-xl text-sm font-medium transition-all duration-200 w-full cursor-pointer ${
+                    isCollapsed ? 'justify-center px-2 py-3' : 'gap-3 px-4 py-3 text-left'
+                  } ${isActive ? themeStyles.activeButton : themeStyles.inactiveButton}`}
+                  onClick={() => {
+                    if (onTabChange) onTabChange(item.id);
+                    if (onClose) onClose();
+                  }}
+                  title={isCollapsed ? item.label : undefined}
+                >
+                  <span className="text-base w-6 flex items-center justify-center shrink-0">{item.icon}</span>
+                  {!isCollapsed && <span className="truncate">{item.label}</span>}
+                  {!isCollapsed && item.badge && (
+                    <span className={`ml-auto text-xs px-2 py-0.5 rounded-full font-semibold ${themeStyles.badge}`}>
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
         </div>
 
-        <div className="text-[0.7rem] font-bold text-slate-400 uppercase tracking-widest my-4 ml-2">
-          {themeStyles.sectionTitle}
-        </div>
-
-        <nav className="flex flex-col gap-1.5">
-          {navItems.map((item) => {
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 w-full text-left cursor-pointer ${
-                  isActive ? themeStyles.activeButton : themeStyles.inactiveButton
-                }`}
-                onClick={() => onTabChange && onTabChange(item.id)}
-              >
-                <span className="text-base w-6 flex items-center justify-center">{item.icon}</span>
-                <span>{item.label}</span>
-                {item.badge && (
-                  <span className={`ml-auto text-xs px-2 py-0.5 rounded-full font-semibold ${themeStyles.badge}`}>
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
-      </div>
-
-      <div className="p-5 border-t border-slate-200 bg-slate-50/80">
-        <div className="flex items-center gap-3 mb-3">
-          <img src={avatarUrl} alt="Avatar" className={`w-[38px] h-[38px] rounded-full object-cover ${themeStyles.avatarBorder}`} />
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold text-slate-900 truncate max-w-[140px]">
-              {user?.name || user?.username || `${themeStyles.defaultName} User`}
-            </span>
-            <span className={`text-xs font-medium ${themeStyles.roleText}`}>
-              {user?.role_name || user?.role || (isIndigo ? 'Administrator' : 'Staff Member')}
-            </span>
+        <div className={`border-t border-slate-200 bg-slate-50/80 transition-all duration-300 ${isCollapsed ? 'p-3' : 'p-5'}`}>
+          <div className={`flex items-center mb-3 ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
+            <img src={avatarUrl} alt="Avatar" className={`w-[38px] h-[38px] rounded-full object-cover shrink-0 ${themeStyles.avatarBorder}`} />
+            {!isCollapsed && (
+              <div className="flex flex-col min-w-0">
+                <span className="text-sm font-semibold text-slate-900 truncate max-w-[140px]">
+                  {user?.name || user?.username || `${themeStyles.defaultName} User`}
+                </span>
+                <span className={`text-xs font-medium truncate ${themeStyles.roleText}`}>
+                  {user?.role_name || user?.role || (isIndigo ? 'Administrator' : 'Staff Member')}
+                </span>
+              </div>
+            )}
           </div>
-        </div>
 
-        <button
-          className="w-full flex items-center justify-center gap-2 p-2 rounded-lg bg-white text-slate-600 border border-slate-200 text-xs font-medium cursor-pointer transition-all duration-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200"
-          onClick={onLogout}
-        >
-          <span>🚪</span> {themeStyles.logoutBtn}
-        </button>
-      </div>
-    </aside>
+          <button
+            className="w-full flex items-center justify-center gap-2 p-2 rounded-lg bg-white text-slate-600 border border-slate-200 text-xs font-medium cursor-pointer transition-all duration-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200"
+            onClick={onLogout}
+            title={isCollapsed ? themeStyles.logoutBtn : undefined}
+          >
+            <span>🚪</span> {!isCollapsed && <span>{themeStyles.logoutBtn}</span>}
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }

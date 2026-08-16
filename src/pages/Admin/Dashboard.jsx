@@ -11,10 +11,12 @@ import UserFormModal from '../../components/User/UserFormModal';
 import RoleFormModal from '../../components/Role/RoleFormModal';
 import DepartmentFormModal from '../../components/Department/DepartmentFormModal';
 import ProjectFormModal from '../../components/Project/ProjectFormModal';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { hasPermission } = useAuth();
 
   const getTabFromPath = () => {
     const path = location.pathname.replace('/', '').toLowerCase();
@@ -26,6 +28,19 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
   };
 
   const activeTab = getTabFromPath();
+
+  // Tab permissions map
+  const tabPermissions = {
+    'user': 'view_user',
+    'pending-users': 'view_user',
+    'project': 'view_project',
+    'department': 'view_department',
+    'role': 'view_role',
+    'designation': 'view_designation'
+  };
+
+  const requiredPermission = tabPermissions[activeTab];
+  const isAuthorized = !requiredPermission || hasPermission(requiredPermission);
 
   const handleTabChange = (newTab) => {
     navigate(`/${newTab}`);
@@ -540,10 +555,12 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
       onLogout={onLogout}
       activeTab={activeTab}
       onTabChange={handleTabChange}
-      searchTerm={searchTerm}
       setSearchTerm={setSearchTerm}
     >
       <BodyContent
+        isAuthorized={isAuthorized}
+        requiredPermission={requiredPermission}
+        onTabChange={handleTabChange}
         activeTab={activeTab}
         adminName={adminName}
         toastMessage={toastMessage}

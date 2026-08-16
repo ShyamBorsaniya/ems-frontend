@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Pagination from '../common/Pagination';
-import CustomSelect from '../common/CustomSelect';
 import ProjectFormModal from './ProjectFormModal';
 import ProjectShowModal from './ProjectShowModal';
 import Swal from 'sweetalert2';
 import { deleteProjectApi } from '../../api/admin/projectApi';
+import { useAuth } from '../../hooks/useAuth';
+import FilterDropdown from '../common/FilterDropdown';
 
 
 export default function ProjectManagement({
@@ -28,6 +29,7 @@ export default function ProjectManagement({
   triggerToast,
   setShowAddProjModal
 }) {
+  const { hasPermission } = useAuth();
   const [selectedProject, setSelectedProject] = useState(null);
   const [editingProject, setEditingProject] = useState(null);
   const [showFormModal, setShowFormModal] = useState(false);
@@ -223,10 +225,12 @@ export default function ProjectManagement({
       }
     }
 
+
+
     return true;
   });
 
-  const displayedProjects = paginationInfo ? projectsList : filteredProjects;
+  const displayedProjects = filteredProjects;
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -244,65 +248,68 @@ export default function ProjectManagement({
           </div>
 
           <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-            {/* Search Input */}
-            <div className="relative flex-1 sm:w-56 min-w-[180px]">
-              <input
-                type="text"
-                placeholder="Search name, code, lead..."
-                value={currentSearch}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-xs focus:outline-none focus:border-indigo-600 focus:bg-white transition-all"
-              />
-              <span className="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
-              {currentSearch && (
-                <button
-                  onClick={() => handleSearchChange('')}
-                  className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-
-            {/* Status Filter */}
-            <CustomSelect
-              selectClassName="py-2 px-3 text-xs min-w-[165px]"
-              value={currentStatus}
-              onChange={(e) => handleStatusChange(e.target.value)}
-              options={[
-                { value: 'all', label: 'All Status' },
-                { value: 'PLANNED', label: 'Planned' },
-                { value: 'ACTIVE', label: 'Active / In Progress' },
-                { value: 'ON_HOLD', label: 'On Hold' },
-                { value: 'COMPLETED', label: 'Completed' },
-                { value: 'CANCELLED', label: 'Cancelled' }
-              ]}
-            />
-
-            {/* Priority Filter */}
-            <CustomSelect
-              selectClassName="py-2 px-3 text-xs min-w-[145px]"
-              value={currentPriority}
-              onChange={(e) => handlePriorityChange(e.target.value)}
-              options={[
-                { value: 'all', label: 'All Priority' },
-                { value: 'LOW', label: 'Low' },
-                { value: 'MEDIUM', label: 'Medium' },
-                { value: 'HIGH', label: 'High' },
-                { value: 'CRITICAL', label: 'Critical' }
+            {/* Filter Dropdown */}
+            <FilterDropdown
+              value={{
+                search: currentSearch,
+                status: currentStatus,
+                priority: currentPriority
+              }}
+              onApply={(filters) => {
+                handleSearchChange(filters.search || '');
+                handleStatusChange(filters.status || 'all');
+                handlePriorityChange(filters.priority || 'all');
+              }}
+              config={[
+                {
+                  id: 'status',
+                  label: 'Status',
+                  type: 'select',
+                  options: [
+                    { value: 'all', label: 'All Status' },
+                    { value: 'PLANNED', label: 'Planned' },
+                    { value: 'ACTIVE', label: 'Active' },
+                    { value: 'ON_HOLD', label: 'On Hold' },
+                    { value: 'COMPLETED', label: 'Completed' },
+                    { value: 'CANCELLED', label: 'Cancelled' }
+                  ],
+                  defaultValue: 'all'
+                },
+                {
+                  id: 'priority',
+                  label: 'Priority',
+                  type: 'select',
+                  options: [
+                    { value: 'all', label: 'All Priority' },
+                    { value: 'LOW', label: 'Low' },
+                    { value: 'MEDIUM', label: 'Medium' },
+                    { value: 'HIGH', label: 'High' },
+                    { value: 'CRITICAL', label: 'Critical' }
+                  ],
+                  defaultValue: 'all'
+                },
+                {
+                  id: 'search',
+                  label: 'Keyword search',
+                  type: 'text',
+                  placeholder: 'Search name, code, lead...',
+                  defaultValue: ''
+                }
               ]}
             />
 
             {/* Add Project Button */}
-            <button
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer flex items-center gap-1.5"
-              onClick={() => {
-                if (setShowAddProjModal) setShowAddProjModal(true);
-                else setShowFormModal(true);
-              }}
-            >
-              <span>+</span> Add Project
-            </button>
+            {hasPermission('add_project') && (
+              <button
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer flex items-center gap-1.5"
+                onClick={() => {
+                  if (setShowAddProjModal) setShowAddProjModal(true);
+                  else setShowFormModal(true);
+                }}
+              >
+                <span>+</span> Add Project
+              </button>
+            )}
           </div>
         </div>
 
@@ -436,30 +443,34 @@ export default function ProjectManagement({
                       </button>
 
                       {/* Edit */}
-                      <button
-                        type="button"
-                        title="Edit Project"
-                        className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1"
-                        onClick={() => setEditingProject(proj)}
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        <span>Edit</span>
-                      </button>
+                      {hasPermission('change_project') && (
+                        <button
+                          type="button"
+                          title="Edit Project"
+                          className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1"
+                          onClick={() => setEditingProject(proj)}
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                          <span>Edit</span>
+                        </button>
+                      )}
 
                       {/* Delete */}
-                      <button
-                        type="button"
-                        title="Delete Project"
-                        className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1"
-                        onClick={() => handleDeleteClick(proj)}
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        <span>Delete</span>
-                      </button>
+                      {hasPermission('delete_project') && (
+                        <button
+                          type="button"
+                          title="Delete Project"
+                          className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1"
+                          onClick={() => handleDeleteClick(proj)}
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          <span>Delete</span>
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
