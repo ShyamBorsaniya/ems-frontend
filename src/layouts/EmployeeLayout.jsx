@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/common/Sidebar';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
+import { useAuth } from '../hooks/useAuth';
 
 export default function EmployeeLayout({
   children,
@@ -10,10 +11,9 @@ export default function EmployeeLayout({
   activeTab = 'dashboard',
   onTabChange,
   searchTerm,
-  setSearchTerm,
-  isPunchedIn,
-  togglePunchStatus
+  setSearchTerm
 }) {
+  const { hasPermission } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     return typeof window !== 'undefined' ? window.innerWidth < 1024 : true;
   });
@@ -26,14 +26,13 @@ export default function EmployeeLayout({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const navItems = [
+  const navItemsConfig = [
     { id: 'dashboard', label: 'My Dashboard', icon: '🏠' },
-    { id: 'attendance', label: 'Attendance Log', icon: '⏱️' },
-    { id: 'tasks', label: 'My Tasks', icon: '📋', badge: '3' },
-    { id: 'leaves', label: 'Leave Portal', icon: '🏖️' },
-    { id: 'profile', label: 'My Profile', icon: '👤' },
-    { id: 'help', label: 'Support Desk', icon: '❓' }
+    { id: 'user', label: 'Users', icon: '👥', permission: 'user:view' },
+    { id: 'project', label: 'Projects', icon: '🚀', permission: 'project:view' }
   ];
+
+  const navItems = navItemsConfig.filter(item => !item.permission || hasPermission(item.permission));
 
   return (
     <div className="flex flex-col h-screen h-dvh max-h-screen max-h-dvh w-full bg-gradient-to-br from-slate-50 via-slate-100 to-emerald-50 text-slate-900 font-sans relative overflow-hidden">
@@ -42,8 +41,6 @@ export default function EmployeeLayout({
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         activeTab={activeTab}
-        isPunchedIn={isPunchedIn}
-        togglePunchStatus={togglePunchStatus}
         onLogout={onLogout}
         onTabChange={onTabChange}
         theme="emerald"

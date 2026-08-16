@@ -119,25 +119,6 @@ export default function Header({
       </div>
 
       <div className="flex items-center gap-3">
-        {!isIndigo && togglePunchStatus && (
-          <button
-            className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold cursor-pointer transition-all duration-200 border ${
-              isPunchedIn
-                ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100'
-                : 'bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100'
-            }`}
-            onClick={togglePunchStatus}
-            title={isPunchedIn ? 'Click to Punch Out' : 'Click to Punch In'}
-          >
-            <span
-              className={`w-2 h-2 rounded-full animate-pulse ${
-                isPunchedIn ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-rose-500'
-              }`}
-            ></span>
-            <span>{isPunchedIn ? 'Punched In' : 'Punched Out'}</span>
-          </button>
-        )}
-
         {/* User Profile Avatar Circle Button & Dropdown */}
         <div className="relative" ref={profileDropdownRef}>
           <button
