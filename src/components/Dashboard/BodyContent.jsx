@@ -5,6 +5,8 @@ import ProjectManagement from '../Project/ProjectManagement';
 import DepartmentManagement from '../Department/DepartmentManagement';
 import DesignationManagement from '../Designation/DesignationManagement';
 import OverviewSummary from '../Overview/OverviewSummary';
+import CompanyProfile from '../Company/CompanyProfile';
+import MyProfile from '../Profile/MyProfile';
 import AccessRestricted from '../common/AccessRestricted';
 
 export default function BodyContent({
@@ -207,6 +209,20 @@ export default function BodyContent({
             employees={employees}
             projects={projects}
             roles={roles}
+            triggerToast={triggerToast}
+          />
+        )}
+
+        {/* 6. COMPANY PROFILE COMPONENT */}
+        {(activeTab === 'company' || activeTab === 'company-profile') && (
+          <CompanyProfile
+            triggerToast={triggerToast}
+          />
+        )}
+
+        {/* 7. MY PROFILE COMPONENT */}
+        {(activeTab === 'profile' || activeTab === 'my-profile') && (
+          <MyProfile
             triggerToast={triggerToast}
           />
         )}

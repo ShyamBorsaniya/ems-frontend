@@ -79,6 +79,31 @@ export function getAuthData() {
 }
 
 /**
+ * Helper to retrieve stored user data object from storage
+ */
+export function getUserData() {
+  const getFromStorage = (key) => localStorage.getItem(key) || sessionStorage.getItem(key);
+  const userStr = getFromStorage(USER_KEY);
+  if (userStr) {
+    try {
+      return JSON.parse(userStr);
+    } catch (e) {
+      console.error('Error parsing stored user data:', e);
+    }
+  }
+  const authDataStr = getFromStorage(AUTH_DATA_KEY);
+  if (authDataStr) {
+    try {
+      const parsed = JSON.parse(authDataStr);
+      return parsed.user || parsed.data?.user || parsed;
+    } catch (e) {
+      console.error('Error parsing stored auth data for user:', e);
+    }
+  }
+  return null;
+}
+
+/**
  * Common helper to retrieve cached company data object
  */
 export function getCompanyData() {

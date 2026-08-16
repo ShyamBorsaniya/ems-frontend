@@ -49,7 +49,7 @@ export default function AppRoutes() {
       return <Navigate to="/login" replace />;
     }
     const path = location.pathname.replace('/', '').toLowerCase();
-    const validTabs = ['dashboard', 'user', 'pending-users', 'project', 'department', 'designation'];
+    const validTabs = ['dashboard', 'user', 'pending-users', 'project', 'department', 'designation', 'company', 'profile', 'my-profile'];
     if (!validTabs.includes(path)) {
       return <Navigate to="/dashboard" replace />;
     }

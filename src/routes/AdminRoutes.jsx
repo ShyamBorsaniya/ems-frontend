@@ -13,6 +13,8 @@ export default function AdminRoutes({ user, onLogout }) {
       <Route path="/department" element={<AdminDashboard user={user} onLogout={onLogout} defaultTab="department" />} />
       <Route path="/role" element={<AdminDashboard user={user} onLogout={onLogout} defaultTab="role" />} />
       <Route path="/designation" element={<AdminDashboard user={user} onLogout={onLogout} defaultTab="designation" />} />
+      <Route path="/company" element={<AdminDashboard user={user} onLogout={onLogout} defaultTab="company" />} />
+      <Route path="/profile" element={<AdminDashboard user={user} onLogout={onLogout} defaultTab="profile" />} />
     </Routes>
   );
 }

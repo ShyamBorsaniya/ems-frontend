@@ -18,9 +18,9 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
 
   const getTabFromPath = () => {
     const path = location.pathname.replace('/', '').toLowerCase();
-    const validTabs = ['dashboard', 'user', 'pending-users', 'project', 'department', 'designation'];
+    const validTabs = ['dashboard', 'user', 'pending-users', 'project', 'department', 'designation', 'company', 'profile', 'my-profile'];
     if (validTabs.includes(path)) {
-      return path;
+      return path === 'my-profile' ? 'profile' : path;
     }
     return activeTabFromRoute || 'dashboard';
   };
