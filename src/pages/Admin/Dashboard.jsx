@@ -3,12 +3,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import AdminLayout from '../../layouts/AdminLayout';
 import BodyContent from '../../components/Dashboard/BodyContent';
 import { fetchUsersApi, fetchPendingUsersApi, approveUserApi, rejectUserApi } from '../../api/admin/userApi';
-import { fetchRolesApi } from '../../api/admin/roleApi';
 import { fetchDepartmentsApi } from '../../api/admin/departmentApi';
 import { fetchProjectsApi } from '../../api/admin/projectApi';
 import { fetchDesignationsApi } from '../../api/admin/designationApi';
 import UserFormModal from '../../components/User/UserFormModal';
-import RoleFormModal from '../../components/Role/RoleFormModal';
 import DepartmentFormModal from '../../components/Department/DepartmentFormModal';
 import ProjectFormModal from '../../components/Project/ProjectFormModal';
 import { useAuth } from '../../hooks/useAuth';
@@ -20,7 +18,7 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
 
   const getTabFromPath = () => {
     const path = location.pathname.replace('/', '').toLowerCase();
-    const validTabs = ['overview', 'user', 'pending-users', 'project', 'department', 'role', 'designation'];
+    const validTabs = ['overview', 'user', 'pending-users', 'project', 'department', 'designation'];
     if (validTabs.includes(path)) {
       return path;
     }
@@ -35,7 +33,6 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
     'pending-users': 'view_user',
     'project': 'view_project',
     'department': 'view_department',
-    'role': 'view_role',
     'designation': 'view_designation'
   };
 
@@ -144,51 +141,6 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
     }
   }, [pendingUsersCurrentPage, pendingUsersSearchTerm]);
 
-  // Backend API Role List state
-  const [rolesList, setRolesList] = useState([]);
-  const [rolesPaginationInfo, setRolesPaginationInfo] = useState(null);
-  const [rolesCurrentPage, setRolesCurrentPage] = useState(1);
-  const [rolesLoading, setRolesLoading] = useState(false);
-  const [rolesError, setRolesError] = useState(null);
-  const [roleSearchTerm, setRoleSearchTerm] = useState('');
-
-  // Fetch roles from backend API (/api/role/)
-  const loadRolesFromApi = useCallback(async (pageOverride) => {
-    setRolesLoading(true);
-    setRolesError(null);
-    const pageToLoad = pageOverride !== undefined ? pageOverride : rolesCurrentPage;
-    try {
-      const filters = {
-        page: pageToLoad,
-        search: roleSearchTerm
-      };
-      const res = await fetchRolesApi(filters);
-      if (res && res.success && res.data) {
-        if (Array.isArray(res.data)) {
-          setRolesList(res.data);
-          setRolesPaginationInfo(null);
-        } else if (res.data.results) {
-          setRolesList(Array.isArray(res.data.results) ? res.data.results : []);
-          setRolesPaginationInfo(res.data.pagination || null);
-        } else {
-          setRolesList([]);
-          setRolesPaginationInfo(null);
-        }
-      } else if (res && Array.isArray(res.data)) {
-        setRolesList(res.data);
-        setRolesPaginationInfo(null);
-      } else {
-        if (res && res.message) {
-          setRolesError(res.message);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to load roles:', err);
-      setRolesError(err.message || 'Unable to connect to /api/role/ endpoint');
-    } finally {
-      setRolesLoading(false);
-    }
-  }, [rolesCurrentPage, roleSearchTerm]);
 
   // Backend API Department List state
   const [deptsList, setDeptsList] = useState([]);
@@ -341,9 +293,6 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
     if (activeTab === 'pending-users' || activeTab === 'overview') {
       loadPendingUsersFromApi();
     }
-    if (activeTab === 'role' || activeTab === 'overview') {
-      loadRolesFromApi();
-    }
     if (activeTab === 'department' || activeTab === 'overview') {
       loadDepartmentsFromApi();
     }
@@ -353,17 +302,7 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
     if (activeTab === 'designation' || activeTab === 'overview') {
       loadDesignationsFromApi();
     }
-  }, [activeTab, loadUsersFromApi, loadPendingUsersFromApi, loadRolesFromApi, loadDepartmentsFromApi, loadProjectsFromApi, loadDesignationsFromApi]);
-
-  const handleRolesPageChange = (newPage) => {
-    setRolesCurrentPage(newPage);
-    loadRolesFromApi(newPage);
-  };
-
-  const handleRoleSearchChange = (val) => {
-    setRoleSearchTerm(val);
-    setRolesCurrentPage(1);
-  };
+  }, [activeTab, loadUsersFromApi, loadPendingUsersFromApi, loadDepartmentsFromApi, loadProjectsFromApi, loadDesignationsFromApi]);
 
   const handleDeptsPageChange = (newPage) => {
     setDeptsCurrentPage(newPage);
@@ -463,7 +402,6 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
 
   // Modals state
   const [showAddUserModal, setShowAddUserModal] = useState(false);
-  const [showAddRoleModal, setShowAddRoleModal] = useState(false);
   const [showAddDeptModal, setShowAddDeptModal] = useState(false);
   const [showAddProjModal, setShowAddProjModal] = useState(false);
 
@@ -487,15 +425,6 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
     { id: 2, name: 'Automated Payroll Engine', lead: 'Angela Martin', progress: 90, status: 'Testing', dept: 'Finance', deadline: 'Aug 20, 2026', budget: '$28,000' },
     { id: 3, name: 'Q3 Enterprise Sales CRM Integrations', lead: 'Jim Halpert', progress: 40, status: 'ACTIVE', dept: 'Sales', deadline: 'Sep 15, 2026', budget: '$35,000' },
     { id: 4, name: 'Employee Wellness & Benefits Portal', lead: 'Pam Beesly', progress: 100, status: 'Completed', dept: 'Human Resources', deadline: 'Jul 31, 2026', budget: '$15,000' }
-  ]);
-
-  // Sample Roles Data
-  const [roles] = useState([
-    { id: 1, title: 'Super Administrator', usersCount: 2, permissions: ['Full System Access', 'Manage Roles', 'Payroll Control', 'Audit Logs'], level: 'Level 1' },
-    { id: 2, title: 'Department Manager', usersCount: 5, permissions: ['Team Management', 'Approve Leaves', 'Assign Projects', 'Reports'], level: 'Level 2' },
-    { id: 3, title: 'HR Officer', usersCount: 3, permissions: ['Employee Onboarding', 'Leave Records', 'Policy Updates'], level: 'Level 2' },
-    { id: 4, title: 'Team Lead', usersCount: 8, permissions: ['Project Sprint Review', 'Attendance Monitoring', 'Tasks'], level: 'Level 3' },
-    { id: 5, title: 'Standard Employee', usersCount: 130, permissions: ['Punch Clock In/Out', 'Apply Leave', 'View Tasks'], level: 'Level 4' }
   ]);
 
   const triggerToast = (msg) => {
@@ -567,7 +496,6 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
         employees={employees}
         filteredEmployees={filteredEmployees}
         projects={projects}
-        roles={roles}
         deptFilter={deptFilter}
         setDeptFilter={setDeptFilter}
         usersList={usersList}
@@ -593,15 +521,6 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
         setPendingUsersSearchTerm={handlePendingUsersSearchChange}
         onApprovePendingUser={handleApprovePendingUser}
         onRejectPendingUser={handleRejectPendingUser}
-        rolesList={rolesList}
-        rolesPaginationInfo={rolesPaginationInfo}
-        rolesCurrentPage={rolesCurrentPage}
-        onRolesPageChange={handleRolesPageChange}
-        rolesLoading={rolesLoading}
-        rolesError={rolesError}
-        roleSearchTerm={roleSearchTerm}
-        setRoleSearchTerm={handleRoleSearchChange}
-        onRefreshRoles={() => loadRolesFromApi(rolesCurrentPage)}
         deptsList={deptsList}
         deptsPaginationInfo={deptsPaginationInfo}
         deptsCurrentPage={deptsCurrentPage}
@@ -638,7 +557,6 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
         triggerToast={triggerToast}
         setShowAddUserModal={setShowAddUserModal}
         setShowAddProjModal={setShowAddProjModal}
-        setShowAddRoleModal={setShowAddRoleModal}
         setShowAddDeptModal={setShowAddDeptModal}
       />
 
@@ -647,14 +565,6 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
         isOpen={showAddUserModal}
         onClose={() => setShowAddUserModal(false)}
         onUserCreated={handleUserCreated}
-        triggerToast={triggerToast}
-      />
-
-      {/* Define Role Modal */}
-      <RoleFormModal
-        isOpen={showAddRoleModal}
-        onClose={() => setShowAddRoleModal(false)}
-        onRoleCreated={(newRole) => setRolesList((prev) => [newRole, ...prev])}
         triggerToast={triggerToast}
       />
 

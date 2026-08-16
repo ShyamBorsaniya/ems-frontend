@@ -20,9 +20,7 @@ export default function AdminLayout({
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 1024) {
-        setIsSidebarCollapsed(true);
-      }
+      setIsSidebarCollapsed(window.innerWidth < 1024);
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -34,7 +32,6 @@ export default function AdminLayout({
     { id: 'pending-users', label: 'Pending Users', icon: '⏳', permission: 'view_user' },
     { id: 'project', label: 'Projects', icon: '🚀', permission: 'view_project' },
     { id: 'department', label: 'Departments', icon: '🏢', permission: 'view_department' },
-    { id: 'role', label: 'Roles', icon: '🔑', permission: 'view_role' },
     { id: 'designation', label: 'Designations', icon: '🎖️', permission: 'view_designation' }
   ];
 
@@ -58,7 +55,7 @@ export default function AdminLayout({
         onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
 
-      <div className="flex flex-1 overflow-hidden min-h-0 relative z-10">
+      <div className="flex flex-1 overflow-hidden min-h-0 relative">
         <Sidebar
           navItems={navItems}
           activeTab={activeTab}

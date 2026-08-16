@@ -64,23 +64,26 @@ export default function Sidebar({
       {/* Mobile Sidebar Backdrop Overlay */}
       {!isCollapsed && (
         <div
-          className="fixed inset-0 bg-slate-900/40 z-45 md:hidden transition-opacity duration-300"
+          className="fixed inset-0 bg-slate-900/40 z-[90] md:hidden transition-opacity duration-300"
           onClick={onClose}
         />
       )}
-      <aside className={`bg-white border-r border-slate-200 flex flex-col justify-between h-full z-50 shadow-sm shrink-0 transition-all duration-300 overflow-x-hidden fixed inset-y-0 left-0 md:relative ${
+      <aside className={`bg-white border-r border-slate-200 flex flex-col justify-between h-full z-[100] md:z-30 shadow-sm shrink-0 transition-all duration-300 overflow-x-hidden fixed inset-y-0 left-0 md:relative w-[260px] min-w-[260px] ${
         isCollapsed
-          ? '-translate-x-full md:translate-x-0 w-[260px] md:w-[76px] md:min-w-[76px]'
-          : 'translate-x-0 w-[260px] min-w-[260px] shadow-2xl md:shadow-none'
+          ? '-translate-x-full md:translate-x-0'
+          : 'translate-x-0 shadow-2xl md:shadow-none'
       }`}>
-        <div className={isCollapsed ? 'p-3' : 'p-6'}>
-          {isCollapsed ? (
-            <div className="h-px bg-slate-200 my-4" />
-          ) : (
-            <div className="text-[0.7rem] font-bold text-slate-400 uppercase tracking-widest mt-2 mb-4 ml-2 truncate">
-              {themeStyles.sectionTitle}
-            </div>
-          )}
+        <div className="p-6">
+          {/* Mobile close button header area */}
+          <div className="flex md:hidden justify-end items-center mb-4">
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-xl transition-all duration-200 w-9 h-9 flex items-center justify-center border border-slate-200 bg-slate-50/50 shadow-xs focus:outline-none cursor-pointer"
+              title="Close sidebar"
+            >
+              <span className="text-sm font-bold">✕</span>
+            </button>
+          </div>
 
           <nav className="flex flex-col gap-1.5">
             {navItems.map((item) => {
@@ -88,18 +91,17 @@ export default function Sidebar({
               return (
                 <button
                   key={item.id}
-                  className={`flex items-center rounded-xl text-sm font-medium transition-all duration-200 w-full cursor-pointer ${
-                    isCollapsed ? 'justify-center px-2 py-3' : 'gap-3 px-4 py-3 text-left'
-                  } ${isActive ? themeStyles.activeButton : themeStyles.inactiveButton}`}
+                  className={`flex items-center rounded-xl text-sm font-medium transition-all duration-200 w-full cursor-pointer gap-3 px-4 py-3 text-left ${
+                    isActive ? themeStyles.activeButton : themeStyles.inactiveButton
+                  }`}
                   onClick={() => {
                     if (onTabChange) onTabChange(item.id);
                     if (onClose) onClose();
                   }}
-                  title={isCollapsed ? item.label : undefined}
                 >
                   <span className="text-base w-6 flex items-center justify-center shrink-0">{item.icon}</span>
-                  {!isCollapsed && <span className="truncate">{item.label}</span>}
-                  {!isCollapsed && item.badge && (
+                  <span className="truncate">{item.label}</span>
+                  {item.badge && (
                     <span className={`ml-auto text-xs px-2 py-0.5 rounded-full font-semibold ${themeStyles.badge}`}>
                       {item.badge}
                     </span>
@@ -110,27 +112,24 @@ export default function Sidebar({
           </nav>
         </div>
 
-        <div className={`border-t border-slate-200 bg-slate-50/80 transition-all duration-300 ${isCollapsed ? 'p-3' : 'p-5'}`}>
-          <div className={`flex items-center mb-3 ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
+        <div className="border-t border-slate-200 bg-slate-50/80 p-5">
+          <div className="flex items-center mb-3 gap-3">
             <img src={avatarUrl} alt="Avatar" className={`w-[38px] h-[38px] rounded-full object-cover shrink-0 ${themeStyles.avatarBorder}`} />
-            {!isCollapsed && (
-              <div className="flex flex-col min-w-0">
-                <span className="text-sm font-semibold text-slate-900 truncate max-w-[140px]">
-                  {user?.name || user?.username || `${themeStyles.defaultName} User`}
-                </span>
-                <span className={`text-xs font-medium truncate ${themeStyles.roleText}`}>
-                  {user?.role_name || user?.role || (isIndigo ? 'Administrator' : 'Staff Member')}
-                </span>
-              </div>
-            )}
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-semibold text-slate-900 truncate max-w-[140px]">
+                {user?.name || user?.username || `${themeStyles.defaultName} User`}
+              </span>
+              <span className={`text-xs font-medium truncate ${themeStyles.roleText}`}>
+                {user?.role_name || user?.role || (isIndigo ? 'Administrator' : 'Staff Member')}
+              </span>
+            </div>
           </div>
 
           <button
             className="w-full flex items-center justify-center gap-2 p-2 rounded-lg bg-white text-slate-600 border border-slate-200 text-xs font-medium cursor-pointer transition-all duration-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200"
             onClick={onLogout}
-            title={isCollapsed ? themeStyles.logoutBtn : undefined}
           >
-            <span>🚪</span> {!isCollapsed && <span>{themeStyles.logoutBtn}</span>}
+            <span>🚪</span> <span>{themeStyles.logoutBtn}</span>
           </button>
         </div>
       </aside>

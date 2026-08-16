@@ -20,9 +20,7 @@ export default function EmployeeLayout({
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 1024) {
-        setIsSidebarCollapsed(true);
-      }
+      setIsSidebarCollapsed(window.innerWidth < 1024);
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -52,7 +50,7 @@ export default function EmployeeLayout({
         onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
 
-      <div className="flex flex-1 overflow-hidden min-h-0 relative z-10">
+      <div className="flex flex-1 overflow-hidden min-h-0 relative">
         <Sidebar
           navItems={navItems}
           activeTab={activeTab}

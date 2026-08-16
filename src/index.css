@@ -75,3 +75,12 @@
 .animate-slideUp {
   animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+@keyframes mobileFadeIn {
+  from { opacity: 0; transform: translate(-50%, -58%); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+.animate-mobileFadeIn {
+  animation: mobileFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

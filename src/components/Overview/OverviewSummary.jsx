@@ -4,7 +4,6 @@ export default function OverviewSummary({
   adminName = 'User',
   employees = [],
   projects = [],
-  roles = [],
   triggerToast
 }) {
   const normalizeStatus = (s) => (s || '').toString().toUpperCase().replace(/[^A-Z0-9]+/g, '_');
@@ -16,12 +15,12 @@ export default function OverviewSummary({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-8 rounded-2xl bg-white border border-slate-200 shadow-lg shadow-slate-900/5 gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 m-0">Welcome, {adminName.split(' ')[0]} 👋</h1>
-          <p className="text-sm text-slate-500 mt-1">WorkPulse Management Console — Streamlining users, projects, departments, and roles.</p>
+          <p className="text-sm text-slate-500 mt-1">WorkPulse Management Console — Streamlining users, projects, and departments.</p>
         </div>
       </div>
 
       {/* Stats KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-indigo-300 hover:shadow-md">
           <div className="flex justify-between items-center mb-4">
             <span className="text-xs font-semibold text-slate-500">Total Users</span>
@@ -38,15 +37,6 @@ export default function OverviewSummary({
           </div>
           <div className="text-2xl font-bold text-slate-900 mb-1">{projects.length} Initiatives</div>
           <div className="text-xs text-slate-400">{inProgressProjectsCount} In Progress</div>
-        </div>
-
-        <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-indigo-300 hover:shadow-md">
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-xs font-semibold text-slate-500">Configured Roles</span>
-            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg">🔑</div>
-          </div>
-          <div className="text-2xl font-bold text-slate-900 mb-1">{roles.length} Tiered Roles</div>
-          <div className="text-xs text-slate-400">Access Matrix Enforced</div>
         </div>
       </div>
 

@@ -3,7 +3,6 @@ import UserManagement from '../User/UserManagement';
 import PendingUserManagement from '../User/PendingUserManagement';
 import ProjectManagement from '../Project/ProjectManagement';
 import DepartmentManagement from '../Department/DepartmentManagement';
-import RoleManagement from '../Role/RoleManagement';
 import DesignationManagement from '../Designation/DesignationManagement';
 import OverviewSummary from '../Overview/OverviewSummary';
 
@@ -43,15 +42,6 @@ export default function BodyContent({
   setPendingUsersSearchTerm,
   onApprovePendingUser,
   onRejectPendingUser,
-  rolesList = [],
-  rolesPaginationInfo = null,
-  rolesCurrentPage = 1,
-  onRolesPageChange,
-  rolesLoading = false,
-  rolesError = null,
-  roleSearchTerm = '',
-  setRoleSearchTerm,
-  onRefreshRoles,
   deptsList = [],
   deptsPaginationInfo = null,
   deptsCurrentPage = 1,
@@ -88,7 +78,6 @@ export default function BodyContent({
   triggerToast,
   setShowAddUserModal,
   setShowAddProjModal,
-  setShowAddRoleModal,
   setShowAddDeptModal
 }) {
   if (!isAuthorized) {
@@ -211,23 +200,6 @@ export default function BodyContent({
             setIsActiveFilter={setDeptStatusFilter}
             onRefresh={onRefreshDepts}
             setShowAddDeptModal={setShowAddDeptModal}
-            triggerToast={triggerToast}
-          />
-        )}
-
-        {/* 4. SEPARATE ROLE COMPONENT */}
-        {activeTab === 'role' && (
-          <RoleManagement
-            roles={rolesList.length > 0 ? rolesList : roles}
-            paginationInfo={rolesPaginationInfo}
-            currentPage={rolesCurrentPage}
-            onPageChange={onRolesPageChange}
-            loading={rolesLoading}
-            error={rolesError}
-            searchTerm={roleSearchTerm}
-            setSearchTerm={setRoleSearchTerm}
-            onRefresh={onRefreshRoles}
-            setShowAddRoleModal={setShowAddRoleModal}
             triggerToast={triggerToast}
           />
         )}

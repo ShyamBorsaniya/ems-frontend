@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import Auth from '../pages/Auth/Auth';
 import AdminDashboard from '../pages/Admin/Dashboard';
@@ -9,6 +9,7 @@ import Loader from '../components/common/Loader';
 export default function AppRoutes() {
   const { currentUser, isLoadingSession, logout, isEmployee } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   if (isLoadingSession) {
     return <Loader fullScreen={true} message="Loading WorkPulse EMS..." />;
@@ -43,11 +44,16 @@ export default function AppRoutes() {
     return <Auth mode="register" />;
   };
 
-  const AdminWrapper = ({ tab }) => {
+  const AdminWrapper = () => {
     if (!currentUser) {
       return <Navigate to="/login" replace />;
     }
-    return <AdminDashboard user={currentUser} onLogout={handleLogout} activeTabFromRoute={tab} />;
+    const path = location.pathname.replace('/', '').toLowerCase();
+    const validTabs = ['overview', 'user', 'pending-users', 'project', 'department', 'designation'];
+    if (!validTabs.includes(path)) {
+      return <Navigate to="/" replace />;
+    }
+    return <AdminDashboard user={currentUser} onLogout={handleLogout} />;
   };
 
   const EmployeeWrapper = () => {
@@ -70,13 +76,7 @@ export default function AppRoutes() {
       <Route path="/login" element={<LoginWrapper />} />
       <Route path="/register" element={<RegisterWrapper />} />
       <Route path="/employee/*" element={<EmployeeWrapper />} />
-      <Route path="/overview" element={<AdminWrapper tab="overview" />} />
-      <Route path="/user" element={<AdminWrapper tab="user" />} />
-      <Route path="/pending-users" element={<AdminWrapper tab="pending-users" />} />
-      <Route path="/project" element={<AdminWrapper tab="project" />} />
-      <Route path="/department" element={<AdminWrapper tab="department" />} />
-      <Route path="/role" element={<AdminWrapper tab="role" />} />
-      <Route path="/designation" element={<AdminWrapper tab="designation" />} />
+      <Route path="/:tab" element={<AdminWrapper />} />
       <Route path="*" element={<RootRedirect />} />
     </Routes>
   );
