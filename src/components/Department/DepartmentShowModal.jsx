@@ -32,10 +32,7 @@ export default function DepartmentShowModal({
         {/* Header */}
         <div className="flex justify-between items-center pb-4 mb-5 border-b border-slate-100">
           <div>
-            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
-              Department Details • ID #{department.id}
-            </span>
-            <h3 className="text-lg font-bold text-slate-900 m-0 mt-2 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-slate-900 m-0 flex items-center gap-2">
               <span>🏢</span> {department.name}
             </h3>
           </div>
@@ -50,12 +47,6 @@ export default function DepartmentShowModal({
 
         {/* Details Grid */}
         <div className="flex flex-col gap-4 text-xs">
-          {/* Company */}
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex justify-between items-center">
-            <span className="font-semibold text-slate-500">Organization:</span>
-            <span className="font-bold text-slate-900">{department.company_name || `Company #${department.company}`}</span>
-          </div>
-
           {/* Status */}
           <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex justify-between items-center">
             <span className="font-semibold text-slate-500">Status:</span>
@@ -93,37 +84,14 @@ export default function DepartmentShowModal({
         </div>
 
         {/* Action Buttons Footer */}
-        <div className="flex justify-between items-center mt-6 pt-4 border-t border-slate-100">
+        <div className="flex justify-end items-center mt-6 pt-4 border-t border-slate-100">
           <button
             type="button"
-            className="px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5"
-            onClick={() => {
-              onClose();
-              if (onDeleteDepartment) onDeleteDepartment(department);
-            }}
+            className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-semibold transition-all cursor-pointer"
+            onClick={onClose}
           >
-            <span>🗑️</span> Delete
+            Close
           </button>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              className="px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5"
-              onClick={() => {
-                onClose();
-                if (onEditDepartment) onEditDepartment(department);
-              }}
-            >
-              <span>✏️</span> Edit Department
-            </button>
-            <button
-              type="button"
-              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-semibold transition-all cursor-pointer"
-              onClick={onClose}
-            >
-              Close
-            </button>
-          </div>
         </div>
       </div>
     </div>

@@ -18,12 +18,7 @@ export default function UserFormModal({
   const isEditMode = Boolean(user && user.id);
 
   // Fetch company details from context or cached storage
-  const cachedCompanyData = authCtx?.company || getCompanyData();
   const cachedCompanyId = authCtx?.companyId || getCompanyId() || authCtx?.currentUser?.company_id || 1;
-  const companyDisplayName =
-    cachedCompanyData?.name ||
-    (typeof authCtx?.companyName === 'string' && authCtx.companyName ? authCtx.companyName : '') ||
-    `Company #${cachedCompanyId}`;
 
   const [formData, setFormData] = useState({
     username: '',
@@ -369,40 +364,25 @@ export default function UserFormModal({
             </div>
           </div>
 
-          {/* Company & Role */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
-                <span>Company</span>
-              </label>
-              <input
-                type="text"
-                name="company_display"
-                value={companyDisplayName}
-                readOnly
-                disabled
-                tabIndex={-1}
-                className="w-full p-2.5 rounded-xl bg-slate-100 border border-slate-300 text-sm font-semibold text-slate-600 cursor-not-allowed select-none focus:outline-none"
-              />
-              {renderFieldError('company')}
-            </div>
-              <CustomSelect
-                label="User Role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                required
-                error={fieldErrors.role}
-                placeholder="-- Select User Role --"
-                options={[
-                  { value: 1, label: 'Super Admin (Role 1)' },
-                  { value: 2, label: 'Admin (Role 2)' },
-                  { value: 3, label: 'HR (Role 3)' },
-                  { value: 4, label: 'Employee (Role 4)' },
-                  { value: 5, label: 'Project Manager (Role 5)' },
-                  { value: 6, label: 'Department Manager (Role 6)' }
-                ]}
-              />
+          {/* User Role */}
+          <div>
+            <CustomSelect
+              label="User Role"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              required
+              error={fieldErrors.role}
+              placeholder="-- Select User Role --"
+              options={[
+                { value: 1, label: 'Super Admin (Role 1)' },
+                { value: 2, label: 'Admin (Role 2)' },
+                { value: 3, label: 'HR (Role 3)' },
+                { value: 4, label: 'Employee (Role 4)' },
+                { value: 5, label: 'Project Manager (Role 5)' },
+                { value: 6, label: 'Department Manager (Role 6)' }
+              ]}
+            />
           </div>
 
           {/* Account Status Switch (Edit & Create Mode) */}

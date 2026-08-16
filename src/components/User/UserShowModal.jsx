@@ -59,28 +59,6 @@ export default function UserShowModal({
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4f46e5&color=fff&size=128`;
   };
 
-  const getCompanyName = (u) => {
-    if (!u) return 'N/A';
-    if (typeof u.company === 'object' && u.company !== null && u.company.name) {
-      return String(u.company.name);
-    }
-    if (typeof u.company_name === 'string' && u.company_name) {
-      return u.company_name;
-    }
-    return 'N/A';
-  };
-
-  const getCompanyId = (u) => {
-    if (!u) return 'N/A';
-    if (typeof u.company === 'object' && u.company !== null && u.company.id !== undefined) {
-      return String(u.company.id);
-    }
-    if (u.company !== null && u.company !== undefined) {
-      return String(u.company);
-    }
-    return 'N/A';
-  };
-
   const getRoleName = (u) => {
     if (!u) return 'SUPER ADMIN';
     if (typeof u.role === 'object' && u.role !== null && u.role.name) {
@@ -151,10 +129,7 @@ export default function UserShowModal({
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
       <div className="w-full max-w-2xl bg-white border border-slate-200 rounded-3xl text-slate-900 shadow-2xl animate-cardFadeUp my-8 overflow-hidden">
         {/* Top Banner Gradient */}
-        <div className="h-28 bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 relative p-6 flex justify-between items-start">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-semibold">
-            <span>👤</span> User Profile Show Page
-          </div>
+        <div className="h-28 bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 relative p-6 flex justify-end items-start">
           <button
             type="button"
             className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-white text-lg flex items-center justify-center cursor-pointer transition-colors"
@@ -239,20 +214,12 @@ export default function UserShowModal({
               </div>
             </div>
 
-            {/* Card 2: Organization & Role */}
+            {/* Card 2: Role Details */}
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col gap-3">
               <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider m-0 flex items-center gap-1.5 border-b border-slate-200 pb-2">
-                <span>🏢</span> Organization & Role Info
+                <span>🛡️</span> Role Details
               </h4>
               <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <span className="text-slate-400 font-medium block">Company Name</span>
-                  <span className="font-semibold text-slate-800">{getCompanyName(currentUser)}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 font-medium block">Company ID</span>
-                  <span className="font-semibold text-slate-800">{getCompanyId(currentUser)}</span>
-                </div>
                 <div>
                   <span className="text-slate-400 font-medium block">Assigned Role</span>
                   <span className="font-semibold text-slate-800">{formatRoleName(getRoleName(currentUser))}</span>
@@ -287,36 +254,7 @@ export default function UserShowModal({
           </div>
 
           {/* Action Toolbar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 mt-6 pt-4 border-t border-slate-100">
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                className="px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5"
-                onClick={() => {
-                  onClose();
-                  if (onEditUser) onEditUser(currentUser);
-                }}
-              >
-                <span>✏️</span> Edit User
-              </button>
-
-              <button
-                type="button"
-                className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${
-                  currentUser.is_active
-                    ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200'
-                    : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200'
-                }`}
-                onClick={() => {
-                  onClose();
-                  if (onSoftDestroyUser) onSoftDestroyUser(currentUser);
-                }}
-              >
-                <span>{currentUser.is_active ? '🗑️' : '♻️'}</span>
-                <span>{currentUser.is_active ? 'Soft Destroy User' : 'Restore User'}</span>
-              </button>
-            </div>
-
+          <div className="flex justify-end items-center mt-6 pt-4 border-t border-slate-100">
             <button
               type="button"
               className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold cursor-pointer shadow-sm transition-all"

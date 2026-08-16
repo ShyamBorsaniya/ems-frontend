@@ -299,7 +299,7 @@ export default function ProjectManagement({
             />
 
             {/* Add Project Button */}
-            {hasPermission('add_project') && (
+            {hasPermission('create:project') && (
               <button
                 className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer flex items-center gap-1.5"
                 onClick={() => {
@@ -443,7 +443,7 @@ export default function ProjectManagement({
                       </button>
 
                       {/* Edit */}
-                      {hasPermission('change_project') && (
+                      {hasPermission('update:project') && (
                         <button
                           type="button"
                           title="Edit Project"
@@ -458,7 +458,7 @@ export default function ProjectManagement({
                       )}
 
                       {/* Delete */}
-                      {hasPermission('delete_project') && (
+                      {hasPermission('delete:project') && (
                         <button
                           type="button"
                           title="Delete Project"

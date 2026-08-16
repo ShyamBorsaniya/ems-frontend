@@ -213,7 +213,7 @@ export default function PendingUserManagement({
                     <th className="py-3 px-4 hidden sm:table-cell">Company</th>
                     <th className="py-3 px-4">Status</th>
                     <th className="py-3 px-4 hidden md:table-cell">Joined Date</th>
-                    {hasPermission('change_user') && <th className="py-3 px-4 text-center">Action</th>}
+                    {hasPermission('user:edit') && <th className="py-3 px-4 text-center">Action</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -272,7 +272,7 @@ export default function PendingUserManagement({
                         </td>
 
                         {/* Actions */}
-                        {hasPermission('change_user') && (
+                        {hasPermission('user:edit') && (
                           <td className="py-3.5 px-4 text-center">
                             <div className="flex items-center justify-center gap-2">
                               <button

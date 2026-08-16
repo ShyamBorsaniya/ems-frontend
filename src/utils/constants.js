@@ -8,7 +8,8 @@ export const USER_ROLES = {
 };
 
 export const DEFAULT_TABS = {
-  OVERVIEW: 'overview',
+  DASHBOARD: 'dashboard',
+  OVERVIEW: 'dashboard',
   USERS: 'user',
   PROJECTS: 'project',
   DEPARTMENTS: 'department',

@@ -6,27 +6,31 @@ import { isEmployeeUser } from '../utils/helpers';
 export const AuthContext = createContext(null);
 
 // Helper to extract a flat array of permission codes
-const extractPermissionCodes = (permissionsArray) => {
-  if (!Array.isArray(permissionsArray)) return [];
-  const codes = [];
+const extractPermissionCodes = (permissionsData) => {
+  if (!permissionsData) return [];
+  const permissionsArray = Array.isArray(permissionsData) ? permissionsData : [permissionsData];
+  const codes = new Set();
   permissionsArray.forEach(item => {
     if (typeof item === 'string') {
-      codes.push(item);
+      codes.add(item);
     } else if (item && typeof item === 'object') {
       if (Array.isArray(item.permissions)) {
         item.permissions.forEach(perm => {
-          if (perm && perm.code) {
-            codes.push(perm.code);
-          } else if (typeof perm === 'string') {
-            codes.push(perm);
+          if (typeof perm === 'string') {
+            codes.add(perm);
+          } else if (perm && typeof perm === 'object') {
+            if (perm.code) codes.add(perm.code);
+            if (perm.name) codes.add(perm.name);
+            if (perm.action) codes.add(perm.action);
           }
         });
-      } else if (item.code) {
-        codes.push(item.code);
       }
+      if (item.code) codes.add(item.code);
+      if (item.name) codes.add(item.name);
+      if (item.action) codes.add(item.action);
     }
   });
-  return codes;
+  return Array.from(codes);
 };
 
 export function AuthProvider({ children }) {
@@ -125,21 +129,38 @@ export function AuthProvider({ children }) {
   const hasPermission = (permission, requireAll = false) => {
     if (!currentUser) return false;
 
-    // Admins/Super Admins get all access by default
+    const userPermissions = currentUser.permissions;
+    const permissionCodes = currentUser.permissionCodes || [];
+
+    // If explicit permissions list/object exists in storage, strictly enforce it!
+    const hasExplicitPermissions = userPermissions && (
+      (Array.isArray(userPermissions) && userPermissions.length > 0) ||
+      (typeof userPermissions === 'object' && Object.keys(userPermissions).length > 0)
+    );
+
+    if (hasExplicitPermissions) {
+      if (Array.isArray(permission)) {
+        if (requireAll) {
+          return permission.every(p => permissionCodes.includes(p));
+        }
+        return permission.some(p => permissionCodes.includes(p));
+      }
+      return permissionCodes.includes(permission);
+    }
+
+    // Default fallback for Super Admin / Admin users when no explicit permissions array is configured
     const roleStr = (currentUser.role_name || currentUser.role || '').toString().toLowerCase();
     if (roleStr.includes('admin') || roleStr.includes('super')) {
       return true;
     }
 
-    if (!currentUser.permissionCodes) return false;
-
     if (Array.isArray(permission)) {
       if (requireAll) {
-        return permission.every(p => currentUser.permissionCodes.includes(p));
+        return permission.every(p => permissionCodes.includes(p));
       }
-      return permission.some(p => currentUser.permissionCodes.includes(p));
+      return permission.some(p => permissionCodes.includes(p));
     }
-    return currentUser.permissionCodes.includes(permission);
+    return permissionCodes.includes(permission);
   };
 
   const value = {

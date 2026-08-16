@@ -18,22 +18,22 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
 
   const getTabFromPath = () => {
     const path = location.pathname.replace('/', '').toLowerCase();
-    const validTabs = ['overview', 'user', 'pending-users', 'project', 'department', 'designation'];
+    const validTabs = ['dashboard', 'user', 'pending-users', 'project', 'department', 'designation'];
     if (validTabs.includes(path)) {
       return path;
     }
-    return activeTabFromRoute || 'user';
+    return activeTabFromRoute || 'dashboard';
   };
 
   const activeTab = getTabFromPath();
 
   // Tab permissions map
   const tabPermissions = {
-    'user': 'view_user',
-    'pending-users': 'view_user',
-    'project': 'view_project',
-    'department': 'view_department',
-    'designation': 'view_designation'
+    'user': 'user:view',
+    'pending-users': 'user:view',
+    'project': ['project:view', 'project.view', 'view:project', 'view_project'],
+    'department': 'department:view',
+    'designation': ['designation:view', 'designation.view', 'view_designation']
   };
 
   const requiredPermission = tabPermissions[activeTab];
@@ -287,19 +287,19 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
   }, [designationsCurrentPage, designationSearchTerm]);
 
   useEffect(() => {
-    if (activeTab === 'user' || activeTab === 'overview') {
+    if (activeTab === 'user' || activeTab === 'dashboard') {
       loadUsersFromApi();
     }
-    if (activeTab === 'pending-users' || activeTab === 'overview') {
+    if (activeTab === 'pending-users' || activeTab === 'dashboard') {
       loadPendingUsersFromApi();
     }
-    if (activeTab === 'department' || activeTab === 'overview') {
+    if (activeTab === 'department' || activeTab === 'dashboard') {
       loadDepartmentsFromApi();
     }
-    if (activeTab === 'project' || activeTab === 'overview') {
+    if (activeTab === 'project' || activeTab === 'dashboard') {
       loadProjectsFromApi();
     }
-    if (activeTab === 'designation' || activeTab === 'overview') {
+    if (activeTab === 'designation' || activeTab === 'dashboard') {
       loadDesignationsFromApi();
     }
   }, [activeTab, loadUsersFromApi, loadPendingUsersFromApi, loadDepartmentsFromApi, loadProjectsFromApi, loadDesignationsFromApi]);

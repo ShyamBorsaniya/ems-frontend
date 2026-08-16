@@ -291,7 +291,7 @@ export default function UserManagement({
             />
 
             {/* Add User Modal Button */}
-            {setShowAddUserModal && hasPermission('add_user') && (
+            {setShowAddUserModal && hasPermission('user:create') && (
               <button
                 className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
                 onClick={() => setShowAddUserModal(true)}
@@ -429,7 +429,7 @@ export default function UserManagement({
                             </button>
 
                             {/* Edit User Icon */}
-                            {hasPermission('change_user') && (
+                            {hasPermission('user:edit') && (
                               <button
                                 type="button"
                                 title="Edit User Record"
@@ -445,7 +445,7 @@ export default function UserManagement({
                             )}
 
                             {/* Soft Destroy User Icon */}
-                            {hasPermission('delete_user') && (
+                            {hasPermission('user:delete') && (
                               <button
                                 type="button"
                                 title={u.is_active ? "Soft Destroy User (Deactivate)" : "Restore User (Activate)"}

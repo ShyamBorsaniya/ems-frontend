@@ -104,7 +104,7 @@ export default function DesignationManagement({
 
   // Local search fallback if parent doesn't manage search term
   const [localSearch, setLocalSearch] = useState('');
-  
+
   const currentSearch = setSearchTerm !== undefined ? searchTerm : localSearch;
 
   const handleSearchChange = (val) => {
@@ -179,7 +179,7 @@ export default function DesignationManagement({
             />
 
             {/* Create Designation Button */}
-            {hasPermission('add_designation') && (
+            {hasPermission('designation:create') && (
               <button
                 className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
                 onClick={() => setShowFormModal(true)}
@@ -204,48 +204,38 @@ export default function DesignationManagement({
 
         {/* Loading Spinner */}
         {loading ? (
-          <div className="py-16 flex flex-col items-center justify-center gap-3 text-slate-500">
-            <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-xs font-semibold">Fetching designation list from backend API...</span>
+          <div className="py-12 text-center text-slate-500 text-xs flex flex-col items-center justify-center gap-2">
+            <span className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></span>
+            <span>Loading designations...</span>
           </div>
         ) : displayedDesignations.length === 0 ? (
-          <div className="py-16 flex flex-col items-center justify-center text-center gap-2">
-            <span className="text-4xl">🔍</span>
-            <h3 className="text-sm font-bold text-slate-800 m-0">No designations found</h3>
-            <p className="text-xs text-slate-500 m-0">Try clearing or adjusting your search parameters.</p>
-            {currentSearch && (
-              <button
-                onClick={() => handleSearchChange('')}
-                className="mt-2 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 text-xs font-semibold cursor-pointer"
-              >
-                Reset Search
-              </button>
-            )}
+          <div className="py-12 text-center text-slate-500 text-xs bg-slate-50 rounded-xl border border-dashed border-slate-200">
+            <p className="font-semibold text-slate-700 m-0 text-sm">No designations found</p>
+            <p className="text-slate-400 m-0 mt-1">Try adjusting your search query or create a new designation.</p>
           </div>
         ) : (
           /* Designations Data Table */
           <>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm border-collapse">
+              <table className="w-full text-left text-xs text-slate-700 border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-semibold">
-                    <th className="py-3 px-4 w-20 hidden sm:table-cell">ID</th>
+                  <tr className="border-b border-slate-200 bg-slate-50/50 text-slate-500 font-semibold text-[11px] uppercase tracking-wider">
+                    <th className="py-3 px-4"># ID</th>
                     <th className="py-3 px-4">Designation Name</th>
                     <th className="py-3 px-4 hidden md:table-cell">Code</th>
                     <th className="py-3 px-4">Department</th>
                     <th className="py-3 px-4 text-center">Status</th>
-                    <th className="py-3 px-4 hidden lg:table-cell">Created Date</th>
-                    <th className="py-3 px-4 text-center">Action</th>
+                    <th className="py-3 px-4 hidden lg:table-cell">Created At</th>
+                    <th className="py-3 px-4 text-center">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {displayedDesignations.map((d) => {
+                <tbody className="divide-y divide-slate-100 font-medium">
+                  {displayedDesignations.map((d, index) => {
+                    const rowId = d.id || index + 1;
                     return (
-                      <tr key={d.id} className="hover:bg-slate-50/80 transition-colors">
+                      <tr key={d.id || index} className="hover:bg-slate-50/80 transition-colors">
                         {/* 1. ID */}
-                        <td className="py-3.5 px-4 font-mono text-xs font-semibold text-slate-500 hidden sm:table-cell">
-                          #{d.id}
-                        </td>
+                        <td className="py-3.5 px-4 text-slate-400 font-mono text-xs">#{rowId}</td>
 
                         {/* 2. Designation Name */}
                         <td className="py-3.5 px-4 font-semibold text-slate-900">
@@ -282,11 +272,10 @@ export default function DesignationManagement({
 
                         {/* 5. Status */}
                         <td className="py-3.5 px-4 text-center">
-                          <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase border ${
-                            d.is_active
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-250'
-                              : 'bg-rose-50 text-rose-700 border-rose-250'
-                          }`}>
+                          <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase border ${d.is_active
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-250'
+                            : 'bg-rose-50 text-rose-700 border-rose-250'
+                            }`}>
                             {d.is_active ? 'Active' : 'Inactive'}
                           </span>
                         </td>
@@ -300,20 +289,22 @@ export default function DesignationManagement({
                         <td className="py-3.5 px-4 text-center">
                           <div className="flex items-center justify-center gap-2">
                             {/* View Designation */}
-                            <button
-                              type="button"
-                              title="View Designation Details"
-                              className="p-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 transition-colors cursor-pointer flex items-center justify-center"
-                              onClick={() => setSelectedDesg(d)}
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                              </svg>
-                            </button>
+                            {hasPermission('designation:view') && (
+                              <button
+                                type="button"
+                                title="View Designation Details"
+                                className="p-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 transition-colors cursor-pointer flex items-center justify-center"
+                                onClick={() => setSelectedDesg(d)}
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                              </button>
+                            )}
 
                             {/* Edit Designation */}
-                            {hasPermission('change_designation') && (
+                            {hasPermission('designation:edit') && (
                               <button
                                 type="button"
                                 title="Edit Designation"
@@ -327,7 +318,7 @@ export default function DesignationManagement({
                             )}
 
                             {/* Delete Designation */}
-                            {hasPermission('delete_designation') && (
+                            {hasPermission('designation:delete') && (
                               <button
                                 type="button"
                                 title="Delete Designation"

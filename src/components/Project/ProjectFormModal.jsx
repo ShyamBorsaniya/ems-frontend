@@ -262,22 +262,6 @@ export default function ProjectFormModal({
 
         {/* Project Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 text-xs">
-          {/* Company Display */}
-          <div>
-            <label className="font-semibold text-slate-700 mb-1 flex items-center justify-between">
-              <span>Organization</span>
-              <span className="text-[10px] text-slate-400 font-normal">Auto-assigned company</span>
-            </label>
-            <input
-              type="text"
-              name="company_display"
-              value={companyDisplayName}
-              readOnly
-              disabled
-              tabIndex={-1}
-              className="w-full p-2.5 rounded-xl bg-slate-100 border border-slate-300 text-xs font-semibold text-slate-600 cursor-not-allowed select-none focus:outline-none"
-            />
-          </div>
 
           {/* Project Name & Code Row */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

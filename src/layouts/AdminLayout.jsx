@@ -27,12 +27,12 @@ export default function AdminLayout({
   }, []);
 
   const navItemsConfig = [
-    { id: 'overview', label: 'Overview', icon: '📊' },
-    { id: 'user', label: 'Users', icon: '👥', permission: 'view_user' },
-    { id: 'pending-users', label: 'Pending Users', icon: '⏳', permission: 'view_user' },
-    { id: 'project', label: 'Projects', icon: '🚀', permission: 'view_project' },
-    { id: 'department', label: 'Departments', icon: '🏢', permission: 'view_department' },
-    { id: 'designation', label: 'Designations', icon: '🎖️', permission: 'view_designation' }
+    { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+    { id: 'user', label: 'Users', icon: '👥', permission: 'user:view' },
+    { id: 'pending-users', label: 'Pending Users', icon: '⏳', permission: 'user:view' },
+    { id: 'project', label: 'Projects', icon: '🚀', permission: ['project:view', 'project.view', 'view:project', 'view_project'] },
+    { id: 'department', label: 'Departments', icon: '🏢', permission: 'department:view' },
+    { id: 'designation', label: 'Designations', icon: '🎖️', permission: ['designation:view', 'designation.view', 'view_designation'] }
   ];
 
   const navItems = navItemsConfig.filter(item => !item.permission || hasPermission(item.permission));

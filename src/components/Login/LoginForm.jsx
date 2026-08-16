@@ -43,7 +43,7 @@ export default function LoginForm({ onLoginSuccess }) {
           if (authenticatedUser.role_id === 5 || roleStr.includes('employee')) {
             navigate('/employee');
           } else {
-            navigate('/overview');
+            navigate('/dashboard');
           }
         }
       } else {

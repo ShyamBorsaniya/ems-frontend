@@ -213,7 +213,7 @@ export default function Header({
                 <button
                   onClick={() => {
                     setIsProfileOpen(false);
-                    if (onTabChange) onTabChange('overview');
+                    if (onTabChange) onTabChange('dashboard');
                   }}
                   className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-indigo-50/80 hover:text-indigo-600 transition-all cursor-pointer group"
                 >

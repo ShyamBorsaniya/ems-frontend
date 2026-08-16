@@ -21,7 +21,7 @@ export default function AppRoutes() {
     if (emp) {
       navigate('/employee');
     } else {
-      navigate('/user');
+      navigate('/dashboard');
     }
   };
 
@@ -32,14 +32,14 @@ export default function AppRoutes() {
 
   const LoginWrapper = () => {
     if (currentUser) {
-      return <Navigate to={isEmployee ? "/employee" : "/user"} replace />;
+      return <Navigate to={isEmployee ? "/employee" : "/dashboard"} replace />;
     }
     return <Auth mode="login" onLoginSuccess={handleLoginSuccess} />;
   };
 
   const RegisterWrapper = () => {
     if (currentUser) {
-      return <Navigate to={isEmployee ? "/employee" : "/user"} replace />;
+      return <Navigate to={isEmployee ? "/employee" : "/dashboard"} replace />;
     }
     return <Auth mode="register" />;
   };
@@ -49,9 +49,9 @@ export default function AppRoutes() {
       return <Navigate to="/login" replace />;
     }
     const path = location.pathname.replace('/', '').toLowerCase();
-    const validTabs = ['overview', 'user', 'pending-users', 'project', 'department', 'designation'];
+    const validTabs = ['dashboard', 'user', 'pending-users', 'project', 'department', 'designation'];
     if (!validTabs.includes(path)) {
-      return <Navigate to="/" replace />;
+      return <Navigate to="/dashboard" replace />;
     }
     return <AdminDashboard user={currentUser} onLogout={handleLogout} />;
   };
@@ -67,7 +67,7 @@ export default function AppRoutes() {
     if (!currentUser) {
       return <Navigate to="/login" replace />;
     }
-    return <Navigate to={isEmployee ? "/employee" : "/user"} replace />;
+    return <Navigate to={isEmployee ? "/employee" : "/dashboard"} replace />;
   };
 
   return (

@@ -212,7 +212,7 @@ export default function DepartmentManagement({
             />
 
             {/* Create Department Button */}
-            {hasPermission('add_department') && (
+            {hasPermission('department:create') && (
               <button
                 className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
                 onClick={() => {
@@ -340,7 +340,7 @@ export default function DepartmentManagement({
                             </button>
 
                             {/* Edit Department */}
-                            {hasPermission('change_department') && (
+                            {hasPermission('department:edit') && (
                               <button
                                 type="button"
                                 title="Edit Department"
@@ -354,7 +354,7 @@ export default function DepartmentManagement({
                             )}
 
                             {/* Delete Department */}
-                            {hasPermission('delete_department') && (
+                            {hasPermission('department:delete') && (
                               <button
                                 type="button"
                                 title="Delete Department"
