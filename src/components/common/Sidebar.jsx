@@ -54,10 +54,6 @@ export default function Sidebar({
         )
       };
 
-  const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-    user?.name || user?.username || themeStyles.defaultName
-  )}&background=${themeStyles.bgParam}&color=fff`;
-  const avatarUrl = user?.profile_image || defaultAvatar;
 
   return (
     <>
@@ -110,27 +106,6 @@ export default function Sidebar({
               );
             })}
           </nav>
-        </div>
-
-        <div className="border-t border-slate-200 bg-slate-50/80 p-5">
-          <div className="flex items-center mb-3 gap-3">
-            <img src={avatarUrl} alt="Avatar" className={`w-[38px] h-[38px] rounded-full object-cover shrink-0 ${themeStyles.avatarBorder}`} />
-            <div className="flex flex-col min-w-0">
-              <span className="text-sm font-semibold text-slate-900 truncate max-w-[140px]">
-                {user?.name || user?.username || `${themeStyles.defaultName} User`}
-              </span>
-              <span className={`text-xs font-medium truncate ${themeStyles.roleText}`}>
-                {user?.role_name || user?.role || (isIndigo ? 'Administrator' : 'Staff Member')}
-              </span>
-            </div>
-          </div>
-
-          <button
-            className="w-full flex items-center justify-center gap-2 p-2 rounded-lg bg-white text-slate-600 border border-slate-200 text-xs font-medium cursor-pointer transition-all duration-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200"
-            onClick={onLogout}
-          >
-            <span>🚪</span> <span>{themeStyles.logoutBtn}</span>
-          </button>
         </div>
       </aside>
     </>

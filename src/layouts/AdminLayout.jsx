@@ -50,6 +50,8 @@ export default function AdminLayout({
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         activeTab={activeTab}
+        onLogout={onLogout}
+        onTabChange={onTabChange}
         theme="indigo"
         isSidebarCollapsed={isSidebarCollapsed}
         onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}

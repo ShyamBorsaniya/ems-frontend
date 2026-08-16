@@ -45,6 +45,7 @@ export default function EmployeeLayout({
         isPunchedIn={isPunchedIn}
         togglePunchStatus={togglePunchStatus}
         onLogout={onLogout}
+        onTabChange={onTabChange}
         theme="emerald"
         isSidebarCollapsed={isSidebarCollapsed}
         onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
