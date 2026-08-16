@@ -161,10 +161,10 @@ export default function DepartmentFormModal({
   };
 
   const modalContent = (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="w-full max-w-lg bg-white border border-slate-200 rounded-2xl p-6 text-slate-900 shadow-2xl animate-cardFadeUp my-8">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+      <div className="w-full max-w-lg max-h-[90vh] flex flex-col bg-white border border-slate-200 rounded-2xl text-slate-900 shadow-2xl animate-cardFadeUp overflow-hidden">
         {/* Header */}
-        <div className="flex justify-between items-center pb-4 mb-5 border-b border-slate-100">
+        <div className="flex justify-between items-center p-6 pb-4 border-b border-slate-100 shrink-0">
           <div>
             <h3 className="text-lg font-bold text-slate-900 m-0 flex items-center gap-2">
               <span>{isEditMode ? '✏️' : '🏢'}</span>
@@ -189,81 +189,103 @@ export default function DepartmentFormModal({
           </button>
         </div>
 
-        {/* Global Error Alert Banner */}
-        {error && (
-          <div className="mb-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2 animate-cardFadeUp">
-            <span className="text-sm">⚠️</span>
-            <span>{error}</span>
-          </div>
-        )}
+        {/* Department Form Container */}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+          {/* Scrollable Form Body */}
+          <div className="p-6 overflow-y-auto flex-1 flex flex-col gap-4">
+            {/* Global Error Alert Banner */}
+            {error && (
+              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2 animate-cardFadeUp">
+                <span className="text-sm">⚠️</span>
+                <span>{error}</span>
+              </div>
+            )}
 
-        {/* Department Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-
-          {/* Department Name */}
-          <div>
-            <label className="text-xs font-semibold text-slate-700 mb-1 block">
-              Department Name <span className="text-rose-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="e.g. Engineering & Product, Human Resources..."
-              required
-              className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm text-slate-900 focus:outline-none transition-all ${
-                fieldErrors.name
-                  ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
-                  : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
-              }`}
-            />
-            {renderFieldError('name')}
-          </div>
-
-          {/* Department Description */}
-          <div>
-            <label className="text-xs font-semibold text-slate-700 mb-1 block">
-              Department Scope & Description
-            </label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows="3"
-              placeholder="Describe the department responsibilities and functions..."
-              className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm text-slate-900 focus:outline-none transition-all ${
-                fieldErrors.description
-                  ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
-                  : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
-              }`}
-            ></textarea>
-            {renderFieldError('description')}
-          </div>
-
-          {/* Status Switch */}
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between mt-1">
+            {/* Department Name */}
             <div>
-              <span className="text-xs font-bold text-slate-800 block">Department Status</span>
-              <span className="text-[11px] text-slate-500 block">Mark department as active or inactive</span>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
+              <label className="text-xs font-semibold text-slate-700 mb-1 block">
+                Department Name <span className="text-rose-500">*</span>
+              </label>
               <input
-                type="checkbox"
-                name="is_active"
-                checked={formData.is_active}
+                type="text"
+                name="name"
+                value={formData.name}
                 onChange={handleChange}
-                className="sr-only peer"
+                placeholder="e.g. Engineering & Product, Human Resources..."
+                required
+                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm text-slate-900 focus:outline-none transition-all ${
+                  fieldErrors.name
+                    ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
+                    : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+                }`}
               />
-              <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
-              <span className="ml-2.5 text-xs font-semibold text-slate-700">
-                {formData.is_active ? 'Active' : 'Inactive'}
-              </span>
-            </label>
+              {renderFieldError('name')}
+            </div>
+
+            {/* Department Code */}
+            <div>
+              <label className="text-xs font-semibold text-slate-700 mb-1 block">
+                Department Code / Identifier
+              </label>
+              <input
+                type="text"
+                name="code"
+                value={formData.code}
+                onChange={handleChange}
+                placeholder="e.g. ENG, HR, MKT"
+                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm font-mono text-slate-900 focus:outline-none transition-all ${
+                  fieldErrors.code
+                    ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
+                    : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+                }`}
+              />
+              {renderFieldError('code')}
+            </div>
+
+            {/* Department Description */}
+            <div>
+              <label className="text-xs font-semibold text-slate-700 mb-1 block">
+                Description & Purpose
+              </label>
+              <textarea
+                name="description"
+                rows={3}
+                value={formData.description}
+                onChange={handleChange}
+                placeholder="Briefly describe the responsibilities and scope of this department..."
+                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm text-slate-900 focus:outline-none transition-all resize-none ${
+                  fieldErrors.description
+                    ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
+                    : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+                }`}
+              />
+              {renderFieldError('description')}
+            </div>
+
+            {/* Operational Status Switch */}
+            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between mt-1">
+              <div>
+                <span className="text-xs font-bold text-slate-800 block">Department Status</span>
+                <span className="text-[11px] text-slate-500 block">Set operational status across user assignments</span>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="is_active"
+                  checked={formData.is_active}
+                  onChange={handleChange}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                <span className="ml-2.5 text-xs font-semibold text-slate-700">
+                  {formData.is_active ? 'Active' : 'Inactive'}
+                </span>
+              </label>
+            </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3 mt-4 pt-3 border-t border-slate-100">
+          {/* Fixed Actions Footer */}
+          <div className="flex justify-end gap-3 p-6 py-4 border-t border-slate-100 bg-white shrink-0">
             <button
               type="button"
               className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-semibold transition-all cursor-pointer"

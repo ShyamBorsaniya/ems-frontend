@@ -224,10 +224,10 @@ export default function ProjectFormModal({
   };
 
   const modalContent = (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="w-full max-w-xl bg-white border border-slate-200 rounded-2xl p-6 text-slate-900 shadow-2xl animate-cardFadeUp my-8">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+      <div className="w-full max-w-xl max-h-[90vh] flex flex-col bg-white border border-slate-200 rounded-2xl text-slate-900 shadow-2xl animate-cardFadeUp overflow-hidden">
         {/* Header */}
-        <div className="flex justify-between items-center pb-4 mb-5 border-b border-slate-100">
+        <div className="flex justify-between items-center p-6 pb-4 border-b border-slate-100 shrink-0">
           <div>
             <h3 className="text-lg font-bold text-slate-900 m-0 flex items-center gap-2">
               <span>{isEditMode ? '✏️' : '🚀'}</span>
@@ -252,191 +252,220 @@ export default function ProjectFormModal({
           </button>
         </div>
 
-        {/* Global Error Banner */}
-        {error && (
-          <div className="mb-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2 animate-cardFadeUp">
-            <span className="text-sm">⚠️</span>
-            <span>{error}</span>
-          </div>
-        )}
+        {/* Project Form Container */}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+          {/* Scrollable Form Body */}
+          <div className="p-6 overflow-y-auto flex-1 flex flex-col gap-4 text-xs">
+            {/* Global Error Banner */}
+            {error && (
+              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2 animate-cardFadeUp">
+                <span className="text-sm">⚠️</span>
+                <span>{error}</span>
+              </div>
+            )}
 
-        {/* Project Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 text-xs">
+            {/* Project Name & Code Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="sm:col-span-2">
+                <label className="font-semibold text-slate-700 mb-1 block">
+                  Project Name <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="e.g. Enterprise CRM Portal"
+                  required
+                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${
+                    fieldErrors.name
+                      ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
+                      : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+                  }`}
+                />
+                {renderFieldError('name')}
+              </div>
+              <div>
+                <label className="font-semibold text-slate-700 mb-1 block">
+                  Project Code / Tag <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="code"
+                  value={formData.code}
+                  onChange={handleChange}
+                  placeholder="PRJ-101"
+                  required
+                  className={`w-full p-2.5 rounded-xl bg-slate-50 border font-mono text-xs text-slate-900 focus:outline-none transition-all ${
+                    fieldErrors.code
+                      ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
+                      : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+                  }`}
+                />
+                {renderFieldError('code')}
+              </div>
+            </div>
 
-          {/* Project Name & Code Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="sm:col-span-2">
+            {/* Project Description */}
+            <div>
               <label className="font-semibold text-slate-700 mb-1 block">
-                Project Name <span className="text-rose-500">*</span>
+                Description & Objectives
               </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
+              <textarea
+                name="description"
+                rows={3}
+                value={formData.description}
                 onChange={handleChange}
-                placeholder="e.g. WorkPulse Mobile App V2"
-                required
-                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${fieldErrors.name
-                    ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600'
+                placeholder="Describe project scope, targets, and deliverable specifications..."
+                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all resize-none ${
+                  fieldErrors.description
+                    ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
                     : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
-                  }`}
+                }`}
               />
-              {renderFieldError('name')}
+              {renderFieldError('description')}
             </div>
 
-            <div>
-              <label className="font-semibold text-slate-700 mb-1 block">
-                Project Code <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="code"
-                value={formData.code}
-                onChange={handleChange}
-                placeholder="PRJ-101"
-                required
-                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs font-mono text-slate-900 focus:outline-none transition-all ${fieldErrors.code
-                    ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600'
-                    : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+            {/* Timeline Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="font-semibold text-slate-700 mb-1 block">
+                  Start Date <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  name="start_date"
+                  value={formData.start_date}
+                  onChange={handleChange}
+                  required
+                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${
+                    fieldErrors.start_date
+                      ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
+                      : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
                   }`}
-              />
-              {renderFieldError('code')}
+                />
+                {renderFieldError('start_date')}
+              </div>
+              <div>
+                <label className="font-semibold text-slate-700 mb-1 block">
+                  Estimated End / Target Date
+                </label>
+                <input
+                  type="date"
+                  name="end_date"
+                  value={formData.end_date}
+                  onChange={handleChange}
+                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${
+                    fieldErrors.end_date
+                      ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
+                      : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+                  }`}
+                />
+                {renderFieldError('end_date')}
+              </div>
             </div>
-          </div>
 
-          {/* Department & Project Manager Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <CustomSelect
-              label="Assigned Department"
-              name="department"
-              value={formData.department}
-              onChange={handleChange}
-              error={fieldErrors.department}
-              placeholder="-- Select Department --"
-              options={departments.map((dept) => ({
-                value: dept.id,
-                label: dept.name
-              }))}
-            />
-
-            <CustomSelect
-              label="Project Manager / Lead"
-              name="project_manager"
-              value={formData.project_manager}
-              onChange={handleChange}
-              error={fieldErrors.project_manager}
-              placeholder="-- Unassigned --"
-              options={employees.map((emp) => ({
-                value: emp.id,
-                label: emp.name || emp.username || `User #${emp.id}`
-              }))}
-            />
-          </div>
-
-          {/* Status & Priority Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <CustomSelect
-              label="Project Status"
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              error={fieldErrors.status}
-              placeholder="-- Select Status --"
-              options={[
-                { value: 'PLANNED', label: '📅 Planned' },
-                { value: 'ACTIVE', label: '⚡ Active / In Progress' },
-                { value: 'ON_HOLD', label: '⏸️ On Hold' },
-                { value: 'COMPLETED', label: '✅ Completed' },
-                { value: 'CANCELLED', label: '🚫 Cancelled' }
-              ]}
-            />
-
-            <CustomSelect
-              label="Priority Level"
-              name="priority"
-              value={formData.priority}
-              onChange={handleChange}
-              error={fieldErrors.priority}
-              placeholder="-- Select Priority --"
-              options={[
-                { value: 'LOW', label: '🔵 Low Priority' },
-                { value: 'MEDIUM', label: '🟡 Medium Priority' },
-                { value: 'HIGH', label: '🟠 High Priority' },
-                { value: 'CRITICAL', label: '🔴 Critical Priority' }
-              ]}
-            />
-          </div>
-
-          {/* Start Date, End Date, Budget Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label className="font-semibold text-slate-700 mb-1 block">
-                Start Date <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="date"
-                name="start_date"
-                value={formData.start_date}
+            {/* Status & Priority Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <CustomSelect
+                label="Lifecycle Status"
+                name="status"
+                value={formData.status}
                 onChange={handleChange}
                 required
-                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${fieldErrors.start_date
-                    ? 'border-rose-500 bg-rose-50/20'
-                    : 'border-slate-300 focus:border-indigo-600'
+                error={fieldErrors.status}
+                options={[
+                  { value: 'planning', label: '📋 Planning / Draft' },
+                  { value: 'in_progress', label: '⚡ In Progress' },
+                  { value: 'on_hold', label: '⏸️ On Hold' },
+                  { value: 'completed', label: '✅ Completed' },
+                  { value: 'cancelled', label: '🚫 Cancelled' }
+                ]}
+              />
+
+              <CustomSelect
+                label="Execution Priority"
+                name="priority"
+                value={formData.priority}
+                onChange={handleChange}
+                required
+                error={fieldErrors.priority}
+                options={[
+                  { value: 'low', label: '🟢 Low Priority' },
+                  { value: 'medium', label: '🟡 Medium Priority' },
+                  { value: 'high', label: '🔴 High Priority' },
+                  { value: 'critical', label: '🔥 Critical Urgency' }
+                ]}
+              />
+            </div>
+
+            {/* Manager Assignment & Budget Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="font-semibold text-slate-700 mb-1 block">
+                  Project Lead / Manager ID
+                </label>
+                <input
+                  type="number"
+                  name="project_manager"
+                  value={formData.project_manager}
+                  onChange={handleChange}
+                  placeholder="e.g. 5 (Manager User ID)"
+                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${
+                    fieldErrors.project_manager
+                      ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
+                      : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
                   }`}
-              />
-              {renderFieldError('start_date')}
+                />
+                {renderFieldError('project_manager')}
+              </div>
+
+              <div>
+                <label className="font-semibold text-slate-700 mb-1 block">
+                  Allocated Budget ($)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  name="budget"
+                  value={formData.budget}
+                  onChange={handleChange}
+                  placeholder="e.g. 25000"
+                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${
+                    fieldErrors.budget
+                      ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
+                      : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+                  }`}
+                />
+                {renderFieldError('budget')}
+              </div>
             </div>
 
-            <div>
-              <label className="font-semibold text-slate-700 mb-1 block">
-                End / Target Date
+            {/* Is Active Toggle Switch */}
+            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between mt-1">
+              <div>
+                <span className="font-bold text-slate-800 block">Project Operational Status</span>
+                <span className="text-[11px] text-slate-500 block">Keep active or archive project initiative</span>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="is_active"
+                  checked={formData.is_active}
+                  onChange={handleChange}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                <span className="ml-2.5 text-xs font-semibold text-slate-700">
+                  {formData.is_active ? 'Active' : 'Inactive'}
+                </span>
               </label>
-              <input
-                type="date"
-                name="end_date"
-                value={formData.end_date}
-                onChange={handleChange}
-                className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-indigo-600"
-              />
-              {renderFieldError('end_date')}
-            </div>
-
-            <div>
-              <label className="font-semibold text-slate-700 mb-1 block">
-                Project Budget ($)
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                name="budget"
-                value={formData.budget}
-                onChange={handleChange}
-                placeholder="e.g. 45000"
-                className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-indigo-600"
-              />
-              {renderFieldError('budget')}
             </div>
           </div>
 
-          {/* Description / Scope */}
-          <div>
-            <label className="font-semibold text-slate-700 mb-1 block">
-              Project Overview & Objectives
-            </label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows="3"
-              placeholder="Outline project scope, deliverables, key target metrics..."
-              className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-indigo-600"
-            ></textarea>
-            {renderFieldError('description')}
-          </div>
-
-          {/* Footer Actions */}
-          <div className="flex justify-end gap-3 mt-4 pt-3 border-t border-slate-100">
+          {/* Fixed Actions Footer */}
+          <div className="flex justify-end gap-3 p-6 py-4 border-t border-slate-100 bg-white shrink-0">
             <button
               type="button"
               className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-semibold transition-all cursor-pointer"

@@ -53,10 +53,10 @@ export default function UserShowModal({
   };
 
   const getUserAvatar = (u) => {
-    if (!u) return 'https://ui-avatars.com/api/?name=User&background=4f46e5&color=fff&size=128';
+    if (!u) return 'https://ui-avatars.com/api/?name=User&background=64748b&color=fff&size=128';
     if (u.profile_image) return u.profile_image;
     const name = getUserFullName(u);
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4f46e5&color=fff&size=128`;
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=64748b&color=fff&size=128`;
   };
 
   const getRoleName = (u) => {
@@ -102,7 +102,7 @@ export default function UserShowModal({
     if (role.includes('hr')) return 'bg-pink-100 text-pink-700 border-pink-300';
     if (role.includes('project')) return 'bg-indigo-100 text-indigo-700 border-indigo-300';
     if (role.includes('department') || role.includes('dept')) return 'bg-amber-100 text-amber-700 border-amber-300';
-    if (role.includes('employee')) return 'bg-blue-100 text-blue-700 border-blue-300';
+    if (role.includes('employee')) return 'bg-sky-100 text-sky-700 border-sky-300';
     return 'bg-slate-100 text-slate-700 border-slate-300';
   };
 
@@ -126,55 +126,51 @@ export default function UserShowModal({
   const avatarUrl = getUserAvatar(currentUser);
 
   const modalContent = (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="w-full max-w-2xl bg-white border border-slate-200 rounded-3xl text-slate-900 shadow-2xl animate-cardFadeUp my-8 overflow-hidden">
-        {/* Top Banner Gradient */}
-        <div className="h-28 bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 relative p-6 flex justify-end items-start">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+      <div className="w-full max-w-2xl max-h-[90vh] flex flex-col bg-white border border-slate-200 rounded-3xl text-slate-900 shadow-2xl animate-cardFadeUp overflow-hidden">
+        {/* Fixed Header Section (Clean White Design) */}
+        <div className="flex justify-between items-center p-6 border-b border-slate-100 shrink-0 bg-white">
+          <div className="flex items-center gap-4">
+            <img
+              src={avatarUrl}
+              alt={fullName}
+              className="w-14 h-14 rounded-2xl border border-slate-200 shadow-sm object-cover bg-slate-100 shrink-0"
+            />
+            <div>
+              <h2 className="text-lg font-extrabold text-slate-900 m-0 leading-tight">
+                {fullName}
+              </h2>
+              <div className="flex items-center flex-wrap gap-2 mt-1.5">
+                <span className="text-xs text-slate-500 font-semibold">
+                  @{currentUser.username}
+                </span>
+                <span className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold border ${getRoleBadgeStyle(getRoleName(currentUser))}`}>
+                  {formatRoleName(getRoleName(currentUser))}
+                </span>
+                <span
+                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
+                    currentUser.is_active
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                      : 'bg-rose-50 text-rose-700 border-rose-300'
+                  }`}
+                >
+                  <span className={currentUser.is_active ? 'text-emerald-500' : 'text-rose-500'}>●</span>
+                  {currentUser.is_active ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+            </div>
+          </div>
           <button
             type="button"
-            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-white text-lg flex items-center justify-center cursor-pointer transition-colors"
+            className="text-slate-400 hover:text-slate-700 text-xl font-semibold cursor-pointer w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 transition-colors"
             onClick={onClose}
           >
             ✕
           </button>
         </div>
 
-        {/* Profile Header Bar */}
-        <div className="px-6 pb-6 pt-0 relative">
-          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 -mt-12 mb-6">
-            <div className="flex items-end gap-4">
-              <img
-                src={avatarUrl}
-                alt={fullName}
-                className="w-24 h-24 rounded-2xl border-4 border-white object-cover shadow-lg bg-white shrink-0"
-              />
-              <div className="pb-1">
-                <h2 className="text-xl font-extrabold text-slate-900 m-0 leading-tight">
-                  {fullName}
-                </h2>
-                <p className="text-xs text-indigo-600 font-semibold m-0 mt-0.5">
-                  @{currentUser.username}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 pb-1">
-              <span className={`px-3 py-1 rounded-lg text-xs font-bold border ${getRoleBadgeStyle(getRoleName(currentUser))}`}>
-                {formatRoleName(getRoleName(currentUser))}
-              </span>
-              <span
-                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
-                  currentUser.is_active
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                    : 'bg-rose-50 text-rose-700 border-rose-300'
-                }`}
-              >
-                <span className={currentUser.is_active ? 'text-emerald-500' : 'text-rose-500'}>●</span>
-                {currentUser.is_active ? 'Active Account' : 'Inactive / Soft Destroyed'}
-              </span>
-            </div>
-          </div>
-
+        {/* Scrollable Profile Body */}
+        <div className="p-6 overflow-y-auto flex-1 relative">
           {/* Loading Indicator for Fresh Backend Data */}
           {loading && (
             <div className="mb-4 p-2.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs flex items-center gap-2">
@@ -252,17 +248,17 @@ export default function UserShowModal({
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Action Toolbar */}
-          <div className="flex justify-end items-center mt-6 pt-4 border-t border-slate-100">
-            <button
-              type="button"
-              className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold cursor-pointer shadow-sm transition-all"
-              onClick={onClose}
-            >
-              Close Page
-            </button>
-          </div>
+        {/* Action Toolbar (Fixed Footer) */}
+        <div className="flex justify-end items-center px-6 py-4 border-t border-slate-100 bg-white shrink-0">
+          <button
+            type="button"
+            className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold cursor-pointer shadow-sm transition-all"
+            onClick={onClose}
+          >
+            Close Page
+          </button>
         </div>
       </div>
     </div>

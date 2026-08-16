@@ -232,22 +232,22 @@ export default function DesignationFormModal({
   };
 
   const modalContent = (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="w-full max-w-lg bg-white border border-slate-200 rounded-2xl p-6 text-slate-900 shadow-2xl animate-cardFadeUp my-8">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+      <div className="w-full max-w-lg max-h-[90vh] flex flex-col bg-white border border-slate-200 rounded-2xl text-slate-900 shadow-2xl animate-cardFadeUp overflow-hidden">
         {/* Header */}
-        <div className="flex justify-between items-center pb-4 mb-5 border-b border-slate-100">
+        <div className="flex justify-between items-center p-6 pb-4 border-b border-slate-100 shrink-0">
           <div>
             <h3 className="text-lg font-bold text-slate-900 m-0 flex items-center gap-2">
-              <span>{isEditMode ? '✏️' : '🎖️'}</span>
+              <span>{isEditMode ? '✏️' : '🏷️'}</span>
               <span>{isEditMode ? 'Edit Designation' : 'Create New Designation'}</span>
             </h3>
             <p className="text-xs text-slate-500 m-0 mt-0.5">
               {isEditMode ? (
                 <>
-                  Updating details for designation <strong className="text-slate-800">{designation.name}</strong> (ID: #{designation.id})
+                  Updating designation details for <strong className="text-slate-800">{designation.name}</strong> (ID: #{designation.id})
                 </>
               ) : (
-                'Define the designation name, code, mapped department, and status.'
+                'Configure designation title, department mapping, and code.'
               )}
             </p>
           </div>
@@ -260,53 +260,29 @@ export default function DesignationFormModal({
           </button>
         </div>
 
-        {/* Global Error Banner */}
-        {error && (
-          <div className="mb-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2 animate-cardFadeUp">
-            <span className="text-sm">⚠️</span>
-            <span>{error}</span>
-          </div>
-        )}
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-
-          {/* Department Selection */}
-          <div>
-            {fetchingDepts ? (
-              <div className="text-xs text-slate-500 py-2.5 flex items-center gap-2">
-                <span className="w-3.5 h-3.5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></span>
-                <span>Loading active departments...</span>
+        {/* Designation Form Container */}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+          {/* Scrollable Form Body */}
+          <div className="p-6 overflow-y-auto flex-1 flex flex-col gap-4">
+            {/* Global Error Banner */}
+            {error && (
+              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2 animate-cardFadeUp">
+                <span className="text-sm">⚠️</span>
+                <span>{error}</span>
               </div>
-            ) : (
-              <CustomSelect
-                label="Department"
-                name="department"
-                value={formData.department}
-                onChange={handleChange}
-                required
-                error={fieldErrors.department}
-                placeholder={departments.length === 0 ? "No active departments found" : "-- Select Department --"}
-                options={departments.map((dept) => ({
-                  value: dept.id,
-                  label: `${dept.name} (${dept.code || `#${dept.id}`})`
-                }))}
-              />
             )}
-          </div>
 
-          {/* Designation Name & Code */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Designation Title */}
             <div>
               <label className="text-xs font-semibold text-slate-700 mb-1 block">
-                Designation Name <span className="text-rose-500">*</span>
+                Designation Title <span className="text-rose-500">*</span>
               </label>
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="e.g. Senior Software Engineer"
+                placeholder="e.g. Senior Software Engineer, Lead HR Specialist..."
                 required
                 className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm text-slate-900 focus:outline-none transition-all ${
                   fieldErrors.name
@@ -317,18 +293,18 @@ export default function DesignationFormModal({
               {renderFieldError('name')}
             </div>
 
+            {/* Designation Code */}
             <div>
               <label className="text-xs font-semibold text-slate-700 mb-1 block">
-                Designation Code <span className="text-rose-500">*</span>
+                Designation Code / Tag
               </label>
               <input
                 type="text"
                 name="code"
                 value={formData.code}
                 onChange={handleChange}
-                placeholder="e.g. SSE"
-                required
-                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm text-slate-900 focus:outline-none transition-all ${
+                placeholder="e.g. SSE-01, HR-LEAD"
+                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm font-mono text-slate-900 focus:outline-none transition-all ${
                   fieldErrors.code
                     ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
                     : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
@@ -336,51 +312,75 @@ export default function DesignationFormModal({
               />
               {renderFieldError('code')}
             </div>
-          </div>
 
-          {/* Description */}
-          <div>
-            <label className="text-xs font-semibold text-slate-700 mb-1 block">
-              Description
-            </label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows="3"
-              placeholder="Describe the job responsibilities for this designation..."
-              className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm text-slate-900 focus:outline-none transition-all ${
-                fieldErrors.description
-                  ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
-                  : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
-              }`}
-            ></textarea>
-            {renderFieldError('description')}
-          </div>
-
-          {/* Status Switch */}
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between mt-1">
+            {/* Department Dropdown */}
             <div>
-              <span className="text-xs font-bold text-slate-800 block">Status</span>
-              <span className="text-[11px] text-slate-500 block">Mark designation as active or inactive</span>
+              {fetchingDepts ? (
+                <div className="text-xs text-slate-500 py-2.5 flex items-center gap-2">
+                  <span className="w-3.5 h-3.5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></span>
+                  <span>Loading active departments...</span>
+                </div>
+              ) : (
+                <CustomSelect
+                  label="Assigned Department"
+                  name="department"
+                  value={formData.department}
+                  onChange={handleChange}
+                  required
+                  error={fieldErrors.department}
+                  placeholder="-- Select Department --"
+                  options={departments.map((dept) => ({
+                    value: dept.id,
+                    label: `${dept.name} (${dept.code || `#${dept.id}`})`
+                  }))}
+                />
+              )}
             </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                name="is_active"
-                checked={formData.is_active}
+
+            {/* Description */}
+            <div>
+              <label className="text-xs font-semibold text-slate-700 mb-1 block">
+                Description & Job Responsibilities
+              </label>
+              <textarea
+                name="description"
+                rows={3}
+                value={formData.description}
                 onChange={handleChange}
-                className="sr-only peer"
+                placeholder="Brief description of key roles and responsibilities for this designation..."
+                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm text-slate-900 focus:outline-none transition-all resize-none ${
+                  fieldErrors.description
+                    ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
+                    : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+                }`}
               />
-              <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
-              <span className="ml-2.5 text-xs font-semibold text-slate-700">
-                {formData.is_active ? 'Active' : 'Inactive'}
-              </span>
-            </label>
+              {renderFieldError('description')}
+            </div>
+
+            {/* Operational Status Switch */}
+            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between mt-1">
+              <div>
+                <span className="text-xs font-bold text-slate-800 block">Designation Status</span>
+                <span className="text-[11px] text-slate-500 block">Set operational availability for user assignment</span>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="is_active"
+                  checked={formData.is_active}
+                  onChange={handleChange}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                <span className="ml-2.5 text-xs font-semibold text-slate-700">
+                  {formData.is_active ? 'Active' : 'Inactive'}
+                </span>
+              </label>
+            </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3 mt-4 pt-3 border-t border-slate-100">
+          {/* Fixed Actions Footer */}
+          <div className="flex justify-end gap-3 p-6 py-4 border-t border-slate-100 bg-white shrink-0">
             <button
               type="button"
               className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-semibold transition-all cursor-pointer"
@@ -411,4 +411,3 @@ export default function DesignationFormModal({
 
   return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 }
-

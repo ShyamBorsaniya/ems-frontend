@@ -163,3 +163,41 @@ export async function rejectUserApi(userId) {
     };
   }
 }
+
+/**
+ * Fetches available roles for user creation / edit dropdown
+ * Endpoint: GET /api/role/?company={companyId} (fallback: /api/role/)
+ */
+export async function fetchRolesApi(companyId = null) {
+  try {
+    const params = new URLSearchParams();
+    if (companyId) {
+      params.append('company', companyId);
+    }
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    let res = await axiosInstance.get(`/api/role/${queryString}`);
+
+    if (!res.ok && res.status === 404) {
+      res = await axiosInstance.get(`/api/admin/roles/${queryString}`);
+    }
+
+    if (res.ok && res.data) {
+      let list = [];
+      if (Array.isArray(res.data)) {
+        list = res.data;
+      } else if (Array.isArray(res.data?.results)) {
+        list = res.data.results;
+      } else if (Array.isArray(res.data?.data?.results)) {
+        list = res.data.data.results;
+      } else if (Array.isArray(res.data?.data)) {
+        list = res.data.data;
+      }
+      return { success: true, roles: list };
+    }
+
+    return { success: false, roles: [] };
+  } catch (error) {
+    console.error('Error fetching roles in fetchRolesApi:', error);
+    return { success: false, roles: [] };
+  }
+}
