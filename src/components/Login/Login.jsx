@@ -5,7 +5,6 @@ import { saveAuthData } from '../../utils/storage';
 export default function Login({ onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -33,7 +32,7 @@ export default function Login({ onLoginSuccess }) {
       setIsLoading(false);
 
       if (response && response.success === true && response.data) {
-        saveAuthData(response, rememberMe);
+        saveAuthData(response, true);
 
         const userData = response.data.user || {};
         const tokens = response.data.tokens || {};
@@ -213,17 +212,7 @@ export default function Login({ onLoginSuccess }) {
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-xs text-slate-600 mb-2">
-              <label className="flex items-center gap-2 cursor-pointer select-none font-medium">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                />
-                <span>Remember this device</span>
-              </label>
-            </div>
+
 
             <button
               type="submit"

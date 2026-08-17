@@ -8,7 +8,6 @@ export default function LoginForm({ onLoginSuccess }) {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -31,7 +30,7 @@ export default function LoginForm({ onLoginSuccess }) {
     setIsLoading(true);
 
     try {
-      const result = await login({ email: email.trim(), password }, rememberMe);
+      const result = await login({ email: email.trim(), password }, true);
       setIsLoading(false);
 
       if (result && result.success) {
@@ -144,17 +143,7 @@ export default function LoginForm({ onLoginSuccess }) {
           </div>
         </div>
 
-        <div className="flex items-center justify-between text-xs text-slate-600 mb-2">
-          <label className="flex items-center gap-2 cursor-pointer select-none font-medium">
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-            />
-            <span>Remember this device</span>
-          </label>
-        </div>
+
 
         <button
           type="submit"

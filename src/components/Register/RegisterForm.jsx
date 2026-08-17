@@ -170,7 +170,7 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="p-6 sm:p-10 flex flex-col justify-center bg-white/60 backdrop-blur-md">
+    <div className="px-6 py-10 sm:px-10 sm:py-12 flex flex-col bg-white/60 backdrop-blur-md max-h-[80vh] overflow-y-auto">
       <div className="mb-6">
         <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Create Account</h2>
         <p className="text-xs sm:text-sm text-slate-500 mt-1">Please fill in all required fields to register your new account.</p>
