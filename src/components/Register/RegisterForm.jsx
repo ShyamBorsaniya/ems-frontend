@@ -1,26 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchCompaniesApi, fetchRolesByCompanyApi, registerUserApi } from '../../api/publicApi';
+import { fetchCompaniesApi, registerUserApi } from '../../api/publicApi';
 import CustomSelect from '../common/CustomSelect';
 
 export default function RegisterForm() {
   // Form State
   const [formData, setFormData] = useState({
     company: '',
-    role: '',
+    department: '',
+    designation: '',
     username: '',
     email: '',
     password: '',
     first_name: '',
     last_name: '',
-    status: 'pending'
+    status: 'inactive',
+    role: 2,
+    employee_code: ''
   });
 
   // Dynamic Options State
   const [companies, setCompanies] = useState([]);
-  const [roles, setRoles] = useState([]);
   const [loadingCompanies, setLoadingCompanies] = useState(true);
-  const [loadingRoles, setLoadingRoles] = useState(false);
 
   // UX & Validation State
   const [showPassword, setShowPassword] = useState(false);
@@ -50,56 +51,46 @@ export default function RegisterForm() {
     };
   }, []);
 
-  // 2. Fetch Roles whenever selected company changes
-  useEffect(() => {
-    let isMounted = true;
-    async function loadRoles() {
-      if (!formData.company) {
-        setRoles([]);
-        setFormData((prev) => ({ ...prev, role: '' }));
-        return;
-      }
+  // Derived options based on selections
+  const selectedCompanyObj = companies.find((comp) => String(comp.id || comp.value) === String(formData.company));
+  const departments = selectedCompanyObj ? (selectedCompanyObj.departments || []) : [];
 
-      setLoadingRoles(true);
-      const res = await fetchRolesByCompanyApi(formData.company);
-      if (isMounted) {
-        if (res.success) {
-          setRoles(res.roles || []);
-          // Auto-select first role if available and current selected role is invalid
-          if (res.roles.length > 0) {
-            setFormData((prev) => ({ ...prev, role: res.roles[0].id || res.roles[0].value || '' }));
-          } else {
-            setFormData((prev) => ({ ...prev, role: '' }));
-          }
-        } else {
-          setRoles([]);
-          setFormData((prev) => ({ ...prev, role: '' }));
-        }
-        setLoadingRoles(false);
-      }
-    }
-
-    loadRoles();
-    return () => {
-      isMounted = false;
-    };
-  }, [formData.company]);
+  const selectedDeptObj = departments.find((dept) => String(dept.id || dept.value) === String(formData.department));
+  const designations = selectedDeptObj ? (selectedDeptObj.designations || []) : [];
 
   // Handle Input Changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData((prev) => {
+      const updated = {
+        ...prev,
+        [name]: value
+      };
+      if (name === 'company') {
+        updated.department = '';
+        updated.designation = '';
+      } else if (name === 'department') {
+        updated.designation = '';
+      }
+      return updated;
+    });
 
     if (errorMessage) setErrorMessage('');
-    if (fieldErrors[name]) {
-      setFieldErrors((prev) => ({
+    
+    // Clear errors for modified field and dependent fields
+    setFieldErrors((prev) => {
+      const updatedErrors = {
         ...prev,
         [name]: null
-      }));
-    }
+      };
+      if (name === 'company') {
+        updatedErrors.department = null;
+        updatedErrors.designation = null;
+      } else if (name === 'department') {
+        updatedErrors.designation = null;
+      }
+      return updatedErrors;
+    });
   };
 
   // Form Validation & Submission
@@ -112,12 +103,14 @@ export default function RegisterForm() {
     const newFieldErrors = {};
 
     if (!formData.company) newFieldErrors.company = ['Please select a company.'];
-    if (!formData.role) newFieldErrors.role = ['Please select a role.'];
+    if (!formData.department) newFieldErrors.department = ['Please select a department.'];
+    if (!formData.designation) newFieldErrors.designation = ['Please select a designation.'];
     if (!formData.username.trim()) newFieldErrors.username = ['Username is required.'];
     if (!formData.email.trim()) newFieldErrors.email = ['Email address is required.'];
     if (!formData.password) newFieldErrors.password = ['Password is required.'];
     if (!formData.first_name.trim()) newFieldErrors.first_name = ['First name is required.'];
     if (!formData.last_name.trim()) newFieldErrors.last_name = ['Last name is required.'];
+    if (!formData.employee_code.trim()) newFieldErrors.employee_code = ['Employee code is required.'];
 
     if (Object.keys(newFieldErrors).length > 0) {
       setFieldErrors(newFieldErrors);
@@ -136,13 +129,16 @@ export default function RegisterForm() {
         // Reset form inputs
         setFormData({
           company: '',
-          role: '',
+          department: '',
+          designation: '',
           username: '',
           email: '',
           password: '',
           first_name: '',
           last_name: '',
-          status: 'pending'
+          status: 'inactive',
+          role: 2,
+          employee_code: ''
         });
       } else {
         setErrorMessage(result.message || 'User registration failed');
@@ -227,29 +223,52 @@ export default function RegisterForm() {
           />
         </div>
 
-        {/* Step 2: Select Role (Filtered by selected company) */}
+        {/* Step 2: Select Department (Filtered by selected company) */}
         <div>
           <CustomSelect
-            label="Select Role"
-            id="role"
-            name="role"
-            value={formData.role}
+            label="Select Department"
+            id="department"
+            name="department"
+            value={formData.department}
             onChange={handleChange}
-            disabled={!formData.company || loadingRoles}
+            disabled={!formData.company}
             required
-            error={fieldErrors.role}
+            error={fieldErrors.department}
             placeholder={
-              loadingRoles
-                ? "Loading roles..."
-                : !formData.company
+              !formData.company
                 ? "-- Select a Company First --"
-                : roles.length === 0
-                ? "-- No Roles Found for Selected Company --"
-                : "-- Choose Role --"
+                : departments.length === 0
+                ? "-- No Departments Found for Selected Company --"
+                : "-- Choose Department --"
             }
-            options={roles.map((r) => ({
-              value: r.id || r.value,
-              label: r.name || r.role_name || r.role_display_name || r.title || `Role #${r.id}`
+            options={departments.map((d) => ({
+              value: d.id || d.value,
+              label: `${d.name || `Department #${d.id}`}${d.code ? ` (${d.code})` : ''}`
+            }))}
+          />
+        </div>
+
+        {/* Step 3: Select Designation (Filtered by selected department) */}
+        <div>
+          <CustomSelect
+            label="Select Designation"
+            id="designation"
+            name="designation"
+            value={formData.designation}
+            onChange={handleChange}
+            disabled={!formData.department}
+            required
+            error={fieldErrors.designation}
+            placeholder={
+              !formData.department
+                ? "-- Select a Department First --"
+                : designations.length === 0
+                ? "-- No Designations Found for Selected Department --"
+                : "-- Choose Designation --"
+            }
+            options={designations.map((desg) => ({
+              value: desg.id || desg.value,
+              label: `${desg.name || `Designation #${desg.id}`}${desg.code ? ` (${desg.code})` : ''}`
             }))}
           />
         </div>
@@ -334,6 +353,26 @@ export default function RegisterForm() {
             />
             {renderFieldError('email')}
           </div>
+        </div>
+
+        {/* Employee Code */}
+        <div>
+          <label htmlFor="employee_code" className="text-xs font-semibold text-slate-700 mb-1 block">
+            Employee Code <span className="text-rose-500">*</span>
+          </label>
+          <input
+            id="employee_code"
+            type="text"
+            name="employee_code"
+            placeholder="EMP-1234"
+            value={formData.employee_code}
+            onChange={handleChange}
+            required
+            className={`w-full py-2.5 px-3.5 rounded-xl bg-white/90 border text-sm text-slate-900 transition-all focus:outline-none ${
+              fieldErrors.employee_code ? 'border-rose-500 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20'
+            }`}
+          />
+          {renderFieldError('employee_code')}
         </div>
 
         {/* Password */}

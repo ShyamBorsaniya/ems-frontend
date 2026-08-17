@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Pagination from '../common/Pagination';
 import { useAuth } from '../../hooks/useAuth';
 import FilterDropdown from '../common/FilterDropdown';
@@ -122,6 +123,11 @@ export default function PendingUserManagement({
 
   // Execute approval or rejection
   const handleConfirmAction = async () => {
+    if (!hasPermission('user:edit')) {
+      triggerToast?.('You do not have permission to approve or reject pending users.');
+      setModalAction(null);
+      return;
+    }
     if (!modalAction || !modalAction.user) return;
     const { type, user } = modalAction;
     setActionLoading(true);
@@ -312,7 +318,7 @@ export default function PendingUserManagement({
       </div>
 
       {/* Confirmation Modal */}
-      {modalAction && (
+      {modalAction && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fade-in">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 flex flex-col gap-5">
             <div className="flex items-center gap-3">
@@ -377,7 +383,8 @@ export default function PendingUserManagement({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

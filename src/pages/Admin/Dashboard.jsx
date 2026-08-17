@@ -287,10 +287,11 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
   }, [designationsCurrentPage, designationSearchTerm]);
 
   useEffect(() => {
-    if (activeTab === 'user' || activeTab === 'dashboard') {
+    const canViewUsers = hasPermission('user:view');
+    if (activeTab === 'user' || (activeTab === 'dashboard' && canViewUsers)) {
       loadUsersFromApi();
     }
-    if (activeTab === 'pending-users' || activeTab === 'dashboard') {
+    if (activeTab === 'pending-users' || (activeTab === 'dashboard' && canViewUsers)) {
       loadPendingUsersFromApi();
     }
     if (activeTab === 'department' || activeTab === 'dashboard') {
@@ -302,7 +303,7 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
     if (activeTab === 'designation' || activeTab === 'dashboard') {
       loadDesignationsFromApi();
     }
-  }, [activeTab, loadUsersFromApi, loadPendingUsersFromApi, loadDepartmentsFromApi, loadProjectsFromApi, loadDesignationsFromApi]);
+  }, [activeTab, loadUsersFromApi, loadPendingUsersFromApi, loadDepartmentsFromApi, loadProjectsFromApi, loadDesignationsFromApi, hasPermission]);
 
   const handleDeptsPageChange = (newPage) => {
     setDeptsCurrentPage(newPage);

@@ -3,22 +3,22 @@ import { parseApiErrorMessage } from '../utils/helpers';
 
 /**
  * Fetches company list for registration dropdown
- * Endpoint: GET /api/company/
+ * Endpoint: GET /api/public/companies/
  */
 export async function fetchCompaniesApi() {
   try {
-    const res = await axiosInstance.get('/api/company/?is_active=true');
+    const res = await axiosInstance.get('/api/public/companies/');
 
     if (res.ok && res.data) {
       let list = [];
-      if (Array.isArray(res.data)) {
+      if (Array.isArray(res.data?.data)) {
+        list = res.data.data;
+      } else if (Array.isArray(res.data)) {
         list = res.data;
       } else if (Array.isArray(res.data?.results)) {
         list = res.data.results;
       } else if (Array.isArray(res.data?.data?.results)) {
         list = res.data.data.results;
-      } else if (Array.isArray(res.data?.data)) {
-        list = res.data.data;
       }
 
       return {
@@ -93,14 +93,30 @@ export async function fetchRolesByCompanyApi(companyId) {
  */
 export async function registerUserApi(userData) {
   const payload = {
-    company: Number(userData.company),
-    role: Number(userData.role),
     username: userData.username.trim(),
     email: userData.email.trim(),
-    password: userData.password,
     first_name: userData.first_name.trim(),
     last_name: userData.last_name.trim(),
-    status: userData.status || 'pending'
+    phone: userData.phone ? userData.phone.trim() : "",
+    company: Number(userData.company),
+    role: Number(userData.role) || 2,
+    is_active: userData.is_active !== undefined ? userData.is_active : false,
+    department: userData.department ? Number(userData.department) : null,
+    designation: userData.designation ? Number(userData.designation) : null,
+    employee_code: userData.employee_code || "",
+    date_of_joining: userData.date_of_joining || null,
+    joining_date: userData.joining_date || userData.date_of_joining || null,
+    salary: userData.salary ? Number(userData.salary) : null,
+    employee_details: {
+      department: userData.department ? Number(userData.department) : null,
+      designation: userData.designation ? Number(userData.designation) : null,
+      employee_code: userData.employee_code || "",
+      date_of_joining: userData.date_of_joining || null,
+      joining_date: userData.joining_date || userData.date_of_joining || null,
+      salary: userData.salary ? Number(userData.salary) : null
+    },
+    password: userData.password,
+    status: userData.status || 'inactive'
   };
 
   try {
