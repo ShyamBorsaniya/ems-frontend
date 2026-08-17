@@ -117,15 +117,6 @@ export default function ProjectManagement({
     }
   };
 
-  const getProgressPercentage = (proj) => {
-    if (proj.progress !== undefined && proj.progress !== null) return proj.progress;
-    const key = normalizeStatus(proj.status);
-    if (key === 'COMPLETED') return 100;
-    if (key === 'PLANNED') return 10;
-    if (key === 'ON_HOLD') return 35;
-    if (key === 'CANCELLED') return 0;
-    return 65; // Default for ACTIVE / other
-  };
 
   // Callbacks for CRUD actions
   const handleProjectCreated = (newProject) => {
@@ -354,7 +345,6 @@ export default function ProjectManagement({
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {displayedProjects.map((proj) => {
-                const progressPct = getProgressPercentage(proj);
                 const leadName = proj.project_manager_name || proj.lead || 'Unassigned';
                 const deptName = proj.department_name || proj.dept || 'General';
 
@@ -394,20 +384,6 @@ export default function ProjectManagement({
                             {proj.priority}
                           </span>
                         )}
-                      </div>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div>
-                      <div className="flex justify-between text-xs text-slate-600 mb-1.5 font-medium">
-                        <span>Progress Completion</span>
-                        <span className="font-semibold text-slate-900">{progressPct}%</span>
-                      </div>
-                      <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full transition-all duration-300"
-                          style={{ width: `${progressPct}%` }}
-                        ></div>
                       </div>
                     </div>
 

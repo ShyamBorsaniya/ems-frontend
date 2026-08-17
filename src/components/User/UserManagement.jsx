@@ -242,33 +242,16 @@ export default function UserManagement({
           </div>
 
           <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-            {/* Filter Dropdown */}
             <FilterDropdown
               value={{
                 search: currentSearch,
-                role: currentRole,
                 status: currentStatus
               }}
               onApply={(filters) => {
                 handleSearchChange(filters.search || '');
-                handleRoleChange(filters.role || 'all');
                 handleStatusChange(filters.status || 'all');
               }}
               config={[
-                {
-                  id: 'role',
-                  label: 'Role',
-                  type: 'select',
-                  options: [
-                    { value: 'all', label: 'All Roles' },
-                    { value: '2', label: 'Admin' },
-                    { value: '3', label: 'HR' },
-                    { value: '4', label: 'Employee' },
-                    { value: '5', label: 'Project Manager' },
-                    { value: '6', label: 'Department Manager' }
-                  ],
-                  defaultValue: 'all'
-                },
                 {
                   id: 'status',
                   label: 'Status',
