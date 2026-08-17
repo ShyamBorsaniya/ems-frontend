@@ -103,19 +103,6 @@ export default function Header({
             </span>
           </div>
         </div>
-
-        {!isIndigo && setSearchTerm && (
-          <div className="relative hidden sm:flex items-center ml-3">
-            <span className="absolute left-3 text-slate-400 text-xs pointer-events-none">🔍</span>
-            <input
-              type="text"
-              placeholder="Search my tasks, leaves, policies..."
-              value={searchTerm || ''}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-56 focus:w-64 py-1.5 pl-9 pr-3 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-xs transition-all duration-200 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-            />
-          </div>
-        )}
       </div>
 
       <div className="flex items-center gap-3">

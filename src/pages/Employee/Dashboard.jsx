@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import EmployeeLayout from '../../layouts/EmployeeLayout';
 import UserManagement from '../../components/User/UserManagement';
 import ProjectManagement from '../../components/Project/ProjectManagement';
@@ -9,7 +10,30 @@ import { useAuth } from '../../hooks/useAuth';
 
 export default function EmployeeDashboard({ user, onLogout }) {
   const { hasPermission } = useAuth();
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const getTabFromPath = () => {
+    const path = location.pathname.toLowerCase().replace(/\/$/, '');
+    if (path === '/employee/user' || path === '/employee/users') {
+      return 'user';
+    }
+    if (path === '/employee/project' || path === '/employee/projects') {
+      return 'project';
+    }
+    return 'dashboard';
+  };
+
+  const activeTab = getTabFromPath();
+  const lastTabRef = useRef(null);
+
+  const handleTabChange = (newTab) => {
+    if (newTab === 'dashboard') {
+      navigate('/employee');
+    } else {
+      navigate(`/employee/${newTab}`);
+    }
+  };
 
   const tabPermissions = {
     'user': 'user:view',
@@ -68,9 +92,17 @@ export default function EmployeeDashboard({ user, onLogout }) {
 
   useEffect(() => {
     if (activeTab === 'user') {
-      loadUsersFromApi();
+      if (lastTabRef.current !== 'user') {
+        loadUsersFromApi();
+        lastTabRef.current = 'user';
+      }
     } else if (activeTab === 'project') {
-      loadProjectsFromApi();
+      if (lastTabRef.current !== 'project') {
+        loadProjectsFromApi();
+        lastTabRef.current = 'project';
+      }
+    } else {
+      lastTabRef.current = activeTab;
     }
   }, [activeTab, loadUsersFromApi, loadProjectsFromApi]);
 
@@ -81,7 +113,7 @@ export default function EmployeeDashboard({ user, onLogout }) {
       user={user}
       onLogout={onLogout}
       activeTab={activeTab}
-      onTabChange={setActiveTab}
+      onTabChange={handleTabChange}
       searchTerm={searchTerm}
       setSearchTerm={setSearchTerm}
     >
@@ -94,7 +126,7 @@ export default function EmployeeDashboard({ user, onLogout }) {
 
         {!isAuthorized ? (
           <div className="relative z-10 w-full flex-1 p-6 sm:p-8 flex flex-col items-center justify-center min-h-[60vh]">
-            <AccessRestricted onReturn={() => setActiveTab('dashboard')} />
+            <AccessRestricted onReturn={() => handleTabChange('dashboard')} />
           </div>
         ) : (
           <>

@@ -8,7 +8,7 @@ export default function OverviewSummary({
   triggerToast
 }) {
   const { hasPermission } = useAuth();
-  const canViewProjects = hasPermission('view:project');
+  const canViewProjects = hasPermission('project:view');
   const normalizeStatus = (s) => (s || '').toString().toUpperCase().replace(/[^A-Z0-9]+/g, '_');
   const inProgressProjectsCount = projects.filter(p => normalizeStatus(p.status) === 'ACTIVE').length;
 

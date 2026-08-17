@@ -7,9 +7,15 @@ import EmployeeDashboard from '../pages/Employee/Dashboard';
 import Loader from '../components/common/Loader';
 
 export default function AppRoutes() {
-  const { currentUser, isLoadingSession, logout, isEmployee } = useAuth();
+  const { currentUser, isLoadingSession, logout, isEmployee, refreshCurrentUserDetails } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  React.useEffect(() => {
+    if (currentUser?.id) {
+      refreshCurrentUserDetails(currentUser.id);
+    }
+  }, [currentUser?.id, refreshCurrentUserDetails]);
 
   if (isLoadingSession) {
     return <Loader fullScreen={true} message="Loading WorkPulse EMS..." />;
@@ -30,23 +36,33 @@ export default function AppRoutes() {
     navigate('/login');
   };
 
-  const LoginWrapper = () => {
+  const renderLoginRoute = () => {
     if (currentUser) {
       return <Navigate to={isEmployee ? "/employee" : "/dashboard"} replace />;
     }
     return <Auth mode="login" onLoginSuccess={handleLoginSuccess} />;
   };
 
-  const RegisterWrapper = () => {
+  const renderRegisterRoute = () => {
     if (currentUser) {
       return <Navigate to={isEmployee ? "/employee" : "/dashboard"} replace />;
     }
     return <Auth mode="register" />;
   };
 
-  const AdminWrapper = () => {
+  const renderAdminRoute = () => {
     if (!currentUser) {
       return <Navigate to="/login" replace />;
+    }
+    if (isEmployee) {
+      const path = location.pathname.replace('/', '').toLowerCase();
+      if (path === 'user' || path === 'users') {
+        return <Navigate to="/employee/user" replace />;
+      }
+      if (path === 'project' || path === 'projects') {
+        return <Navigate to="/employee/project" replace />;
+      }
+      return <Navigate to="/employee" replace />;
     }
     const path = location.pathname.replace('/', '').toLowerCase();
     const validTabs = ['dashboard', 'user', 'pending-users', 'project', 'department', 'designation', 'company', 'profile', 'my-profile'];
@@ -56,14 +72,14 @@ export default function AppRoutes() {
     return <AdminDashboard user={currentUser} onLogout={handleLogout} />;
   };
 
-  const EmployeeWrapper = () => {
+  const renderEmployeeRoute = () => {
     if (!currentUser) {
       return <Navigate to="/login" replace />;
     }
     return <EmployeeDashboard user={currentUser} onLogout={handleLogout} />;
   };
 
-  const RootRedirect = () => {
+  const renderRootRedirect = () => {
     if (!currentUser) {
       return <Navigate to="/login" replace />;
     }
@@ -72,12 +88,12 @@ export default function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/" element={<RootRedirect />} />
-      <Route path="/login" element={<LoginWrapper />} />
-      <Route path="/register" element={<RegisterWrapper />} />
-      <Route path="/employee/*" element={<EmployeeWrapper />} />
-      <Route path="/:tab" element={<AdminWrapper />} />
-      <Route path="*" element={<RootRedirect />} />
+      <Route path="/" element={renderRootRedirect()} />
+      <Route path="/login" element={renderLoginRoute()} />
+      <Route path="/register" element={renderRegisterRoute()} />
+      <Route path="/employee/*" element={renderEmployeeRoute()} />
+      <Route path="/:tab" element={renderAdminRoute()} />
+      <Route path="*" element={renderRootRedirect()} />
     </Routes>
   );
 }

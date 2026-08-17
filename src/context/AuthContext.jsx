@@ -1,7 +1,8 @@
-import React, { createContext, useState, useEffect } from 'react';
-import { getAuthData, clearAuthData, saveAuthData, getCompanyData, getCompanyId } from '../utils/storage';
+import React, { createContext, useState, useEffect, useCallback } from 'react';
+import { getAuthData, clearAuthData, saveAuthData, getCompanyData, getCompanyId, updateUserData } from '../utils/storage';
 import { loginApi } from '../api/authApi';
 import { isEmployeeUser } from '../utils/helpers';
+import { fetchUserByIdApi } from '../api/admin/userApi';
 
 export const AuthContext = createContext(null);
 
@@ -163,6 +164,52 @@ export function AuthProvider({ children }) {
     return permissionCodes.includes(permission);
   };
 
+  const refreshCurrentUserDetails = useCallback(async (userId) => {
+    if (!userId) return null;
+    try {
+      const response = await fetchUserByIdApi(userId);
+      if (response) {
+        const userData = response.data || response;
+        if (userData && (userData.id || userData.username)) {
+          // Update local/session storage
+          updateUserData(userData);
+
+          // Update currentUser state in React context
+          setCurrentUser((prevUser) => {
+            if (!prevUser) return null;
+            const companyData = userData.company || (typeof userData.company === 'object' ? userData.company : null);
+            const tokens = prevUser.tokens;
+
+            return {
+              ...prevUser,
+              id: userData.id,
+              username: userData.username,
+              email: userData.email,
+              name: [userData.first_name, userData.last_name].filter(Boolean).join(' ') || userData.username || 'User',
+              role: userData.role_name || (userData.role === 5 ? 'Employee' : 'User'),
+              role_name: userData.role_name,
+              role_id: userData.role,
+              phone: userData.phone,
+              profile_image: userData.profile_image,
+              company: companyData,
+              company_id: companyData?.id || (typeof userData.company === 'number' ? userData.company : null),
+              company_name: companyData?.name || '',
+              is_active: userData.is_active,
+              created_at: userData.created_at,
+              tokens: tokens,
+              permissions: userData.permissions || [],
+              permissionCodes: extractPermissionCodes(userData.permissions)
+            };
+          });
+          return userData;
+        }
+      }
+    } catch (error) {
+      console.error('Error refreshing current user details:', error);
+    }
+    return null;
+  }, []);
+
   const value = {
     currentUser,
     setCurrentUser,
@@ -173,7 +220,8 @@ export function AuthProvider({ children }) {
     login,
     logout,
     isEmployee: isEmployeeUser(currentUser),
-    hasPermission
+    hasPermission,
+    refreshCurrentUserDetails
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -182,6 +182,42 @@ export function updateTokens(newTokens) {
 }
 
 /**
+ * Updates stored user data in active storage
+ */
+export function updateUserData(newUserData) {
+  if (!newUserData) return;
+
+  const isLocal = !!localStorage.getItem(ACCESS_TOKEN_KEY);
+  const isSession = !!sessionStorage.getItem(ACCESS_TOKEN_KEY);
+  const storage = isLocal ? localStorage : (isSession ? sessionStorage : localStorage);
+
+  storage.setItem(USER_KEY, JSON.stringify(newUserData));
+
+  const company = newUserData.company;
+  if (company) {
+    const companyObj = typeof company === 'object' ? company : { id: company };
+    storage.setItem(COMPANY_KEY, JSON.stringify(companyObj));
+  }
+
+  const authDataStr = storage.getItem(AUTH_DATA_KEY);
+  if (authDataStr) {
+    try {
+      const parsed = JSON.parse(authDataStr);
+      if (parsed.user) {
+        parsed.user = newUserData;
+      } else if (parsed.data && parsed.data.user) {
+        parsed.data.user = newUserData;
+      } else {
+        parsed.user = newUserData;
+      }
+      storage.setItem(AUTH_DATA_KEY, JSON.stringify(parsed));
+    } catch (e) {
+      console.error('Error updating cached auth data with new user details:', e);
+    }
+  }
+}
+
+/**
  * Clears all authentication tokens, user data, and cached company details from storage
  */
 export function clearAuthData() {

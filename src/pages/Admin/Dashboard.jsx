@@ -470,8 +470,8 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
 
   const filteredEmployees = employees.filter(emp => {
     const matchesSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          emp.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          emp.role.toLowerCase().includes(searchTerm.toLowerCase());
+      emp.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      emp.role.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDept = deptFilter === 'All' || emp.department === deptFilter;
     return matchesSearch && matchesDept;
   });
