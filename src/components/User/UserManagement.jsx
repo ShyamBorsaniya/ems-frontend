@@ -90,6 +90,25 @@ export default function UserManagement({
     return 'bg-slate-100 text-slate-700 border-slate-200';
   };
 
+  const getStatusBadgeStyle = (statusVal) => {
+    const status = String(statusVal || '').toLowerCase();
+    if (status === 'approved' || status === 'approve') {
+      return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    }
+    if (status === 'rejected' || status === 'reject') {
+      return 'bg-rose-50 text-rose-700 border-rose-200';
+    }
+    return 'bg-amber-50 text-amber-700 border-amber-200';
+  };
+
+  const formatStatusName = (statusVal) => {
+    if (!statusVal) return 'Pending';
+    const str = String(statusVal);
+    if (str.toLowerCase() === 'approve') return 'Approved';
+    if (str.toLowerCase() === 'reject') return 'Rejected';
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  };
+
   const formatDate = (isoString) => {
     if (!isoString) return 'N/A';
     try {
@@ -304,6 +323,7 @@ export default function UserManagement({
               { type: 'text', className: 'py-3 px-4' },
               { type: 'text', className: 'py-3 px-4 hidden md:table-cell' },
               { type: 'pill', className: 'py-3 px-4' },
+              { type: 'pill', className: 'py-3 px-4' },
               { type: 'text', className: 'py-3 px-4 hidden sm:table-cell' },
               { type: 'actions', className: 'py-3 px-4 text-center w-[100px]' }
             ]}
@@ -335,6 +355,7 @@ export default function UserManagement({
                     <th className="py-3 px-4">Role</th>
                     <th className="py-3 px-4 hidden md:table-cell">Phone</th>
                     <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4">Is Active</th>
                     <th className="py-3 px-4 hidden sm:table-cell">Joined Date</th>
                     <th className="py-3 px-4 text-center">Action</th>
                   </tr>
@@ -343,24 +364,27 @@ export default function UserManagement({
                   {displayedUsers.map((u) => {
                     const fullName = getUserFullName(u);
                     const avatarUrl = getUserAvatar(u);
+                    const isPending = (u.status || '').toLowerCase() === 'pending';
                     return (
                       <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
                         {/* 1. Name & Email */}
                         <td className="py-3.5 px-4">
                           <div
-                            className="flex items-center gap-3 cursor-pointer group"
+                            className={`flex items-center gap-3 ${isPending ? 'cursor-default' : 'cursor-pointer group'}`}
                             onClick={() => {
-                              setSelectedUser(u);
+                              if (!isPending) setSelectedUser(u);
                             }}
-                            title="Click to view user profile"
+                            title={isPending ? undefined : "Click to view user profile"}
                           >
                             <img
                               src={avatarUrl}
                               alt={fullName}
-                              className="w-9 h-9 rounded-full object-cover border border-slate-200 shrink-0 group-hover:border-indigo-400 transition-colors"
+                              className={`w-9 h-9 rounded-full object-cover border border-slate-200 shrink-0 transition-colors ${
+                                isPending ? '' : 'group-hover:border-indigo-400'
+                              }`}
                             />
                             <div className="flex flex-col">
-                              <span className="font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors">{fullName}</span>
+                              <span className={`font-semibold text-slate-900 ${isPending ? '' : 'group-hover:text-indigo-600 transition-colors'}`}>{fullName}</span>
                               <span className="text-xs text-slate-400">
                                 @{u.username} • {u.email}
                               </span>
@@ -380,17 +404,28 @@ export default function UserManagement({
                           {u.phone || 'N/A'}
                         </td>
 
+                        {/* 4. Approval Status */}
+                        <td className="py-3.5 px-4">
+                          <span className={`inline-flex px-2.5 py-1 rounded-md text-[11px] font-semibold border ${getStatusBadgeStyle(u.status)}`}>
+                            {formatStatusName(u.status)}
+                          </span>
+                        </td>
+
                         {/* 5. Account Status */}
                         <td className="py-3.5 px-4">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${u.is_active
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                              : 'bg-slate-100 text-slate-600 border-slate-200'
-                              }`}
-                          >
-                            <span className={u.is_active ? 'text-emerald-500' : 'text-slate-400'}>●</span>
-                            {u.is_active ? 'Active' : 'Inactive'}
-                          </span>
+                          {u.is_active ? (
+                            <span className="text-emerald-600" title="Active">
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                              </svg>
+                            </span>
+                          ) : (
+                            <span className="text-rose-600" title="Inactive">
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </span>
+                          )}
                         </td>
 
                         {/* 6. Created At */}
@@ -400,63 +435,67 @@ export default function UserManagement({
 
                         {/* 7. Action Column (View, Edit, Soft Destroy Icons) */}
                         <td className="py-3.5 px-4 text-center">
-                          <div className="flex items-center justify-center gap-2">
-                            {/* View User Icon */}
-                            <button
-                              type="button"
-                              title="View User Profile"
-                              className="p-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 transition-colors cursor-pointer flex items-center justify-center"
-                              onClick={() => {
-                                setSelectedUser(u);
-                              }}
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                              </svg>
-                            </button>
-
-                            {/* Edit User Icon */}
-                            {hasPermission('user:edit') && (
+                          {isPending ? (
+                            <span className="text-slate-400 font-medium select-none" title="No actions available for pending users">—</span>
+                          ) : (
+                            <div className="flex items-center justify-center gap-2">
+                              {/* View User Icon */}
                               <button
                                 type="button"
-                                title="Edit User Record"
-                                className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 transition-colors cursor-pointer flex items-center justify-center"
+                                title="View User Profile"
+                                className="p-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 transition-colors cursor-pointer flex items-center justify-center"
                                 onClick={() => {
-                                  setEditingUser(u);
+                                  setSelectedUser(u);
                                 }}
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
                               </button>
-                            )}
 
-                            {/* Soft Destroy User Icon */}
-                            {hasPermission('user:delete') && (
-                              <button
-                                type="button"
-                                title={u.is_active ? "Soft Destroy User (Deactivate)" : "Restore User (Activate)"}
-                                className={`p-1.5 rounded-lg transition-colors cursor-pointer border flex items-center justify-center ${u.is_active
-                                    ? 'bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-200'
-                                    : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border-emerald-200'
-                                  }`}
-                                onClick={() => {
-                                  handleSoftDestroyClick(u);
-                                }}
-                              >
-                                {u.is_active ? (
+                              {/* Edit User Icon */}
+                              {hasPermission('user:edit') && (
+                                <button
+                                  type="button"
+                                  title="Edit User Record"
+                                  className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 transition-colors cursor-pointer flex items-center justify-center"
+                                  onClick={() => {
+                                    setEditingUser(u);
+                                  }}
+                                >
                                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                   </svg>
-                                ) : (
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                  </svg>
-                                )}
-                              </button>
-                            )}
-                          </div>
+                                </button>
+                              )}
+
+                              {/* Soft Destroy User Icon */}
+                              {hasPermission('user:delete') && (
+                                <button
+                                  type="button"
+                                  title={u.is_active ? "Soft Destroy User (Deactivate)" : "Restore User (Activate)"}
+                                  className={`p-1.5 rounded-lg transition-colors cursor-pointer border flex items-center justify-center ${u.is_active
+                                      ? 'bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-200'
+                                      : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border-emerald-200'
+                                    }`}
+                                  onClick={() => {
+                                    handleSoftDestroyClick(u);
+                                  }}
+                                >
+                                  {u.is_active ? (
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                  ) : (
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                  )}
+                                </button>
+                              )}
+                            </div>
+                          )}
                         </td>
                       </tr>
                     );

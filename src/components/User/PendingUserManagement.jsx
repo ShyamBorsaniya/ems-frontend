@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import Swal from 'sweetalert2';
 import Pagination from '../common/Pagination';
 import { useAuth } from '../../hooks/useAuth';
 import FilterDropdown from '../common/FilterDropdown';
@@ -122,29 +123,78 @@ export default function PendingUserManagement({
 
   const displayedUsers = filteredUsers;
 
-  // Execute approval or rejection
+  // Execute approval
   const handleConfirmAction = async () => {
-    if (!hasPermission('user:edit')) {
-      triggerToast?.('You do not have permission to approve or reject pending users.');
+    if (!hasPermission('user:manage_pending')) {
+      triggerToast?.('You do not have permission to approve pending users.');
       setModalAction(null);
       return;
     }
     if (!modalAction || !modalAction.user) return;
-    const { type, user } = modalAction;
+    const { user } = modalAction;
     setActionLoading(true);
 
     try {
-      if (type === 'approve' && onApprove) {
+      if (onApprove) {
         await onApprove(user.id);
-      } else if (type === 'reject' && onReject) {
-        await onReject(user.id);
       }
       setModalAction(null);
     } catch (err) {
-      console.error(`Error performing ${type} on user ${user.id}:`, err);
+      console.error(`Error performing approval on user ${user.id}:`, err);
     } finally {
       setActionLoading(false);
     }
+  };
+
+  // Execute rejection via SweetAlert2
+  const handleRejectClick = (targetUser) => {
+    if (!hasPermission('user:manage_pending')) {
+      triggerToast?.('You do not have permission to reject pending users.');
+      return;
+    }
+    const fullName = getUserFullName(targetUser);
+
+    const htmlContent = `
+      <div class="flex flex-col gap-3 text-left">
+        <p class="text-xs text-slate-600 leading-relaxed m-0">
+          Rejecting this user will mark their account status as 'Rejected'.
+        </p>
+      </div>
+    `;
+
+    Swal.fire({
+      title: 'Reject User Registration',
+      html: htmlContent,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Reject User',
+      cancelButtonText: 'Cancel',
+      buttonsStyling: false,
+      showLoaderOnConfirm: true,
+      customClass: {
+        popup: 'rounded-2xl border border-slate-200 shadow-2xl p-6 text-slate-900 bg-white',
+        title: 'text-base font-bold text-slate-900 m-0',
+        htmlContainer: 'mt-3 mb-5',
+        actions: 'flex gap-3 justify-end w-full mt-4',
+        confirmButton: 'px-5 py-2.5 text-white text-xs font-semibold shadow-md transition-all cursor-pointer flex items-center gap-2 rounded-xl bg-rose-600 hover:bg-rose-700 shadow-rose-600/20',
+        cancelButton: 'px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-semibold transition-all cursor-pointer'
+      },
+      preConfirm: async () => {
+        try {
+          if (onReject) {
+            await onReject(targetUser.id);
+          }
+          return true;
+        } catch (err) {
+          Swal.showValidationMessage(`Request failed: ${err.message || err}`);
+        }
+      },
+      allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+      if (result.isConfirmed && triggerToast) {
+        triggerToast(`User "${fullName}" rejected successfully!`);
+      }
+    });
   };
 
   return (
@@ -195,10 +245,9 @@ export default function PendingUserManagement({
             columns={[
               { type: 'avatar-text', className: 'py-3 px-4' },
               { type: 'text', className: 'py-3 px-4' },
-              { type: 'text', className: 'py-3 px-4 hidden sm:table-cell' },
               { type: 'pill', className: 'py-3 px-4' },
               { type: 'text', className: 'py-3 px-4 hidden md:table-cell' },
-              ...(hasPermission('user:edit') ? [{ type: 'actions', className: 'py-3 px-4 text-center w-[100px]' }] : [])
+              ...(hasPermission('user:manage_pending') ? [{ type: 'actions', className: 'py-3 px-4 text-center w-[100px]' }] : [])
             ]}
           />
         ) : displayedUsers.length === 0 ? (
@@ -224,10 +273,9 @@ export default function PendingUserManagement({
                   <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-semibold">
                     <th className="py-3 px-4">User Details</th>
                     <th className="py-3 px-4">Role</th>
-                    <th className="py-3 px-4 hidden sm:table-cell">Company</th>
                     <th className="py-3 px-4">Status</th>
                     <th className="py-3 px-4 hidden md:table-cell">Joined Date</th>
-                    {hasPermission('user:edit') && <th className="py-3 px-4 text-center">Action</th>}
+                    {hasPermission('user:manage_pending') && <th className="py-3 px-4 text-center">Action</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -236,8 +284,6 @@ export default function PendingUserManagement({
                     const avatarUrl = getUserAvatar(u);
                     const roleNameDisplay = formatRoleName(u.role_name || u.role);
                     const roleBadgeClass = getRoleBadgeStyle(u.role_name || u.role);
-                    const companyName = getCompanyName(u);
-                    const companyCode = getCompanyCode(u);
 
                     return (
                       <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
@@ -264,14 +310,6 @@ export default function PendingUserManagement({
                           </span>
                         </td>
 
-                        {/* Company */}
-                        <td className="py-3.5 px-4 text-slate-600 hidden sm:table-cell">
-                          <div className="flex flex-col">
-                            <span className="font-medium text-slate-800">{companyName}</span>
-                            {companyCode && <span className="text-[0.7rem] text-slate-400 font-mono">[{companyCode}]</span>}
-                          </div>
-                        </td>
-
                         {/* Status */}
                         <td className="py-3.5 px-4">
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
@@ -286,7 +324,7 @@ export default function PendingUserManagement({
                         </td>
 
                         {/* Actions */}
-                        {hasPermission('user:edit') && (
+                        {(hasPermission('user:edit') || hasPermission('user:manage_pending')) && (
                           <td className="py-3.5 px-4 text-center">
                             <div className="flex items-center justify-center gap-2">
                               <button
@@ -298,7 +336,7 @@ export default function PendingUserManagement({
                               </button>
                               <button
                                 type="button"
-                                onClick={() => setModalAction({ type: 'reject', user: u })}
+                                onClick={() => handleRejectClick(u)}
                                 className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer active:scale-95"
                               >
                                 <span>✕</span> Reject
@@ -330,18 +368,12 @@ export default function PendingUserManagement({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fade-in">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 flex flex-col gap-5">
             <div className="flex items-center gap-3">
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${
-                  modalAction.type === 'approve'
-                    ? 'bg-emerald-100 text-emerald-600'
-                    : 'bg-rose-100 text-rose-600'
-                }`}
-              >
-                {modalAction.type === 'approve' ? '✓' : '⚠️'}
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg bg-emerald-100 text-emerald-600">
+                ✓
               </div>
               <div>
                 <h3 className="text-lg font-bold text-slate-900 m-0">
-                  {modalAction.type === 'approve' ? 'Approve User Registration' : 'Reject User Registration'}
+                  Approve User Registration
                 </h3>
                 <p className="text-xs text-slate-500 m-0 mt-0.5">
                   Please confirm your action for this account.
@@ -362,9 +394,7 @@ export default function PendingUserManagement({
             </div>
 
             <p className="text-xs text-slate-600 leading-relaxed m-0">
-              {modalAction.type === 'approve'
-                ? 'Approving this user will mark their account status as approved and allow them to access the system.'
-                : 'Rejecting this user will mark their account status as rejected.'}
+              Approving this user will mark their account status as 'Approve' and allow them to access the system.
             </p>
 
             <div className="flex items-center justify-end gap-3 pt-2">
@@ -380,14 +410,10 @@ export default function PendingUserManagement({
                 type="button"
                 disabled={actionLoading}
                 onClick={handleConfirmAction}
-                className={`px-4 py-2 rounded-xl text-xs font-semibold text-white shadow-md transition-all flex items-center gap-2 cursor-pointer ${
-                  modalAction.type === 'approve'
-                    ? 'bg-emerald-600 hover:bg-emerald-700'
-                    : 'bg-rose-600 hover:bg-rose-700'
-                }`}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-white shadow-md transition-all flex items-center gap-2 cursor-pointer bg-emerald-600 hover:bg-emerald-700"
               >
                 {actionLoading && <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>}
-                {modalAction.type === 'approve' ? 'Approve User' : 'Reject User'}
+                Approve User
               </button>
             </div>
           </div>

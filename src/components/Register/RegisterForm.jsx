@@ -14,7 +14,7 @@ export default function RegisterForm() {
     password: '',
     first_name: '',
     last_name: '',
-    status: 'inactive',
+    status: 'pending',
     role: 2
   });
 
@@ -156,7 +156,7 @@ export default function RegisterForm() {
           password: '',
           first_name: '',
           last_name: '',
-          status: 'inactive',
+          status: 'pending',
           role: 2
         });
       } else {

@@ -108,7 +108,7 @@ export async function registerUserApi(userData) {
       designation: userData.designation ? Number(userData.designation) : null
     },
     password: userData.password,
-    status: userData.status || 'inactive'
+    status: userData.status || 'pending'
   };
 
   try {

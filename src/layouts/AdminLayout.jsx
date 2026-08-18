@@ -29,7 +29,7 @@ export default function AdminLayout({
   const navItemsConfig = [
     { id: 'dashboard', label: 'Dashboard', icon: '📊' },
     { id: 'user', label: 'Users', icon: '👥', permission: 'user:view' },
-    { id: 'pending-users', label: 'Pending Users', icon: '⏳', permission: 'user:view' },
+    { id: 'pending-users', label: 'Pending Users', icon: '⏳', permission: 'user:manage_pending' },
     { id: 'project', label: 'Projects', icon: '🚀', permission: ['project:view', 'project.view', 'view:project', 'view_project'] },
     { id: 'department', label: 'Departments', icon: '🏢', permission: 'department:view' },
     { id: 'designation', label: 'Designations', icon: '🎖️', permission: ['designation:view', 'designation.view', 'view_designation'] },

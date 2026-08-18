@@ -30,7 +30,7 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
   // Tab permissions map
   const tabPermissions = {
     'user': 'user:view',
-    'pending-users': 'user:view',
+    'pending-users': 'user:manage_pending',
     'project': ['project:view', 'project.view', 'view:project', 'view_project'],
     'department': 'department:view',
     'designation': ['designation:view', 'designation.view', 'view_designation']
@@ -288,10 +288,11 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
 
   useEffect(() => {
     const canViewUsers = hasPermission('user:view');
+    const canViewPending = hasPermission('user:manage_pending');
     if (activeTab === 'user' || (activeTab === 'dashboard' && canViewUsers)) {
       loadUsersFromApi();
     }
-    if (activeTab === 'pending-users' || (activeTab === 'dashboard' && canViewUsers)) {
+    if (activeTab === 'pending-users' || (activeTab === 'dashboard' && canViewPending)) {
       loadPendingUsersFromApi();
     }
     if (activeTab === 'department' || activeTab === 'dashboard') {
