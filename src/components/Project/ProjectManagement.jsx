@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 import { deleteProjectApi } from '../../api/admin/projectApi';
 import { useAuth } from '../../hooks/useAuth';
 import FilterDropdown from '../common/FilterDropdown';
+import Skeleton from '../common/Skeleton';
 
 
 export default function ProjectManagement({
@@ -316,12 +317,9 @@ export default function ProjectManagement({
           </div>
         )}
 
-        {/* Loading Spinner */}
+        {/* Loading Skeleton */}
         {loading ? (
-          <div className="py-16 flex flex-col items-center justify-center gap-3 text-slate-500">
-            <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-xs font-semibold">Fetching projects from backend API...</span>
-          </div>
+          <Skeleton.Card count={6} />
         ) : displayedProjects.length === 0 ? (
           <div className="py-16 flex flex-col items-center justify-center text-center gap-2">
             <span className="text-4xl">🔍</span>

@@ -6,6 +6,7 @@ import UserShowModal from './UserShowModal';
 import { deleteUserApi, restoreUserApi } from '../../api/admin/userApi';
 import { useAuth } from '../../hooks/useAuth';
 import FilterDropdown from '../common/FilterDropdown';
+import Skeleton from '../common/Skeleton';
 
 export default function UserManagement({
   usersList = [],
@@ -294,12 +295,19 @@ export default function UserManagement({
           </div>
         )}
 
-        {/* Loading Spinner */}
+        {/* Loading Skeleton */}
         {loading ? (
-          <div className="py-16 flex flex-col items-center justify-center gap-3 text-slate-500">
-            <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-xs font-semibold">Fetching user list from backend API...</span>
-          </div>
+          <Skeleton.Table
+            rows={5}
+            columns={[
+              { type: 'avatar-text', className: 'py-3 px-4 w-[250px]' },
+              { type: 'text', className: 'py-3 px-4' },
+              { type: 'text', className: 'py-3 px-4 hidden md:table-cell' },
+              { type: 'pill', className: 'py-3 px-4' },
+              { type: 'text', className: 'py-3 px-4 hidden sm:table-cell' },
+              { type: 'actions', className: 'py-3 px-4 text-center w-[100px]' }
+            ]}
+          />
         ) : displayedUsers.length === 0 ? (
           <div className="py-16 flex flex-col items-center justify-center text-center gap-2">
             <span className="text-4xl">🔍</span>

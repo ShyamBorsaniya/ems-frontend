@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 import { deleteDesignationApi } from '../../api/admin/designationApi';
 import { useAuth } from '../../hooks/useAuth';
 import FilterDropdown from '../common/FilterDropdown';
+import Skeleton from '../common/Skeleton';
 
 
 export default function DesignationManagement({
@@ -202,12 +203,20 @@ export default function DesignationManagement({
           </div>
         )}
 
-        {/* Loading Spinner */}
+        {/* Loading Skeleton */}
         {loading ? (
-          <div className="py-12 text-center text-slate-500 text-xs flex flex-col items-center justify-center gap-2">
-            <span className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></span>
-            <span>Loading designations...</span>
-          </div>
+          <Skeleton.Table
+            rows={4}
+            columns={[
+              { type: 'text', className: 'py-3 px-4 w-[60px]' },
+              { type: 'avatar-text', className: 'py-3 px-4 w-[250px]' },
+              { type: 'text', className: 'py-3 px-4 hidden md:table-cell' },
+              { type: 'text', className: 'py-3 px-4' },
+              { type: 'pill', className: 'py-3 px-4 text-center w-[100px]' },
+              { type: 'text', className: 'py-3 px-4 hidden lg:table-cell' },
+              { type: 'actions', className: 'py-3 px-4 text-center w-[100px]' }
+            ]}
+          />
         ) : displayedDesignations.length === 0 ? (
           <div className="py-12 text-center text-slate-500 text-xs bg-slate-50 rounded-xl border border-dashed border-slate-200">
             <p className="font-semibold text-slate-700 m-0 text-sm">No designations found</p>

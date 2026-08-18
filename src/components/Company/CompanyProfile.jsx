@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { AuthContext } from '../../context/AuthContext';
 import { getCompanyId } from '../../utils/storage';
 import { fetchCompanyByIdApi, updateCompanyApi } from '../../api/admin/companyApi';
+import Skeleton from '../common/Skeleton';
 
 export default function CompanyProfile({ triggerToast }) {
   const authCtx = useContext(AuthContext);
@@ -123,16 +124,7 @@ export default function CompanyProfile({ triggerToast }) {
   };
 
   if (loading) {
-    return (
-      <div className="w-full flex flex-col gap-6 animate-fadeIn">
-        <div className="p-8 rounded-3xl bg-white border border-slate-200/80 shadow-xl flex items-center justify-center min-h-[350px]">
-          <div className="flex flex-col items-center gap-3 text-slate-500">
-            <span className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></span>
-            <span className="text-xs font-semibold">Loading organization profile details...</span>
-          </div>
-        </div>
-      </div>
-    );
+    return <Skeleton.Profile />;
   }
 
   if (error || !company) {
