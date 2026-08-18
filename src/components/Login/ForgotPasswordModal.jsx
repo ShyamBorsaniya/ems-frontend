@@ -42,7 +42,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
         </button>
 
         {!submitted ? (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
             <div className="text-center flex flex-col items-center">
               <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center mb-3">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -53,10 +53,8 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
               <p className="text-xs text-slate-500 mt-1 max-w-xs">Enter your registered work email and we will send you instructions to reset your EMS account password.</p>
             </div>
 
-            {error && <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-semibold">{error}</div>}
-
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="reset-email" className="text-xs font-semibold text-slate-700">Work Email</label>
+              <label htmlFor="reset-email" className={`text-xs font-semibold ${error ? 'text-rose-600' : 'text-slate-700'}`}>Work Email</label>
               <div className="relative flex items-center">
                 <span className="absolute left-3.5 text-slate-400">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -69,11 +67,19 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
                   type="email"
                   placeholder="name@company.com"
                   value={resetEmail}
-                  onChange={(e) => setResetEmail(e.target.value)}
+                  onChange={(e) => {
+                    setResetEmail(e.target.value);
+                    if (error) setError('');
+                  }}
                   autoFocus
-                  className="w-full py-2.5 pl-10 pr-3.5 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 transition-all focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20"
+                  className={`w-full py-2.5 pl-10 pr-3.5 rounded-xl bg-white border text-sm text-slate-900 transition-all focus:outline-none focus:ring-2 ${
+                    error
+                      ? 'border-rose-500 bg-rose-50/10 focus:ring-rose-500/20'
+                      : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-600/20'
+                  }`}
                 />
               </div>
+              {error && <p className="text-xs text-rose-600 mt-0.5">{error}</p>}
             </div>
 
             <div className="flex items-center justify-end gap-3 mt-2">

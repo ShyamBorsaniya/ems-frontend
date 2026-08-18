@@ -157,6 +157,14 @@ class AxiosInstance {
     });
   }
 
+  async patch(endpoint, data = {}, options = {}) {
+    return this.request(endpoint, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+      ...options
+    });
+  }
+
   async delete(endpoint, options = {}) {
     return this.request(endpoint, { method: 'DELETE', ...options });
   }

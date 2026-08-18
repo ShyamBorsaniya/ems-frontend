@@ -51,6 +51,15 @@ export async function createUserApi(userData) {
   return res.data;
 }
 
+export async function onboardUserApi(userData) {
+  if (userData && userData.id) {
+    const res = await axiosInstance.patch(`/api/user/onboard/${userData.id}/`, userData);
+    return res.data;
+  }
+  const res = await axiosInstance.post('/api/user/onboard/', userData);
+  return res.data;
+}
+
 export async function updateUserApi(userId, userData) {
   const res = await axiosInstance.put(`/api/user/${userId}/`, userData);
   return res.data;

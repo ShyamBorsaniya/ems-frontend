@@ -5,7 +5,7 @@ import { getUserData } from '../../utils/storage';
 import { fetchUserByIdApi, updateUserApi } from '../../api/admin/userApi';
 import Skeleton from '../common/Skeleton';
 
-export default function MyProfile({ triggerToast }) {
+export default function MyProfile({ triggerToast, readOnly = false }) {
   const authCtx = useContext(AuthContext);
   const currentUser = authCtx?.currentUser || {};
   const storedUser = getUserData();
@@ -222,7 +222,7 @@ export default function MyProfile({ triggerToast }) {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleUpdateSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+        <form onSubmit={handleUpdateSubmit} noValidate className="flex flex-col flex-1 min-h-0 overflow-hidden">
           <div className="p-6 overflow-y-auto flex-1 flex flex-col gap-4 text-xs">
             {updateError && (
               <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
@@ -398,13 +398,15 @@ export default function MyProfile({ triggerToast }) {
             </div>
           </div>
 
-          <button
-            onClick={handleOpenEditModal}
-            className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition-all cursor-pointer flex items-center gap-2 shrink-0"
-          >
-            <span>✏️</span>
-            <span>Edit My Profile</span>
-          </button>
+          {!readOnly && (
+            <button
+              onClick={handleOpenEditModal}
+              className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition-all cursor-pointer flex items-center gap-2 shrink-0"
+            >
+              <span>✏️</span>
+              <span>Edit My Profile</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -463,6 +465,58 @@ export default function MyProfile({ triggerToast }) {
             </div>
           </div>
         </div>
+
+        {/* Card 3: Professional & Employment Details (Only for employees) */}
+        {profileUser.employee && (
+          <div className="md:col-span-2 p-6 rounded-3xl bg-white border border-slate-200/80 shadow-md flex flex-col gap-4">
+            <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider m-0 border-b border-slate-100 pb-3 flex items-center gap-2">
+              <span>🏢</span> Professional & Employment Details
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+              <div className="p-3 rounded-2xl bg-slate-50/80 border border-slate-200/60">
+                <span className="text-[11px] text-slate-400 font-medium block">Employee Code</span>
+                <span className="font-bold text-indigo-600">{profileUser.employee.code || 'N/A'}</span>
+              </div>
+              <div className="p-3 rounded-2xl bg-slate-50/80 border border-slate-200/60">
+                <span className="text-[11px] text-slate-400 font-medium block">Department</span>
+                <span className="font-bold text-slate-800">{profileUser.employee.department_name || 'N/A'}</span>
+              </div>
+              <div className="p-3 rounded-2xl bg-slate-50/80 border border-slate-200/60">
+                <span className="text-[11px] text-slate-400 font-medium block">Designation</span>
+                <span className="font-bold text-slate-800">{profileUser.employee.designation_name || 'N/A'}</span>
+              </div>
+              <div className="p-3 rounded-2xl bg-slate-50/80 border border-slate-200/60">
+                <span className="text-[11px] text-slate-400 font-medium block">Date of Joining</span>
+                <span className="font-bold text-slate-800">{profileUser.employee.joining_date || 'N/A'}</span>
+              </div>
+              
+              <div className="p-3 rounded-2xl bg-slate-50/80 border border-slate-200/60">
+                <span className="text-[11px] text-slate-400 font-medium block">Employment Type</span>
+                <span className="font-bold text-slate-800 capitalize">{(profileUser.employee.employment_type || 'N/A').replace('_', ' ')}</span>
+              </div>
+              <div className="p-3 rounded-2xl bg-slate-50/80 border border-slate-200/60">
+                <span className="text-[11px] text-slate-400 font-medium block">Gender</span>
+                <span className="font-bold text-slate-800 capitalize">{profileUser.employee.gender || 'N/A'}</span>
+              </div>
+              <div className="p-3 rounded-2xl bg-slate-50/80 border border-slate-200/60">
+                <span className="text-[11px] text-slate-400 font-medium block">Date of Birth</span>
+                <span className="font-bold text-slate-800">{profileUser.employee.date_of_birth || 'N/A'}</span>
+              </div>
+              <div className="p-3 rounded-2xl bg-slate-50/80 border border-slate-200/60">
+                <span className="text-[11px] text-slate-400 font-medium block">Emergency Contact</span>
+                <span className="font-bold text-slate-800">
+                  {profileUser.employee.emergency_contact_name || 'N/A'} 
+                  {profileUser.employee.emergency_contact_phone ? ` (${profileUser.employee.emergency_contact_phone})` : ''}
+                </span>
+              </div>
+              
+              <div className="md:col-span-4 p-3 rounded-2xl bg-slate-50/80 border border-slate-200/60">
+                <span className="text-[11px] text-slate-400 font-medium block">Address</span>
+                <span className="font-bold text-slate-800 break-all">{profileUser.employee.address || 'N/A'}</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Modal Portal */}

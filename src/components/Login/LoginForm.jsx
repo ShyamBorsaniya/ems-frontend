@@ -89,7 +89,7 @@ export default function LoginForm({ onLoginSuccess }) {
       )}
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="email" className={`text-xs font-semibold ${errors.email ? 'text-rose-600' : 'text-slate-700'}`}>Work Email or Username</label>
           <div className="relative flex items-center">

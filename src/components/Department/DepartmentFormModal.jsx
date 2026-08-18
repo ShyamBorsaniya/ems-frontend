@@ -147,16 +147,12 @@ export default function DepartmentFormModal({
     }
   };
 
-  // Helper renderer for field-level error messages
   const renderFieldError = (fieldName) => {
     const errVal = fieldErrors[fieldName];
     if (!errVal) return null;
     const message = Array.isArray(errVal) ? errVal.join(' ') : String(errVal);
     return (
-      <span className="text-[11px] font-semibold text-rose-600 mt-1 flex items-center gap-1">
-        <span>⚠️</span>
-        <span>{message}</span>
-      </span>
+      <p className="text-xs text-rose-600 mt-0.5">{message}</p>
     );
   };
 
@@ -190,7 +186,7 @@ export default function DepartmentFormModal({
         </div>
 
         {/* Department Form Container */}
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col flex-1 min-h-0 overflow-hidden">
           {/* Scrollable Form Body */}
           <div className="p-6 overflow-y-auto flex-1 flex flex-col gap-4">
             {/* Global Error Alert Banner */}
@@ -203,7 +199,7 @@ export default function DepartmentFormModal({
 
             {/* Department Name */}
             <div>
-              <label className="text-xs font-semibold text-slate-700 mb-1 block">
+              <label className={`text-xs font-semibold mb-1 block ${fieldErrors.name ? 'text-rose-600' : 'text-slate-700'}`}>
                 Department Name <span className="text-rose-500">*</span>
               </label>
               <input
@@ -213,10 +209,10 @@ export default function DepartmentFormModal({
                 onChange={handleChange}
                 placeholder="e.g. Engineering & Product, Human Resources..."
                 required
-                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm text-slate-900 focus:outline-none transition-all ${
+                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm text-slate-900 focus:outline-none transition-all focus:ring-2 ${
                   fieldErrors.name
-                    ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
-                    : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+                    ? 'border-rose-500 bg-rose-50/10 focus:ring-rose-500/20'
+                    : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-600/20 bg-white'
                 }`}
               />
               {renderFieldError('name')}
@@ -224,7 +220,7 @@ export default function DepartmentFormModal({
 
             {/* Department Code */}
             <div>
-              <label className="text-xs font-semibold text-slate-700 mb-1 block">
+              <label className={`text-xs font-semibold mb-1 block ${fieldErrors.code ? 'text-rose-600' : 'text-slate-700'}`}>
                 Department Code / Identifier
               </label>
               <input
@@ -233,10 +229,10 @@ export default function DepartmentFormModal({
                 value={formData.code}
                 onChange={handleChange}
                 placeholder="e.g. ENG, HR, MKT"
-                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm font-mono text-slate-900 focus:outline-none transition-all ${
+                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm font-mono text-slate-900 focus:outline-none transition-all focus:ring-2 ${
                   fieldErrors.code
-                    ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
-                    : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+                    ? 'border-rose-500 bg-rose-50/10 focus:ring-rose-500/20'
+                    : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-600/20 bg-white'
                 }`}
               />
               {renderFieldError('code')}
@@ -244,7 +240,7 @@ export default function DepartmentFormModal({
 
             {/* Department Description */}
             <div>
-              <label className="text-xs font-semibold text-slate-700 mb-1 block">
+              <label className={`text-xs font-semibold mb-1 block ${fieldErrors.description ? 'text-rose-600' : 'text-slate-700'}`}>
                 Description & Purpose
               </label>
               <textarea
@@ -253,10 +249,10 @@ export default function DepartmentFormModal({
                 value={formData.description}
                 onChange={handleChange}
                 placeholder="Briefly describe the responsibilities and scope of this department..."
-                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm text-slate-900 focus:outline-none transition-all resize-none ${
+                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-sm text-slate-900 focus:outline-none transition-all resize-none focus:ring-2 ${
                   fieldErrors.description
-                    ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
-                    : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+                    ? 'border-rose-500 bg-rose-50/10 focus:ring-rose-500/20'
+                    : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-600/20 bg-white'
                 }`}
               />
               {renderFieldError('description')}

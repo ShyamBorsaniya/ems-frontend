@@ -216,10 +216,7 @@ export default function ProjectFormModal({
     if (!errVal) return null;
     const message = Array.isArray(errVal) ? errVal.join(' ') : String(errVal);
     return (
-      <span className="text-[11px] font-semibold text-rose-600 mt-1 flex items-center gap-1">
-        <span>⚠️</span>
-        <span>{message}</span>
-      </span>
+      <p className="text-xs text-rose-600 mt-0.5">{message}</p>
     );
   };
 
@@ -239,7 +236,7 @@ export default function ProjectFormModal({
                   Updating project details for <strong className="text-slate-800">{project.name}</strong> (ID: #{project.id})
                 </>
               ) : (
-                'Configure project details, timeline, manager assignment, priority, and budget.'
+                'Configure project details, timeline, priority, and budget.'
               )}
             </p>
           </div>
@@ -253,7 +250,7 @@ export default function ProjectFormModal({
         </div>
 
         {/* Project Form Container */}
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col flex-1 min-h-0 overflow-hidden">
           {/* Scrollable Form Body */}
           <div className="p-6 overflow-y-auto flex-1 flex flex-col gap-4 text-xs">
             {/* Global Error Banner */}
@@ -264,49 +261,29 @@ export default function ProjectFormModal({
               </div>
             )}
 
-            {/* Project Name & Code Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="sm:col-span-2">
-                <label className="font-semibold text-slate-700 mb-1 block">
-                  Project Name <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="e.g. Enterprise CRM Portal"
-                  required
-                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${fieldErrors.name
-                      ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
-                      : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
-                    }`}
-                />
-                {renderFieldError('name')}
-              </div>
-              <div>
-                <label className="font-semibold text-slate-700 mb-1 block">
-                  Project Code / Tag <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="code"
-                  value={formData.code}
-                  onChange={handleChange}
-                  placeholder="PRJ-101"
-                  required
-                  className={`w-full p-2.5 rounded-xl bg-slate-50 border font-mono text-xs text-slate-900 focus:outline-none transition-all ${fieldErrors.code
-                      ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
-                      : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
-                    }`}
-                />
-                {renderFieldError('code')}
-              </div>
+            {/* Project Name */}
+            <div>
+              <label className={`text-xs font-semibold mb-1 block ${fieldErrors.name ? 'text-rose-600' : 'text-slate-700'}`}>
+                Project Name <span className="text-rose-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="e.g. Enterprise CRM Portal"
+                required
+                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all focus:ring-2 ${fieldErrors.name
+                    ? 'border-rose-500 bg-rose-50/10 focus:ring-rose-500/20'
+                    : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-600/20 bg-white'
+                  }`}
+              />
+              {renderFieldError('name')}
             </div>
 
             {/* Project Description */}
             <div>
-              <label className="font-semibold text-slate-700 mb-1 block">
+              <label className={`text-xs font-semibold mb-1 block ${fieldErrors.description ? 'text-rose-600' : 'text-slate-700'}`}>
                 Description & Objectives
               </label>
               <textarea
@@ -315,9 +292,9 @@ export default function ProjectFormModal({
                 value={formData.description}
                 onChange={handleChange}
                 placeholder="Describe project scope, targets, and deliverable specifications..."
-                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all resize-none ${fieldErrors.description
-                    ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
-                    : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all resize-none focus:ring-2 ${fieldErrors.description
+                    ? 'border-rose-500 bg-rose-50/10 focus:ring-rose-500/20'
+                    : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-600/20 bg-white'
                   }`}
               />
               {renderFieldError('description')}
@@ -326,7 +303,7 @@ export default function ProjectFormModal({
             {/* Timeline Row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="font-semibold text-slate-700 mb-1 block">
+                <label className={`text-xs font-semibold mb-1 block ${fieldErrors.start_date ? 'text-rose-600' : 'text-slate-700'}`}>
                   Start Date <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -335,15 +312,15 @@ export default function ProjectFormModal({
                   value={formData.start_date}
                   onChange={handleChange}
                   required
-                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${fieldErrors.start_date
-                      ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
-                      : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all focus:ring-2 ${fieldErrors.start_date
+                      ? 'border-rose-500 bg-rose-50/10 focus:ring-rose-500/20'
+                      : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-600/20 bg-white'
                     }`}
                 />
                 {renderFieldError('start_date')}
               </div>
               <div>
-                <label className="font-semibold text-slate-700 mb-1 block">
+                <label className={`text-xs font-semibold mb-1 block ${fieldErrors.end_date ? 'text-rose-600' : 'text-slate-700'}`}>
                   Estimated End / Target Date
                 </label>
                 <input
@@ -351,9 +328,9 @@ export default function ProjectFormModal({
                   name="end_date"
                   value={formData.end_date}
                   onChange={handleChange}
-                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${fieldErrors.end_date
-                      ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
-                      : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
+                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all focus:ring-2 ${fieldErrors.end_date
+                      ? 'border-rose-500 bg-rose-50/10 focus:ring-rose-500/20'
+                      : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-600/20 bg-white'
                     }`}
                 />
                 {renderFieldError('end_date')}
@@ -394,45 +371,25 @@ export default function ProjectFormModal({
               />
             </div>
 
-            {/* Manager Assignment & Budget Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="font-semibold text-slate-700 mb-1 block">
-                  Project Lead / Manager ID
-                </label>
-                <input
-                  type="number"
-                  name="project_manager"
-                  value={formData.project_manager}
-                  onChange={handleChange}
-                  placeholder="e.g. 5 (Manager User ID)"
-                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${fieldErrors.project_manager
-                      ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
-                      : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
-                    }`}
-                />
-                {renderFieldError('project_manager')}
-              </div>
-
-              <div>
-                <label className="font-semibold text-slate-700 mb-1 block">
-                  Allocated Budget ($)
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  name="budget"
-                  value={formData.budget}
-                  onChange={handleChange}
-                  placeholder="e.g. 25000"
-                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${fieldErrors.budget
-                      ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
-                      : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
-                    }`}
-                />
-                {renderFieldError('budget')}
-              </div>
+            {/* Budget Row */}
+            <div>
+              <label className={`text-xs font-semibold mb-1 block ${fieldErrors.budget ? 'text-rose-600' : 'text-slate-700'}`}>
+                Allocated Budget ($)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                name="budget"
+                value={formData.budget}
+                onChange={handleChange}
+                placeholder="e.g. 25000"
+                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all focus:ring-2 ${fieldErrors.budget
+                    ? 'border-rose-500 bg-rose-50/10 focus:ring-rose-500/20'
+                    : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-600/20 bg-white'
+                  }`}
+              />
+              {renderFieldError('budget')}
             </div>
 
             {/* Is Active Toggle Switch */}

@@ -83,3 +83,31 @@ export async function fetchDepartmentByIdApi(deptId) {
     return null;
   }
 }
+
+/**
+ * Fetches departments along with their nested designations
+ * Endpoint: GET /api/department/designations/
+ */
+export async function fetchDeptDesignationsApi() {
+  try {
+    const res = await axiosInstance.get('/api/department/designations/');
+    if (res.ok && res.data) {
+      return res.data;
+    }
+    return {
+      status_code: res.status || 400,
+      success: false,
+      message: res.data?.message || 'Failed to retrieve department and designations',
+      data: []
+    };
+  } catch (error) {
+    console.error('Error in fetchDeptDesignationsApi:', error);
+    return {
+      status_code: 500,
+      success: false,
+      message: error.message || 'Network error retrieving department and designations',
+      data: []
+    };
+  }
+}
+

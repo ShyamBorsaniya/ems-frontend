@@ -411,23 +411,10 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
   const [toastMessage, setToastMessage] = useState('');
 
   // Sample Users / Employees Data
-  const [employees, setEmployees] = useState([
-    { id: 101, name: 'Sarah Connor', email: 'sarah.c@company.com', role: 'Engineering Lead', department: 'Engineering', status: 'Present', accountStatus: 'Active', avatar: 'https://ui-avatars.com/api/?name=Sarah+Connor&background=4f46e5&color=fff' },
-    { id: 102, name: 'Michael Scott', email: 'm.scott@company.com', role: 'Regional Manager', department: 'Management', status: 'Present', accountStatus: 'Active', avatar: 'https://ui-avatars.com/api/?name=Michael+Scott&background=7c3aed&color=fff' },
-    { id: 103, name: 'Pam Beesly', email: 'pam.b@company.com', role: 'HR Manager', department: 'Human Resources', status: 'Remote', accountStatus: 'Active', avatar: 'https://ui-avatars.com/api/?name=Pam+Beesly&background=ec4899&color=fff' },
-    { id: 104, name: 'Jim Halpert', email: 'jim.h@company.com', role: 'Sales Lead', department: 'Sales', status: 'On Leave', accountStatus: 'Active', avatar: 'https://ui-avatars.com/api/?name=Jim+Halpert&background=0284c7&color=fff' },
-    { id: 105, name: 'Dwight Schrute', email: 'dwight.s@company.com', role: 'Sr. Sales Rep', department: 'Sales', status: 'Present', accountStatus: 'Active', avatar: 'https://ui-avatars.com/api/?name=Dwight+Schrute&background=059669&color=fff' },
-    { id: 106, name: 'Angela Martin', email: 'angela.m@company.com', role: 'Senior Accountant', department: 'Finance', status: 'Present', accountStatus: 'Active', avatar: 'https://ui-avatars.com/api/?name=Angela+Martin&background=d97706&color=fff' },
-    { id: 107, name: 'Ryan Howard', email: 'ryan.h@company.com', role: 'Product Manager', department: 'Engineering', status: 'Offline', accountStatus: 'Inactive', avatar: 'https://ui-avatars.com/api/?name=Ryan+Howard&background=64748b&color=fff' }
-  ]);
+  const [employees, setEmployees] = useState([]);
 
   // Sample Projects Data
-  const [projects] = useState([
-    { id: 1, name: 'WorkPulse Mobile App V2', lead: 'Sarah Connor', progress: 75, status: 'ACTIVE', dept: 'Engineering', deadline: 'Aug 30, 2026', budget: '$45,000' },
-    { id: 2, name: 'Automated Payroll Engine', lead: 'Angela Martin', progress: 90, status: 'Testing', dept: 'Finance', deadline: 'Aug 20, 2026', budget: '$28,000' },
-    { id: 3, name: 'Q3 Enterprise Sales CRM Integrations', lead: 'Jim Halpert', progress: 40, status: 'ACTIVE', dept: 'Sales', deadline: 'Sep 15, 2026', budget: '$35,000' },
-    { id: 4, name: 'Employee Wellness & Benefits Portal', lead: 'Pam Beesly', progress: 100, status: 'Completed', dept: 'Human Resources', deadline: 'Jul 31, 2026', budget: '$15,000' }
-  ]);
+  const [projects] = useState([]);
 
   const triggerToast = (msg) => {
     setToastMessage(msg);
@@ -450,6 +437,7 @@ export default function AdminDashboard({ user, onLogout, activeTabFromRoute }) {
       role: createdUserObj.role || 1,
       role_name: createdUserObj.role_name || (createdUserObj.role === 1 ? 'super_admin' : createdUserObj.role === 2 ? 'admin' : createdUserObj.role === 3 ? 'hr' : 'employee'),
       is_active: createdUserObj.is_active ?? true,
+      status: createdUserObj.status || 'approve',
       created_at: createdUserObj.created_at || new Date().toISOString(),
       updated_at: createdUserObj.updated_at || new Date().toISOString()
     };

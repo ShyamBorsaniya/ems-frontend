@@ -23,32 +23,7 @@ export default function OverviewSummary({
         </div>
       </div>
 
-      {/* Stats KPI Cards */}
-      {(canViewUsers || canViewProjects) && (
-        <div className={`grid grid-cols-1 ${(canViewUsers && canViewProjects) ? 'sm:grid-cols-2' : ''} gap-5`}>
-          {canViewUsers && (
-            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-indigo-300 hover:shadow-md">
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-xs font-semibold text-slate-500">Total Users</span>
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">👥</div>
-              </div>
-              <div className="text-2xl font-bold text-slate-900 mb-1">{employees.length} Active</div>
-              <div className="text-xs text-slate-400">Across 5 Departments</div>
-            </div>
-          )}
 
-          {canViewProjects && (
-            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-indigo-300 hover:shadow-md">
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-xs font-semibold text-slate-500">Active Projects</span>
-                <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-lg">🚀</div>
-              </div>
-              <div className="text-2xl font-bold text-slate-900 mb-1">{projects.length} Initiatives</div>
-              <div className="text-xs text-slate-400">{inProgressProjectsCount} In Progress</div>
-            </div>
-          )}
-        </div>
-      )}
 
 
     </div>

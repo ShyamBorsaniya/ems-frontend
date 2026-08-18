@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import EmployeeLayout from '../../layouts/EmployeeLayout';
 import UserManagement from '../../components/User/UserManagement';
 import ProjectManagement from '../../components/Project/ProjectManagement';
+import MyProfile from '../../components/Profile/MyProfile';
 import AccessRestricted from '../../components/common/AccessRestricted';
 import { fetchUsersApi } from '../../api/admin/userApi';
 import { fetchProjectsApi } from '../../api/admin/projectApi';
@@ -20,6 +21,9 @@ export default function EmployeeDashboard({ user, onLogout }) {
     }
     if (path === '/employee/project' || path === '/employee/projects') {
       return 'project';
+    }
+    if (path === '/employee/profile' || path === '/employee/my-profile') {
+      return 'profile';
     }
     return 'dashboard';
   };
@@ -53,6 +57,14 @@ export default function EmployeeDashboard({ user, onLogout }) {
   const [projectsList, setProjectsList] = useState([]);
   const [projectsLoading, setProjectsLoading] = useState(false);
   const [projectsError, setProjectsError] = useState(null);
+
+  // Toast State
+  const [toastMessage, setToastMessage] = useState('');
+
+  const triggerToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(''), 3500);
+  };
 
   const loadUsersFromApi = useCallback(async () => {
     setUsersLoading(true);
@@ -124,6 +136,13 @@ export default function EmployeeDashboard({ user, onLogout }) {
           <div className="absolute rounded-full blur-[140px] opacity-35 w-[450px] h-[450px] bg-teal-200/70 -bottom-36 -left-20"></div>
         </div>
 
+        {/* Toast Notification */}
+        {toastMessage && (
+          <div className="fixed top-20 right-6 z-50 bg-emerald-600 text-white px-5 py-3 rounded-xl shadow-xl font-semibold text-sm flex items-center gap-2 animate-bounce">
+            <span>✓</span> {toastMessage}
+          </div>
+        )}
+
         {!isAuthorized ? (
           <div className="relative z-10 w-full flex-1 p-6 sm:p-8 flex flex-col items-center justify-center min-h-[60vh]">
             <AccessRestricted onReturn={() => handleTabChange('dashboard')} />
@@ -167,53 +186,14 @@ export default function EmployeeDashboard({ user, onLogout }) {
                   </div>
                 </div>
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                  <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-emerald-300">
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="text-xs font-semibold text-slate-500">Attendance Rate</span>
-                      <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-lg">📅</div>
-                    </div>
-                    <div className="text-2xl font-bold text-slate-900 mb-1">96.8%</div>
-                    <div className="text-xs text-slate-400">21 Days Present this month</div>
-                  </div>
-
-                  <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-emerald-300">
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="text-xs font-semibold text-slate-500">Leave Balance</span>
-                      <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">🏖️</div>
-                    </div>
-                    <div className="text-2xl font-bold text-slate-900 mb-1">14 Days</div>
-                    <div className="text-xs text-slate-400">10 Paid / 4 Sick leaves available</div>
-                  </div>
-
-                  <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-emerald-300">
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="text-xs font-semibold text-slate-500">Work Hours Logged</span>
-                      <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg">⏱️</div>
-                    </div>
-                    <div className="text-2xl font-bold text-slate-900 mb-1">38.5 hrs</div>
-                    <div className="text-xs text-slate-400">Target: 40.0 hrs / week</div>
-                  </div>
-                </div>
-
-                {/* Announcements Card */}
-                <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm w-full">
-                  <div className="mb-4 pb-3 border-b border-slate-100">
-                    <span className="text-lg font-bold text-slate-900 flex items-center gap-2">📢 Announcements</span>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-slate-50 p-4 rounded-xl border-l-4 border-indigo-600">
-                      <div className="font-semibold text-sm text-slate-900">Annual All-Hands Meeting</div>
-                      <div className="text-xs text-slate-500 mt-1">Aug 25 at 10:00 AM • Main Auditorium & Virtual</div>
-                    </div>
-                    <div className="bg-slate-50 p-4 rounded-xl border-l-4 border-emerald-600">
-                      <div className="font-semibold text-sm text-slate-900">Q3 Performance Appraisals</div>
-                      <div className="text-xs text-slate-500 mt-1">Self-evaluation portal opens Sep 01</div>
-                    </div>
-                  </div>
-                </div>
               </main>
+            )}
+
+            {/* 4. MY PROFILE TAB */}
+            {activeTab === 'profile' && (
+              <div className="relative z-10 w-full max-w-[1350px]">
+                <MyProfile triggerToast={triggerToast} readOnly={true} />
+              </div>
             )}
           </>
         )}

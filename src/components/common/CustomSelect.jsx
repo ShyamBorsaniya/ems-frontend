@@ -65,22 +65,21 @@ export default function CustomSelect({
   return (
     <div ref={dropdownRef} className={`flex flex-col gap-1.5 w-full relative ${className}`}>
       {label && (
-        <label htmlFor={selectId} className="text-xs font-semibold text-slate-700 block">
+        <label htmlFor={selectId} className={`text-xs font-semibold block ${error ? 'text-rose-600' : 'text-slate-700'}`}>
           {label} {required && <span className="text-rose-500">*</span>}
         </label>
       )}
       
       <div className="relative w-full">
-        {/* Toggle Button */}
         <button
           id={selectId}
           type="button"
           onClick={toggleDropdown}
           disabled={disabled}
-          className={`w-full py-2.5 px-3.5 rounded-xl bg-white border text-sm text-left text-slate-900 transition-all duration-200 focus:outline-none focus:ring-2 flex justify-between items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed ${
+          className={`w-full py-2.5 px-3.5 rounded-xl border text-sm text-left text-slate-900 transition-all duration-200 focus:outline-none focus:ring-2 flex justify-between items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed ${
             error
-              ? 'border-rose-500 focus:ring-rose-500/20'
-              : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-600/20'
+              ? 'border-rose-500 focus:ring-rose-500/20 bg-rose-50/10'
+              : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-600/20 bg-white'
           } ${selectClassName}`}
           {...props}
         >
@@ -119,7 +118,7 @@ export default function CustomSelect({
           </ul>
         )}
       </div>
-      {error && <span className="text-xs text-rose-600 font-medium">{error}</span>}
+      {error && <p className="text-xs text-rose-600 mt-0.5">{error}</p>}
     </div>
   );
 }

@@ -168,7 +168,7 @@ export default function CompanyProfile({ triggerToast }) {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleUpdateSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+        <form onSubmit={handleUpdateSubmit} noValidate className="flex flex-col flex-1 min-h-0 overflow-hidden">
           <div className="p-6 overflow-y-auto flex-1 flex flex-col gap-4 text-xs">
             {updateError && (
               <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
