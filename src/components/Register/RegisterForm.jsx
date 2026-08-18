@@ -15,8 +15,7 @@ export default function RegisterForm() {
     first_name: '',
     last_name: '',
     status: 'inactive',
-    role: 2,
-    employee_code: ''
+    role: 2
   });
 
   // Dynamic Options State
@@ -76,7 +75,7 @@ export default function RegisterForm() {
     });
 
     if (errorMessage) setErrorMessage('');
-    
+
     // Clear errors for modified field and dependent fields
     setFieldErrors((prev) => {
       const updatedErrors = {
@@ -102,19 +101,40 @@ export default function RegisterForm() {
 
     const newFieldErrors = {};
 
-    if (!formData.company) newFieldErrors.company = ['Please select a company.'];
-    if (!formData.department) newFieldErrors.department = ['Please select a department.'];
-    if (!formData.designation) newFieldErrors.designation = ['Please select a designation.'];
-    if (!formData.username.trim()) newFieldErrors.username = ['Username is required.'];
-    if (!formData.email.trim()) newFieldErrors.email = ['Email address is required.'];
-    if (!formData.password) newFieldErrors.password = ['Password is required.'];
-    if (!formData.first_name.trim()) newFieldErrors.first_name = ['First name is required.'];
-    if (!formData.last_name.trim()) newFieldErrors.last_name = ['Last name is required.'];
-    if (!formData.employee_code.trim()) newFieldErrors.employee_code = ['Employee code is required.'];
+    if (!formData.first_name.trim()) {
+      newFieldErrors.first_name = ['Please enter your first name.'];
+    }
+    if (!formData.last_name.trim()) {
+      newFieldErrors.last_name = ['Please enter your last name.'];
+    }
+    if (!formData.username.trim()) {
+      newFieldErrors.username = ['Please enter a username.'];
+    }
+    if (!formData.email.trim()) {
+      newFieldErrors.email = ['Please enter your email address.'];
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email.trim())) {
+        newFieldErrors.email = ['The email field must be a valid email address.'];
+      }
+    }
+    if (!formData.password) {
+      newFieldErrors.password = ['Please enter a password.'];
+    } else if (formData.password.length < 8) {
+      newFieldErrors.password = ['Password must be at least 8 characters long.'];
+    }
+    if (!formData.company) {
+      newFieldErrors.company = ['Please select a company.'];
+    }
+    if (!formData.department) {
+      newFieldErrors.department = ['Please select a department.'];
+    }
+    if (!formData.designation) {
+      newFieldErrors.designation = ['Please select a designation.'];
+    }
 
     if (Object.keys(newFieldErrors).length > 0) {
       setFieldErrors(newFieldErrors);
-      setErrorMessage('Please fill in all required fields.');
       return;
     }
 
@@ -137,8 +157,7 @@ export default function RegisterForm() {
           first_name: '',
           last_name: '',
           status: 'inactive',
-          role: 2,
-          employee_code: ''
+          role: 2
         });
       } else {
         setErrorMessage(result.message || 'User registration failed');
@@ -158,10 +177,7 @@ export default function RegisterForm() {
     if (!err) return null;
     const msg = Array.isArray(err) ? err.join(' ') : String(err);
     return (
-      <span className="text-[11px] font-semibold text-rose-600 mt-1 flex items-center gap-1">
-        <span>⚠️</span>
-        <span>{msg}</span>
-      </span>
+      <p className="text-xs text-rose-600 mt-0.5">{msg}</p>
     );
   };
 
@@ -203,7 +219,109 @@ export default function RegisterForm() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+        {/* First & Last Name */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label htmlFor="first_name" className={`text-xs font-semibold mb-1 block ${fieldErrors.first_name ? 'text-rose-600' : 'text-slate-700'}`}>
+              First Name <span className="text-rose-500">*</span>
+            </label>
+            <input
+              id="first_name"
+              type="text"
+              name="first_name"
+              placeholder="John"
+              value={formData.first_name}
+              onChange={handleChange}
+              className={`w-full py-2.5 px-3.5 rounded-xl bg-white/90 border text-sm text-slate-900 transition-all focus:outline-none ${fieldErrors.first_name ? 'border-rose-500 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20'
+                }`}
+            />
+            {renderFieldError('first_name')}
+          </div>
+
+          <div>
+            <label htmlFor="last_name" className={`text-xs font-semibold mb-1 block ${fieldErrors.last_name ? 'text-rose-600' : 'text-slate-700'}`}>
+              Last Name <span className="text-rose-500">*</span>
+            </label>
+            <input
+              id="last_name"
+              type="text"
+              name="last_name"
+              placeholder="Doe"
+              value={formData.last_name}
+              onChange={handleChange}
+              className={`w-full py-2.5 px-3.5 rounded-xl bg-white/90 border text-sm text-slate-900 transition-all focus:outline-none ${fieldErrors.last_name ? 'border-rose-500 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20'
+                }`}
+            />
+            {renderFieldError('last_name')}
+          </div>
+        </div>
+
+        {/* Username & Email */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label htmlFor="username" className={`text-xs font-semibold mb-1 block ${fieldErrors.username ? 'text-rose-600' : 'text-slate-700'}`}>
+              Username <span className="text-rose-500">*</span>
+            </label>
+            <input
+              id="username"
+              type="text"
+              name="username"
+              placeholder="johndoe"
+              value={formData.username}
+              onChange={handleChange}
+              className={`w-full py-2.5 px-3.5 rounded-xl bg-white/90 border text-sm text-slate-900 transition-all focus:outline-none ${fieldErrors.username ? 'border-rose-500 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20'
+                }`}
+            />
+            {renderFieldError('username')}
+          </div>
+
+          <div>
+            <label htmlFor="email" className={`text-xs font-semibold mb-1 block ${fieldErrors.email ? 'text-rose-600' : 'text-slate-700'}`}>
+              Email Address <span className="text-rose-500">*</span>
+            </label>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              placeholder="john@example.com"
+              value={formData.email}
+              onChange={handleChange}
+              className={`w-full py-2.5 px-3.5 rounded-xl bg-white/90 border text-sm text-slate-900 transition-all focus:outline-none ${fieldErrors.email ? 'border-rose-500 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20'
+                }`}
+            />
+            {renderFieldError('email')}
+          </div>
+        </div>
+
+        {/* Password */}
+        <div>
+          <label htmlFor="password" className={`text-xs font-semibold mb-1 block ${fieldErrors.password ? 'text-rose-600' : 'text-slate-700'}`}>
+            Password <span className="text-rose-500">*</span>
+          </label>
+          <div className="relative flex items-center">
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              name="password"
+              placeholder="••••••••••••"
+              value={formData.password}
+              onChange={handleChange}
+              className={`w-full py-2.5 px-3.5 pr-11 rounded-xl bg-white/90 border text-sm text-slate-900 transition-all focus:outline-none ${fieldErrors.password ? 'border-rose-500 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20'
+                }`}
+            />
+            <button
+              type="button"
+              className="absolute right-3.5 text-slate-400 hover:text-slate-700 flex items-center cursor-pointer text-xs font-semibold"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+          </div>
+          {renderFieldError('password')}
+        </div>
+
         {/* Step 1: Select Company */}
         <div>
           <CustomSelect
@@ -238,8 +356,8 @@ export default function RegisterForm() {
               !formData.company
                 ? "-- Select a Company First --"
                 : departments.length === 0
-                ? "-- No Departments Found for Selected Company --"
-                : "-- Choose Department --"
+                  ? "-- No Departments Found for Selected Company --"
+                  : "-- Choose Department --"
             }
             options={departments.map((d) => ({
               value: d.id || d.value,
@@ -263,146 +381,14 @@ export default function RegisterForm() {
               !formData.department
                 ? "-- Select a Department First --"
                 : designations.length === 0
-                ? "-- No Designations Found for Selected Department --"
-                : "-- Choose Designation --"
+                  ? "-- No Designations Found for Selected Department --"
+                  : "-- Choose Designation --"
             }
             options={designations.map((desg) => ({
               value: desg.id || desg.value,
               label: `${desg.name || `Designation #${desg.id}`}${desg.code ? ` (${desg.code})` : ''}`
             }))}
           />
-        </div>
-
-        {/* First & Last Name */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-          <div>
-            <label htmlFor="first_name" className="text-xs font-semibold text-slate-700 mb-1 block">
-              First Name <span className="text-rose-500">*</span>
-            </label>
-            <input
-              id="first_name"
-              type="text"
-              name="first_name"
-              placeholder="John"
-              value={formData.first_name}
-              onChange={handleChange}
-              required
-              className={`w-full py-2.5 px-3.5 rounded-xl bg-white/90 border text-sm text-slate-900 transition-all focus:outline-none ${
-                fieldErrors.first_name ? 'border-rose-500 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20'
-              }`}
-            />
-            {renderFieldError('first_name')}
-          </div>
-
-          <div>
-            <label htmlFor="last_name" className="text-xs font-semibold text-slate-700 mb-1 block">
-              Last Name <span className="text-rose-500">*</span>
-            </label>
-            <input
-              id="last_name"
-              type="text"
-              name="last_name"
-              placeholder="Doe"
-              value={formData.last_name}
-              onChange={handleChange}
-              required
-              className={`w-full py-2.5 px-3.5 rounded-xl bg-white/90 border text-sm text-slate-900 transition-all focus:outline-none ${
-                fieldErrors.last_name ? 'border-rose-500 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20'
-              }`}
-            />
-            {renderFieldError('last_name')}
-          </div>
-        </div>
-
-        {/* Username & Email */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-          <div>
-            <label htmlFor="username" className="text-xs font-semibold text-slate-700 mb-1 block">
-              Username <span className="text-rose-500">*</span>
-            </label>
-            <input
-              id="username"
-              type="text"
-              name="username"
-              placeholder="johndoe"
-              value={formData.username}
-              onChange={handleChange}
-              required
-              className={`w-full py-2.5 px-3.5 rounded-xl bg-white/90 border text-sm text-slate-900 transition-all focus:outline-none ${
-                fieldErrors.username ? 'border-rose-500 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20'
-              }`}
-            />
-            {renderFieldError('username')}
-          </div>
-
-          <div>
-            <label htmlFor="email" className="text-xs font-semibold text-slate-700 mb-1 block">
-              Email Address <span className="text-rose-500">*</span>
-            </label>
-            <input
-              id="email"
-              type="email"
-              name="email"
-              placeholder="john@example.com"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className={`w-full py-2.5 px-3.5 rounded-xl bg-white/90 border text-sm text-slate-900 transition-all focus:outline-none ${
-                fieldErrors.email ? 'border-rose-500 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20'
-              }`}
-            />
-            {renderFieldError('email')}
-          </div>
-        </div>
-
-        {/* Employee Code */}
-        <div>
-          <label htmlFor="employee_code" className="text-xs font-semibold text-slate-700 mb-1 block">
-            Employee Code <span className="text-rose-500">*</span>
-          </label>
-          <input
-            id="employee_code"
-            type="text"
-            name="employee_code"
-            placeholder="EMP-1234"
-            value={formData.employee_code}
-            onChange={handleChange}
-            required
-            className={`w-full py-2.5 px-3.5 rounded-xl bg-white/90 border text-sm text-slate-900 transition-all focus:outline-none ${
-              fieldErrors.employee_code ? 'border-rose-500 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20'
-            }`}
-          />
-          {renderFieldError('employee_code')}
-        </div>
-
-        {/* Password */}
-        <div>
-          <label htmlFor="password" className="text-xs font-semibold text-slate-700 mb-1 block">
-            Password <span className="text-rose-500">*</span>
-          </label>
-          <div className="relative flex items-center">
-            <input
-              id="password"
-              type={showPassword ? 'text' : 'password'}
-              name="password"
-              placeholder="••••••••••••"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className={`w-full py-2.5 px-3.5 pr-11 rounded-xl bg-white/90 border text-sm text-slate-900 transition-all focus:outline-none ${
-                fieldErrors.password ? 'border-rose-500 focus:ring-2 focus:ring-rose-500/20' : 'border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20'
-              }`}
-            />
-            <button
-              type="button"
-              className="absolute right-3.5 text-slate-400 hover:text-slate-700 flex items-center cursor-pointer text-xs font-semibold"
-              onClick={() => setShowPassword(!showPassword)}
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
-            >
-              {showPassword ? 'Hide' : 'Show'}
-            </button>
-          </div>
-          {renderFieldError('password')}
         </div>
 
         {/* Submit Button */}

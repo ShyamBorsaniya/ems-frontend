@@ -103,17 +103,9 @@ export async function registerUserApi(userData) {
     is_active: userData.is_active !== undefined ? userData.is_active : false,
     department: userData.department ? Number(userData.department) : null,
     designation: userData.designation ? Number(userData.designation) : null,
-    employee_code: userData.employee_code || "",
-    date_of_joining: userData.date_of_joining || null,
-    joining_date: userData.joining_date || userData.date_of_joining || null,
-    salary: userData.salary ? Number(userData.salary) : null,
     employee_details: {
       department: userData.department ? Number(userData.department) : null,
-      designation: userData.designation ? Number(userData.designation) : null,
-      employee_code: userData.employee_code || "",
-      date_of_joining: userData.date_of_joining || null,
-      joining_date: userData.joining_date || userData.date_of_joining || null,
-      salary: userData.salary ? Number(userData.salary) : null
+      designation: userData.designation ? Number(userData.designation) : null
     },
     password: userData.password,
     status: userData.status || 'inactive'
