@@ -147,23 +147,7 @@ export default function Header({
 
               {/* Menu Options */}
               <div className="py-1 flex flex-col gap-0.5">
-                {/* Notifications Option */}
-                <button
-                  onClick={() => {
-                    setIsProfileOpen(false);
-                  }}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-indigo-50/80 hover:text-indigo-600 transition-all cursor-pointer group"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm p-1.5 rounded-lg bg-slate-100 text-slate-600 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
-                      🔔
-                    </span>
-                    <span>Notifications</span>
-                  </div>
-                  <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-rose-100 text-rose-600">
-                    3 New
-                  </span>
-                </button>
+
 
                 <button
                   onClick={() => {
@@ -178,18 +162,7 @@ export default function Header({
                   <span>My Profile</span>
                 </button>
 
-                <button
-                  onClick={() => {
-                    setIsProfileOpen(false);
-                    if (onTabChange) onTabChange('company');
-                  }}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-indigo-50/80 hover:text-indigo-600 transition-all cursor-pointer group"
-                >
-                  <span className="text-sm p-1.5 rounded-lg bg-slate-100 text-slate-600 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
-                    🏢
-                  </span>
-                  <span>Company Profile</span>
-                </button>
+
               </div>
 
               <div className="my-1 border-t border-slate-200/80" />

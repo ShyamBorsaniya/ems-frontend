@@ -277,11 +277,10 @@ export default function ProjectFormModal({
                   onChange={handleChange}
                   placeholder="e.g. Enterprise CRM Portal"
                   required
-                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${
-                    fieldErrors.name
+                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${fieldErrors.name
                       ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
                       : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
-                  }`}
+                    }`}
                 />
                 {renderFieldError('name')}
               </div>
@@ -296,11 +295,10 @@ export default function ProjectFormModal({
                   onChange={handleChange}
                   placeholder="PRJ-101"
                   required
-                  className={`w-full p-2.5 rounded-xl bg-slate-50 border font-mono text-xs text-slate-900 focus:outline-none transition-all ${
-                    fieldErrors.code
+                  className={`w-full p-2.5 rounded-xl bg-slate-50 border font-mono text-xs text-slate-900 focus:outline-none transition-all ${fieldErrors.code
                       ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
                       : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
-                  }`}
+                    }`}
                 />
                 {renderFieldError('code')}
               </div>
@@ -317,11 +315,10 @@ export default function ProjectFormModal({
                 value={formData.description}
                 onChange={handleChange}
                 placeholder="Describe project scope, targets, and deliverable specifications..."
-                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all resize-none ${
-                  fieldErrors.description
+                className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all resize-none ${fieldErrors.description
                     ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
                     : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
-                }`}
+                  }`}
               />
               {renderFieldError('description')}
             </div>
@@ -338,11 +335,10 @@ export default function ProjectFormModal({
                   value={formData.start_date}
                   onChange={handleChange}
                   required
-                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${
-                    fieldErrors.start_date
+                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${fieldErrors.start_date
                       ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
                       : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
-                  }`}
+                    }`}
                 />
                 {renderFieldError('start_date')}
               </div>
@@ -355,11 +351,10 @@ export default function ProjectFormModal({
                   name="end_date"
                   value={formData.end_date}
                   onChange={handleChange}
-                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${
-                    fieldErrors.end_date
+                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${fieldErrors.end_date
                       ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
                       : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
-                  }`}
+                    }`}
                 />
                 {renderFieldError('end_date')}
               </div>
@@ -375,11 +370,11 @@ export default function ProjectFormModal({
                 required
                 error={fieldErrors.status}
                 options={[
-                  { value: 'planning', label: '📋 Planning / Draft' },
-                  { value: 'in_progress', label: '⚡ In Progress' },
-                  { value: 'on_hold', label: '⏸️ On Hold' },
-                  { value: 'completed', label: '✅ Completed' },
-                  { value: 'cancelled', label: '🚫 Cancelled' }
+                  { value: 'PLANNED', label: '📋 Planned' },
+                  { value: 'ACTIVE', label: '⚡ Active' },
+                  { value: 'ON_HOLD', label: '⏸️ On Hold' },
+                  { value: 'COMPLETED', label: '✅ Completed' },
+                  { value: 'CANCELLED', label: '🚫 Cancelled' }
                 ]}
               />
 
@@ -391,10 +386,10 @@ export default function ProjectFormModal({
                 required
                 error={fieldErrors.priority}
                 options={[
-                  { value: 'low', label: '🟢 Low Priority' },
-                  { value: 'medium', label: '🟡 Medium Priority' },
-                  { value: 'high', label: '🔴 High Priority' },
-                  { value: 'critical', label: '🔥 Critical Urgency' }
+                  { value: 'LOW', label: '🟢 Low Priority' },
+                  { value: 'MEDIUM', label: '🟡 Medium Priority' },
+                  { value: 'HIGH', label: '🔴 High Priority' },
+                  { value: 'CRITICAL', label: '🔥 Critical Urgency' }
                 ]}
               />
             </div>
@@ -411,11 +406,10 @@ export default function ProjectFormModal({
                   value={formData.project_manager}
                   onChange={handleChange}
                   placeholder="e.g. 5 (Manager User ID)"
-                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${
-                    fieldErrors.project_manager
+                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${fieldErrors.project_manager
                       ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
                       : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
-                  }`}
+                    }`}
                 />
                 {renderFieldError('project_manager')}
               </div>
@@ -432,11 +426,10 @@ export default function ProjectFormModal({
                   value={formData.budget}
                   onChange={handleChange}
                   placeholder="e.g. 25000"
-                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${
-                    fieldErrors.budget
+                  className={`w-full p-2.5 rounded-xl bg-slate-50 border text-xs text-slate-900 focus:outline-none transition-all ${fieldErrors.budget
                       ? 'border-rose-500 bg-rose-50/20 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
                       : 'border-slate-300 focus:border-indigo-600 focus:bg-white'
-                  }`}
+                    }`}
                 />
                 {renderFieldError('budget')}
               </div>

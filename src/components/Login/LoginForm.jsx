@@ -12,18 +12,33 @@ export default function LoginForm({ onLoginSuccess }) {
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [errors, setErrors] = useState({ email: '', password: '' });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
 
+    let isValid = true;
+    const newErrors = { email: '', password: '' };
+
     if (!email.trim()) {
-      setErrorMessage('Please enter your email or username.');
-      return;
+      newErrors.email = 'Please enter your email or username.';
+      isValid = false;
+    } else if (email.includes('@')) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email.trim())) {
+        newErrors.email = 'The email field must be a valid email address.';
+        isValid = false;
+      }
     }
 
     if (!password) {
-      setErrorMessage('Please enter your account password.');
+      newErrors.password = 'Please enter your account password.';
+      isValid = false;
+    }
+
+    if (!isValid) {
+      setErrors(newErrors);
       return;
     }
 
@@ -76,7 +91,7 @@ export default function LoginForm({ onLoginSuccess }) {
       {/* Form */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="email" className="text-xs font-semibold text-slate-700">Work Email or Username</label>
+          <label htmlFor="email" className={`text-xs font-semibold ${errors.email ? 'text-rose-600' : 'text-slate-700'}`}>Work Email or Username</label>
           <div className="relative flex items-center">
             <span className="absolute left-3.5 text-slate-400 flex items-center pointer-events-none">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -91,17 +106,22 @@ export default function LoginForm({ onLoginSuccess }) {
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
+                if (errors.email) setErrors(prev => ({ ...prev, email: '' }));
                 if (errorMessage) setErrorMessage('');
               }}
-              className={`w-full py-3 pl-11 pr-4 rounded-xl bg-white/90 border text-sm text-slate-900 transition-all duration-200 focus:outline-none focus:ring-2 ${
-                errorMessage ? 'border-rose-500 focus:ring-rose-500/20' : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-600/20'
-              }`}
+              className={`w-full py-3 pl-11 rounded-xl bg-white/90 border text-sm text-slate-900 transition-all duration-200 focus:outline-none focus:ring-2 ${errors.email
+                ? 'border-rose-500 focus:ring-rose-500/20 bg-rose-50/10 pr-10'
+                : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-600/20 pr-4'
+                }`}
             />
           </div>
+          {errors.email && (
+            <p className="text-xs text-rose-600 mt-0.5">{errors.email}</p>
+          )}
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="password" className="text-xs font-semibold text-slate-700">Password</label>
+          <label htmlFor="password" className={`text-xs font-semibold ${errors.password ? 'text-rose-600' : 'text-slate-700'}`}>Password</label>
           <div className="relative flex items-center">
             <span className="absolute left-3.5 text-slate-400 flex items-center pointer-events-none">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -116,31 +136,38 @@ export default function LoginForm({ onLoginSuccess }) {
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
+                if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
                 if (errorMessage) setErrorMessage('');
               }}
-              className={`w-full py-3 pl-11 pr-11 rounded-xl bg-white/90 border text-sm text-slate-900 transition-all duration-200 focus:outline-none focus:ring-2 ${
-                errorMessage ? 'border-rose-500 focus:ring-rose-500/20' : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-600/20'
-              }`}
+              className={`w-full py-3 pl-11 rounded-xl bg-white/90 border text-sm text-slate-900 transition-all duration-200 focus:outline-none focus:ring-2 ${errors.password
+                ? 'border-rose-500 focus:ring-rose-500/20 bg-rose-50/10 pr-20'
+                : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-600/20 pr-11'
+                }`}
             />
-            <button
-              type="button"
-              className="absolute right-3.5 text-slate-400 hover:text-slate-700 flex items-center cursor-pointer"
-              onClick={() => setShowPassword(!showPassword)}
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
-            >
-              {showPassword ? (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                  <line x1="1" y1="1" x2="23" y2="23"></line>
-                </svg>
-              ) : (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-              )}
-            </button>
+            <div className="absolute right-3.5 flex items-center gap-2">
+              <button
+                type="button"
+                className="text-slate-400 hover:text-slate-700 flex items-center cursor-pointer"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
+          {errors.password && (
+            <p className="text-xs text-rose-600 mt-0.5">{errors.password}</p>
+          )}
         </div>
 
 

@@ -32,7 +32,8 @@ export default function AdminLayout({
     { id: 'pending-users', label: 'Pending Users', icon: '⏳', permission: 'user:view' },
     { id: 'project', label: 'Projects', icon: '🚀', permission: ['project:view', 'project.view', 'view:project', 'view_project'] },
     { id: 'department', label: 'Departments', icon: '🏢', permission: 'department:view' },
-    { id: 'designation', label: 'Designations', icon: '🎖️', permission: ['designation:view', 'designation.view', 'view_designation'] }
+    { id: 'designation', label: 'Designations', icon: '🎖️', permission: ['designation:view', 'designation.view', 'view_designation'] },
+    { id: 'company', label: 'Manage Company', icon: '🏢' }
   ];
 
   const navItems = navItemsConfig.filter(item => !item.permission || hasPermission(item.permission));

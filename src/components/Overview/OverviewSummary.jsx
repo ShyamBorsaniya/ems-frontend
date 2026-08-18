@@ -50,27 +50,7 @@ export default function OverviewSummary({
         </div>
       )}
 
-      {/* Executive Overview Card */}
-      <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
-        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-          <span className="text-base font-bold text-slate-900">📊 Executive Dashboard & System Health</span>
-        </div>
-        <p className="text-slate-600 text-sm">
-          All systems operating normally.
-          {canViewUsers && (
-            <>
-              {' '}<strong className="text-slate-900 font-semibold">{employees.length} active users</strong>
-              {!canViewProjects && '.'}
-            </>
-          )}
-          {canViewProjects && (
-            <>
-              {canViewUsers ? ', ' : ' '}
-              <strong className="text-slate-900 font-semibold">{projects.length} projects</strong> running across 5 departments.
-            </>
-          )}
-        </p>
-      </div>
+
     </div>
   );
 }

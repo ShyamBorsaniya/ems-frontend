@@ -221,9 +221,6 @@ export default function UserManagement({
         return false;
       }
     }
-
-
-
     return true;
   });
 
@@ -432,11 +429,10 @@ export default function UserManagement({
                               <button
                                 type="button"
                                 title={u.is_active ? "Soft Destroy User (Deactivate)" : "Restore User (Activate)"}
-                                className={`p-1.5 rounded-lg transition-colors cursor-pointer border flex items-center justify-center ${
-                                  u.is_active
+                                className={`p-1.5 rounded-lg transition-colors cursor-pointer border flex items-center justify-center ${u.is_active
                                     ? 'bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-200'
                                     : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border-emerald-200'
-                                }`}
+                                  }`}
                                 onClick={() => {
                                   handleSoftDestroyClick(u);
                                 }}
